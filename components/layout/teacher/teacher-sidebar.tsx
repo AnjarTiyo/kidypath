@@ -51,7 +51,7 @@ const data = {
       isActive: false,
     },
     {
-      title: "Pelaksanaan KBM",
+      title: "Perencanaan KBM",
       url: "#",
       icon: IconChalkboard,
     },
@@ -59,24 +59,6 @@ const data = {
       title: "Presensi",
       url: "#",
       icon: IconCalendar,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
     },
     {
       title: "Data Siswa",
