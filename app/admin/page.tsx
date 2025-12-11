@@ -3,11 +3,13 @@ import { redirect } from "next/navigation"
 import { MenuCard, MenuCardProps, MenuGrid } from "@/components/layout/menu-card"
 import {
   IconUsers,
-  IconSettings,
   IconChartBar,
   IconHome,
   IconSpeakerphone,
   IconLayoutDashboard,
+  IconChalkboardTeacher,
+  IconSchool,
+  IconCalendarEvent,
 } from "@tabler/icons-react"
 import { PageHeader } from "@/components/layout/page-header"
 
@@ -36,16 +38,28 @@ export default async function AdminPage() {
       href: "/admin/user",
     },
     {
-      icon: IconSettings,
-      title: "Pengaturan Sekolah",
-      description: "Atur konfigurasi dan preferensi sekolah",
-      href: "/admin/setting",
+      icon: IconChalkboardTeacher,
+      title: "Manajemen Kelas",
+      description: "Kelola kelas",
+      href: "/admin/class",
+    },
+    {
+      icon: IconSchool,
+      title: "Manajemen Peserta Didik",
+      description: "Kelola akun peserta didik",
+      href: "/admin/user",
     },
     {
       icon: IconChartBar,
       title: "Laporan",
       description: "Lihat laporan dan analitik sistem",
       href: "/admin/report",
+    },
+    {
+      icon: IconCalendarEvent,
+      title: "Manajemen Agenda",
+      description: "Kelola agenda",
+      href: "/admin/agenda",
     },
     {
       icon: IconSpeakerphone,

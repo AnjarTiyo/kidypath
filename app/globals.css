@@ -52,15 +52,14 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2 0.02 240);
   /* Kementrian PU Blue - Professional government blue */
-  --primary: oklch(0.45 0.15 240);
+  --primary: #1b1464;
   --primary-foreground: oklch(0.99 0 0);
-  /* Light blue secondary */
-  --secondary: oklch(0.92 0.04 240);
+  --secondary: #f6ed53;
   --secondary-foreground: oklch(0.2 0.02 240);
   --muted: oklch(0.96 0.01 240);
   --muted-foreground: oklch(0.5 0.02 240);
   /* Green accent - representing education and growth */
-  --accent: oklch(0.75 0.15 145);
+  --accent: #6f6c8d;
   --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.9 0.01 240);

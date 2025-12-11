@@ -27,7 +27,7 @@ export function MenuCard({
     <div
       className={cn(
         "group relative flex flex-row items-start gap-4 p-6 rounded-lg border bg-card text-card-foreground transition-all",
-        "hover:shadow-md hover:border-primary/50 hover:-translate-y-1",
+        "hover:shadow-md hover:border-secondary/50 hover:-translate-y-1",
         disabled
           ? "opacity-50 cursor-not-allowed"
           : "cursor-pointer active:scale-95",
@@ -37,8 +37,8 @@ export function MenuCard({
       {/* Icon Container */}
       <div
         className={cn(
-          "flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors",
-          "group-hover:bg-primary group-hover:text-primary-foreground",
+          "flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-secondary text-secondary-foreground transition-colors",
+          "group-hover:bg-secondary group-hover:text-secondary-foreground",
           iconClassName
         )}
       >
