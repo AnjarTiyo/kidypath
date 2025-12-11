@@ -3,17 +3,7 @@ import Credentials from "next-auth/providers/credentials"
 import { db } from "@/lib/db"
 import { users } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
-
-// Password verification function (matches the seed file)
-async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const computedHash = Array.from(new Uint8Array(hashBuffer))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-  return computedHash === hash;
-}
+import { verifyPassword } from "@/lib/auth-utils"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -49,12 +39,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return null;
           }
 
-          // Return user data
+          // Return user data (with non-null values)
           return {
             id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
+            email: user.email ?? "",
+            name: user.name ?? "",
+            role: user.role ?? "parent",
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -85,4 +75,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "jwt",
   },
+  trustHost: true,
+  debug: process.env.NODE_ENV === 'development',
 })
