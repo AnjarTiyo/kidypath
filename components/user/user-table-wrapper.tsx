@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react"
 import { SortingState } from "@tanstack/react-table"
 import { UserTable } from "./user-table"
 import { User } from "./user-columns"
-import { Skeleton } from "@/components/ui/skeleton"
+import { UserTableSkeleton } from "./user-table-skeleton"
+import { UserTableError } from "./user-table-error"
 import { UserPageActions } from "./user-page-actions"
 
 interface PaginationData {
@@ -100,27 +101,11 @@ export function UserTableWrapper({ renderHeader }: UserTableWrapperProps) {
   }
 
   if (loading && users.length === 0) {
-    return (
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Skeleton className="h-10 flex-1" />
-          <Skeleton className="h-10 w-[180px]" />
-          <Skeleton className="h-10 w-[120px]" />
-        </div>
-        <div className="space-y-3">
-          <Skeleton className="h-[400px] w-full" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-      </div>
-    )
+    return <UserTableSkeleton />
   }
 
   if (error && users.length === 0) {
-    return (
-      <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-        <p className="text-sm text-destructive">{error}</p>
-      </div>
-    )
+    return <UserTableError message={error} onRetry={fetchUsers} />
   }
 
   return (
@@ -128,19 +113,18 @@ export function UserTableWrapper({ renderHeader }: UserTableWrapperProps) {
       {renderHeader && renderHeader(fetchUsers)}
       <div className="space-y-4">
         <UserTable
-          data={users}
-          pagination={pagination}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
-          onSearchChange={handleSearchChange}
-          onRoleFilterChange={handleRoleFilterChange}
-          onSortingChange={handleSortingChange}
-          sorting={sorting}
-          onRefresh={fetchUsers}
-          search={search}
-          roleFilter={roleFilter}
-          loading={loading}
-        />
+            data={users}
+            pagination={pagination}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            onSearchChange={handleSearchChange}
+            onRoleFilterChange={handleRoleFilterChange}
+            onSortingChange={handleSortingChange}
+            sorting={sorting}
+            onRefresh={fetchUsers}
+            search={search}
+            roleFilter={roleFilter}
+          />
       </div>
     </>
   )

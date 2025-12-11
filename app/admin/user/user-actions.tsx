@@ -11,9 +11,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { IconDots, IconEdit, IconTrash } from "@tabler/icons-react"
-import { User } from "./columns"
-import { UserFormDialog } from "./user-form-dialog"
-import { DeleteUserDialog } from "./delete-user-dialog"
+import { UserFormDialog } from "@/components/user/user-form-dialog"
+import { DeleteUserDialog } from "@/components/user/delete-user-dialog"
+import { User } from "@/components/user/user-columns"
+
 
 interface UserActionsProps {
   user: User
