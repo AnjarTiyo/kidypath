@@ -1,4 +1,4 @@
-import { Navbar } from "@/components/navbar"
+import { Navbar } from "@/components/layout/navbar"
 import { AuthProvider } from "@/components/auth/auth-provider"
 
 export default function ParentLayout({

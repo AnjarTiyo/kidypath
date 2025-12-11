@@ -1,4 +1,4 @@
-import { Navbar } from "@/components/navbar"
+import { Navbar } from "@/components/layout/navbar"
 import { AuthProvider } from "@/components/auth/auth-provider"
 
 export default function AdminLayout({
@@ -10,7 +10,9 @@ export default function AdminLayout({
     <AuthProvider>
       <div className="min-h-screen bg-background">
         <Navbar />
-        {children}
+        <div className="p-6 mx-auto space-y-6 container">
+          {children}
+        </div>
       </div>
     </AuthProvider>
   )

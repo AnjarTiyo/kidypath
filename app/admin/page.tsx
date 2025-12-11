@@ -1,5 +1,16 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
+import { MenuCard, MenuCardProps, MenuGrid } from "@/components/layout/menu-card"
+import {
+  IconUsers,
+  IconSettings,
+  IconChartBar,
+  IconUserCircle,
+  IconHome,
+  IconSpeakerphone,
+  IconLayoutDashboard,
+} from "@tabler/icons-react"
+import { PageHeader } from "@/components/layout/page-header"
 
 export default async function AdminPage() {
   const session = await auth()
@@ -12,37 +23,55 @@ export default async function AdminPage() {
     redirect("/unauthorized")
   }
 
-  return (
-    <div className="container mx-auto p-6">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome, {session.user.name || session.user.email}
-          </p>
-        </div>
+  const availableMenus: MenuCardProps[] = [
+    {
+      icon: IconLayoutDashboard,
+      title: "Dasbor",
+      description: "Lihat ringkasan sistem dan statistik",
+      href: "/admin/dashboard",
+    },
+    {
+      icon: IconUsers,
+      title: "Manajemen Pengguna",
+      description: "Kelola akun pengguna, guru, dan orang tua",
+      href: "/admin/user",
+    },
+    {
+      icon: IconSettings,
+      title: "Pengaturan Sekolah",
+      description: "Atur konfigurasi dan preferensi sekolah",
+      href: "/admin/setting",
+    },
+    {
+      icon: IconChartBar,
+      title: "Laporan",
+      description: "Lihat laporan dan analitik sistem",
+      href: "/admin/report",
+    },
+    {
+      icon: IconSpeakerphone,
+      title: "Pengumuman",
+      description: "Lihat dan kelola pengumuman sekolah",
+      href: "/admin/announcement",
+    },
+  ]
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">User Management</h2>
-            <p className="text-sm text-muted-foreground">
-              Manage users, teachers, and parents
-            </p>
-          </div>
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">School Settings</h2>
-            <p className="text-sm text-muted-foreground">
-              Configure school-wide settings
-            </p>
-          </div>
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">Reports</h2>
-            <p className="text-sm text-muted-foreground">
-              View system-wide reports and analytics
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+
+  return (
+    <>
+      <PageHeader
+        title="Admin Dashboard"
+        description={`Selamat Datang, ${session.user.name || session.user.email}!`}
+        breadcrumbs={[
+          { label: "Beranda", href: "/admin", icon: IconHome },
+        ]}
+      />
+
+      <MenuGrid>
+        {availableMenus.map((menu, index) => (
+          <MenuCard key={index} {...menu} />
+        ))}
+      </MenuGrid>
+    </>
   )
 }
