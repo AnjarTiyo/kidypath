@@ -2,7 +2,6 @@
 
 import { signIn } from "@/auth"
 import { AuthError } from "next-auth"
-import { redirect } from "next/navigation"
 
 export async function authenticate(formData: FormData) {
   const email = formData.get("email") as string

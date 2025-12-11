@@ -10,7 +10,7 @@ export default async function UnauthorizedPage() {
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold">403 - Unauthorized</h1>
         <p className="text-muted-foreground">
-          You don't have permission to access this page.
+          You don&apos;t have permission to access this page.
         </p>
         {session?.user && (
           <p className="text-sm text-muted-foreground">

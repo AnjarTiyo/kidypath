@@ -5,7 +5,6 @@ import {
   IconUsers,
   IconSettings,
   IconChartBar,
-  IconUserCircle,
   IconHome,
   IconSpeakerphone,
   IconLayoutDashboard,

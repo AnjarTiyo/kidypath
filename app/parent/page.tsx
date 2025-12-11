@@ -26,7 +26,7 @@ export default async function ParentPage() {
           <div className="p-6 border rounded-lg">
             <h2 className="text-xl font-semibold mb-2">My Children</h2>
             <p className="text-sm text-muted-foreground">
-              View your children's information
+              View your children&apos;s information
             </p>
           </div>
           <div className="p-6 border rounded-lg">
