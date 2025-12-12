@@ -39,15 +39,15 @@ export default async function AdminPage() {
     },
     {
       icon: IconChalkboardTeacher,
-      title: "Manajemen Kelas",
-      description: "Kelola kelas",
+      title: "Manajemen Rombongan Belajar",
+      description: "Kelola Rombongan Belajar",
       href: "/admin/classroom",
     },
     {
       icon: IconSchool,
       title: "Manajemen Peserta Didik",
       description: "Kelola akun peserta didik",
-      href: "/admin/user",
+      href: "/admin/student",
     },
     {
       icon: IconChartBar,
