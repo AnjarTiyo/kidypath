@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Card } from "../ui/card"
 
 interface PaginationData {
   page: number
@@ -50,7 +51,7 @@ export function UserTable({
   const columns = useMemo(() => getUserColumns(onRefresh), [onRefresh])
 
   return (
-    <div className="space-y-4">
+    <Card className="p-4">
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <Input
@@ -87,6 +88,6 @@ export function UserTable({
         manualPagination
         manualSorting
       />
-    </div>
+    </Card>
   )
 }

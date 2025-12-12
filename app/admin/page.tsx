@@ -41,7 +41,7 @@ export default async function AdminPage() {
       icon: IconChalkboardTeacher,
       title: "Manajemen Kelas",
       description: "Kelola kelas",
-      href: "/admin/class",
+      href: "/admin/classroom",
     },
     {
       icon: IconSchool,

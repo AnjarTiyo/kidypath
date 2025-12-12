@@ -28,7 +28,13 @@ export const classrooms = pgTable('classrooms', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name'),
   academicYear: varchar('academic_year'),
-  teacherId: uuid('teacher_id').references(() => users.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+});
+
+export const classroomTeachers = pgTable('classroom_teachers', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  classroomId: uuid('classroom_id').references(() => classrooms.id, { onDelete: 'cascade' }),
+  teacherId: uuid('teacher_id').references(() => users.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
 
@@ -113,21 +119,29 @@ export const monthlyReports = pgTable('monthly_reports', {
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
-  classrooms: many(classrooms),
+  classroomTeachers: many(classroomTeachers),
   parentChildren: many(parentChild),
   activityAgenda: many(activityAgenda),
   lessonPlans: many(lessonPlans),
   dailyAssessments: many(dailyAssessments),
 }));
 
-export const classroomsRelations = relations(classrooms, ({ one, many }) => ({
-  teacher: one(users, {
-    fields: [classrooms.teacherId],
-    references: [users.id],
-  }),
+export const classroomsRelations = relations(classrooms, ({ many }) => ({
+  teachers: many(classroomTeachers),
   students: many(students),
   activityAgenda: many(activityAgenda),
   lessonPlans: many(lessonPlans),
+}));
+
+export const classroomTeachersRelations = relations(classroomTeachers, ({ one }) => ({
+  classroom: one(classrooms, {
+    fields: [classroomTeachers.classroomId],
+    references: [classrooms.id],
+  }),
+  teacher: one(users, {
+    fields: [classroomTeachers.teacherId],
+    references: [users.id],
+  }),
 }));
 
 export const studentsRelations = relations(students, ({ one, many }) => ({

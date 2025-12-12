@@ -59,7 +59,7 @@
   --muted: oklch(0.96 0.01 240);
   --muted-foreground: oklch(0.5 0.02 240);
   /* Green accent - representing education and growth */
-  --accent: #6f6c8d;
+  --accent: #dddddf;
   --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.9 0.01 240);
