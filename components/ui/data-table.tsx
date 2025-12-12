@@ -177,10 +177,9 @@ export function DataTable<TData, TValue>({
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex-1 text-sm text-muted-foreground">
           {manualPagination ? (
-            <span>
-              Showing {currentPageIndex * currentPageSize + 1} to{" "}
-              {Math.min((currentPageIndex + 1) * currentPageSize, totalCount)} of{" "}
-              {totalCount} results
+            <span className="text-xs">
+              Manampilkan {currentPageIndex * currentPageSize + 1} dari{" "}
+                  {Math.min((currentPageIndex + 1) * currentPageSize, totalCount)}
             </span>
           ) : (
             <span>
@@ -191,7 +190,7 @@ export function DataTable<TData, TValue>({
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium">Rows per page</p>
+            <p className="text-xs font-medium">Baris per hal.</p>
             <Select
               value={`${currentPageSize}`}
               onValueChange={(value) => handlePageSizeChange(Number(value))}
@@ -209,8 +208,8 @@ export function DataTable<TData, TValue>({
             </Select>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-              Page {currentPageIndex + 1} of {currentPageCount || 1}
+            <div className="flex w-[100px] items-center justify-center text-xs font-medium">
+              Hal. {currentPageIndex + 1} dari {currentPageCount || 1}
             </div>
             <div className="flex items-center gap-1">
               <Button
@@ -219,7 +218,7 @@ export function DataTable<TData, TValue>({
                 onClick={() => handlePageChange(0)}
                 disabled={!canPreviousPage}
               >
-                <span className="sr-only">Go to first page</span>
+                <span className="sr-only text-xs">Ke hal. pertama</span>
                 <IconChevronsLeft className="h-4 w-4" />
               </Button>
               <Button
