@@ -15,6 +15,13 @@
       "when": 1765535128383,
       "tag": "0002_busy_hammerhead",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1765591511058,
+      "tag": "0002_graceful_electro",
+      "breakpoints": true
     }
   ]
 }

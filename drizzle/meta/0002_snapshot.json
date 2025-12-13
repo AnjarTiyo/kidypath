@@ -1,6 +1,6 @@
 {
-  "id": "b337868f-ef83-4126-ad11-af8ed3958856",
-  "prevId": "d9c08bc2-7863-4d42-80f3-f333e1e3cfda",
+  "id": "7cca28cd-00fd-4240-b865-3caf02f50e2d",
+  "prevId": "b337868f-ef83-4126-ad11-af8ed3958856",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -409,6 +409,18 @@
         "date": {
           "name": "date",
           "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": false
         },

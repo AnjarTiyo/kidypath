@@ -1,5 +1,17 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
+import { MenuCard, MenuCardProps, MenuGrid } from "@/components/layout/menu-card"
+import {
+  IconUsers,
+  IconChartBar,
+  IconHome,
+  IconSpeakerphone,
+  IconLayoutDashboard,
+  IconChalkboardTeacher,
+  IconSchool,
+  IconCalendarEvent,
+} from "@tabler/icons-react"
+import { PageHeader } from "@/components/layout/page-header"
 
 export default async function TeacherPage() {
   const session = await auth()
@@ -12,55 +24,55 @@ export default async function TeacherPage() {
     redirect("/unauthorized")
   }
 
-  return (
-    <div className="container mx-auto p-6">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Teacher Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome, {session.user.name || session.user.email}
-          </p>
-        </div>
+  const availableMenus: MenuCardProps[] = [
+    {
+      icon: IconLayoutDashboard,
+      title: "Dasbor",
+      description: "Ringkasan data, aktivitas, dan statistik harian",
+      href: "/teacher/dashboard",
+    },
+    {
+      icon: IconUsers,
+      title: "Rencana Pembelajaran",
+      description: "Kelola agenda dan rencana pembelajaran harian",
+      href: "/teacher/lesson-plan",
+    },
+    {
+      icon: IconChalkboardTeacher,
+      title: "Jurnal Harian",
+      description: "Catatan kegiatan harian tiap kelas",
+      href: "/teacher/journal",
+    },
+    {
+      icon: IconSchool,
+      title: "Penilaian Peserta Didik",
+      description: "Kelola penilaian dan perkembangan peserta didik",
+      href: "/teacher/assessment",
+    },
+    {
+      icon: IconChartBar,
+      title: "Laporan",
+      description: "Lihat laporan harian, mingguan, dan bulanan",
+      href: "/teacher/report",
+    },
+  ]
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">My Classrooms</h2>
-            <p className="text-sm text-muted-foreground">
-              View and manage your classrooms
-            </p>
-          </div>
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">Daily Assessments</h2>
-            <p className="text-sm text-muted-foreground">
-              Record student assessments
-            </p>
-          </div>
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">Lesson Plans</h2>
-            <p className="text-sm text-muted-foreground">
-              Create and manage lesson plans
-            </p>
-          </div>
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">Activity Agenda</h2>
-            <p className="text-sm text-muted-foreground">
-              Plan daily activities
-            </p>
-          </div>
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">Reports</h2>
-            <p className="text-sm text-muted-foreground">
-              Generate weekly and monthly reports
-            </p>
-          </div>
-          <div className="p-6 border rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">Students</h2>
-            <p className="text-sm text-muted-foreground">
-              View student information
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+
+  return (
+    <>
+      <PageHeader
+        title="Teacher Dashboard"
+        description={`Selamat Datang, Teacher ${session.user.name || session.user.email}!`}
+        breadcrumbs={[
+          { label: "Beranda", href: "/teacher", icon: IconHome },
+        ]}
+      />
+
+      <MenuGrid>
+        {availableMenus.map((menu, index) => (
+          <MenuCard key={index} {...menu} />
+        ))}
+      </MenuGrid>
+    </>
   )
 }

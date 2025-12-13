@@ -10,7 +10,9 @@ export default function TeacherLayout({
     <AuthProvider>
       <div className="min-h-screen bg-background">
         <Navbar />
-        {children}
+        <div className="p-6 mx-auto space-y-6 container">
+          {children}
+        </div>
       </div>
     </AuthProvider>
   )
