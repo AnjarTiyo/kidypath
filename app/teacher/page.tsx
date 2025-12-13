@@ -38,16 +38,16 @@ export default async function TeacherPage() {
       href: "/teacher/lesson-plan",
     },
     {
-      icon: IconChalkboardTeacher,
-      title: "Jurnal Harian",
-      description: "Catatan kegiatan harian tiap kelas",
-      href: "/teacher/journal",
-    },
-    {
       icon: IconSchool,
       title: "Penilaian Peserta Didik",
       description: "Kelola penilaian dan perkembangan peserta didik",
       href: "/teacher/assessment",
+    },
+    {
+      icon: IconChalkboardTeacher,
+      title: "Jurnal Harian",
+      description: "Catatan kegiatan harian tiap kelas",
+      href: "/teacher/journal",
     },
     {
       icon: IconChartBar,

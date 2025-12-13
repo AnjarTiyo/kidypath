@@ -84,7 +84,7 @@ export default function DetailLessonPlan({
       <Card>
         <CardHeader className="border-b h-18 flex-1">
           <CardTitle className="text-base">Detail Rencana Pembelajaran</CardTitle>
-          <CardDescription className="text-xs">
+          <CardDescription className="text-xs line-clamp-2">
             Pilih tanggal untuk melihat detail rencana pembelajaran
           </CardDescription>
         </CardHeader>

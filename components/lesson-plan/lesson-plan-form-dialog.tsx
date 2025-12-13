@@ -13,6 +13,7 @@ import { id } from "date-fns/locale"
 import { CalendarIcon, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Textarea } from "../ui/textarea"
+import { IconSparkles } from "@tabler/icons-react"
 
 interface LessonPlan {
   id: string
@@ -50,7 +51,7 @@ export function LessonPlanFormDialog({
   const [loading, setLoading] = useState(false)
   const [classrooms, setClassrooms] = useState<Classroom[]>([])
   const [loadingClassrooms, setLoadingClassrooms] = useState(false)
-  
+
   const [formData, setFormData] = useState({
     classroomId: "",
     date: selectedDate || new Date(),
@@ -148,7 +149,7 @@ export function LessonPlanFormDialog({
       const url = lessonPlan
         ? `/api/lesson-plans/${lessonPlan.id}`
         : "/api/lesson-plans"
-      
+
       const method = lessonPlan ? "PUT" : "POST"
 
       const response = await fetch(url, {
@@ -247,42 +248,62 @@ export function LessonPlanFormDialog({
               </div>
             )}
 
-            {/* Classroom Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="classroom">
-                Rombongan Belajar <span className="text-destructive">*</span>
-              </Label>
-              <Select
-                value={formData.classroomId}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, classroomId: value })
-                }
-                disabled={!!lessonPlan || loadingClassrooms || (user?.role === "teacher" && classrooms.length === 0)}
-              >
-                <SelectTrigger id="classroom">
-                  <SelectValue placeholder="Pilih rombongan belajar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {loadingClassrooms ? (
-                    <div className="p-2 text-center text-sm text-muted-foreground">
-                      Memuat...
-                    </div>
-                  ) : classrooms.length === 0 ? (
-                    <div className="p-2 text-center text-sm text-muted-foreground">
-                      Tidak ada rombongan belajar
-                    </div>
-                  ) : (
-                    classrooms.map((classroom) => (
-                      <SelectItem key={classroom.id} value={classroom.id}>
-                        {classroom.name} - {classroom.academicYear}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-              {errors.classroomId && (
-                <p className="text-sm text-destructive">{errors.classroomId}</p>
-              )}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="classroom">
+                  Rombongan Belajar <span className="text-destructive">*</span>
+                </Label>
+                <Select
+                  value={formData.classroomId}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, classroomId: value })
+                  }
+                  disabled={!!lessonPlan || loadingClassrooms || (user?.role === "teacher" && classrooms.length === 0)}
+                >
+                  <SelectTrigger id="classroom" className="w-full">
+                    <SelectValue placeholder="Pilih rombongan belajar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {loadingClassrooms ? (
+                      <div className="p-2 text-center text-sm text-muted-foreground">
+                        Memuat...
+                      </div>
+                    ) : classrooms.length === 0 ? (
+                      <div className="p-2 text-center text-sm text-muted-foreground">
+                        Tidak ada rombongan belajar
+                      </div>
+                    ) : (
+                      classrooms.map((classroom) => (
+                        <SelectItem key={classroom.id} value={classroom.id}>
+                          {classroom.name} - {classroom.academicYear}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                {errors.classroomId && (
+                  <p className="text-sm text-destructive">{errors.classroomId}</p>
+                )}
+              </div>
+              {/* Code (Optional) */}
+              <div className="space-y-2">
+                <Label htmlFor="code">
+                  Kode (Opsional)
+                </Label>
+                <input
+                  id="code"
+                  type="text"
+                  placeholder="Contoh: LP-001 atau tema pembelajaran"
+                  value={formData.code}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFormData({ ...formData, code: e.target.value })
+                  }
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                {errors.code && (
+                  <p className="text-sm text-destructive">{errors.code}</p>
+                )}
+              </div>
             </div>
 
             {/* Date Selection */}
@@ -345,31 +366,22 @@ export function LessonPlanFormDialog({
               )}
             </div>
 
-            {/* Code (Optional) */}
-            <div className="space-y-2">
-              <Label htmlFor="code">
-                Kode (Opsional)
-              </Label>
-              <input
-                id="code"
-                type="text"
-                placeholder="Contoh: LP-001 atau tema pembelajaran"
-                value={formData.code}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFormData({ ...formData, code: e.target.value })
-                }
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-              {errors.code && (
-                <p className="text-sm text-destructive">{errors.code}</p>
-              )}
-            </div>
+
 
             {/* Content */}
             <div className="space-y-2">
-              <Label htmlFor="content">
-                Konten Rencana Pembelajaran <span className="text-destructive">*</span>
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="content">
+                  Konten Rencana Pembelajaran <span className="text-destructive">*</span>
+                </Label>
+                <Button
+                  size={"sm"}
+                  variant={"outline"}
+                >
+                  <IconSparkles className="mr-2 h-4 w-4" />
+                  Buat dengan AI
+                </Button>
+              </div>
               <Textarea
                 id="content"
                 placeholder="Masukkan rencana pembelajaran..."
@@ -399,8 +411,8 @@ export function LessonPlanFormDialog({
             >
               Batal
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={loading || (user?.role === "teacher" && classrooms.length === 0)}
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
