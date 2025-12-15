@@ -18,25 +18,25 @@ export async function GET(
 
     const { id } = await params
 
-    const [lessonPlan] = await db
-      .select({
-        id: lessonPlans.id,
-        classroomId: lessonPlans.classroomId,
-        classroomName: classrooms.name,
-        date: lessonPlans.date,
-        title: lessonPlans.title,
-        code: lessonPlans.code,
-        generatedByAi: lessonPlans.generatedByAi,
-        content: lessonPlans.content,
-        createdBy: lessonPlans.createdBy,
-        createdByName: users.name,
-        createdAt: lessonPlans.createdAt,
-      })
-      .from(lessonPlans)
-      .leftJoin(classrooms, eq(lessonPlans.classroomId, classrooms.id))
-      .leftJoin(users, eq(lessonPlans.createdBy, users.id))
-      .where(eq(lessonPlans.id, id))
-      .limit(1)
+    // Use query builder to get lesson plan with items
+    const lessonPlan = await db.query.lessonPlans.findFirst({
+      where: eq(lessonPlans.id, id),
+      with: {
+        items: {
+          orderBy: (items, { asc }) => [asc(items.createdAt)],
+        },
+        classroom: {
+          columns: {
+            name: true,
+          },
+        },
+        creator: {
+          columns: {
+            name: true,
+          },
+        },
+      },
+    })
 
     if (!lessonPlan) {
       return NextResponse.json(
@@ -63,7 +63,33 @@ export async function GET(
       }
     }
 
-    return NextResponse.json(lessonPlan)
+    // Format response
+    const response = {
+      id: lessonPlan.id,
+      classroomId: lessonPlan.classroomId,
+      classroomName: lessonPlan.classroom?.name,
+      date: lessonPlan.date,
+      title: lessonPlan.title,
+      code: lessonPlan.code,
+      generatedByAi: lessonPlan.generatedByAi,
+      createdBy: lessonPlan.createdBy,
+      createdByName: lessonPlan.creator?.name,
+      createdAt: lessonPlan.createdAt,
+      updatedAt: lessonPlan.updatedAt,
+      items: lessonPlan.items,
+    }
+
+    // Debug logging
+    console.log(`[API][GET ${id}] Lesson plan has ${response.items?.length || 0} items`)
+    if (response.items && response.items.length > 0) {
+      console.log(`[API][GET ${id}] First item:`, {
+        scope: response.items[0].developmentScope,
+        hasGoal: !!response.items[0].learningGoal,
+        hasActivity: !!response.items[0].activityContext,
+      })
+    }
+
+    return NextResponse.json(response)
   } catch (error) {
     console.error("Error fetching lesson plan:", error)
     return NextResponse.json(
@@ -91,13 +117,34 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
-    const { title, code, content, date, generatedByAi } = body
+    const { title, code, items, date, generatedByAi } = body
 
-    if (!content || !title) {
+    if (!title || !items || !Array.isArray(items)) {
       return NextResponse.json(
-        { error: "Title and content are required" },
+        { error: "Title and items are required" },
         { status: 400 }
       )
+    }
+
+    // Validate that we have all 6 development scopes
+    const requiredScopes = ['religious_moral', 'physical_motor', 'cognitive', 'language', 'social_emotional', 'art']
+    const presentScopes = new Set(items.map((item: any) => item.developmentScope))
+    
+    if (items.length !== 6 || !requiredScopes.every(scope => presentScopes.has(scope))) {
+      return NextResponse.json(
+        { error: "Lesson plan must include all 6 development scopes" },
+        { status: 400 }
+      )
+    }
+
+    // Validate each item has required fields
+    for (const item of items) {
+      if (!item.learningGoal || !item.activityContext) {
+        return NextResponse.json(
+          { error: "Each item must have learningGoal and activityContext" },
+          { status: 400 }
+        )
+      }
     }
 
     // Get existing lesson plan
@@ -153,19 +200,52 @@ export async function PUT(
       }
     }
 
-    // Update lesson plan
-    const updateData: any = { content, title }
-    if (date !== undefined) updateData.date = date
-    if (code !== undefined) updateData.code = code || null
-    if (generatedByAi !== undefined) updateData.generatedByAi = generatedByAi
+    // Import lessonPlanItems
+    const { lessonPlanItems } = await import('@/lib/db/schema')
 
-    const [updated] = await db
-      .update(lessonPlans)
-      .set(updateData)
-      .where(eq(lessonPlans.id, id))
-      .returning()
+    // Update lesson plan and items in a transaction
+    const result = await db.transaction(async (tx) => {
+      // Update lesson plan
+      const updateData: any = { 
+        title,
+        updatedAt: new Date(),
+      }
+      if (date !== undefined) updateData.date = date
+      if (code !== undefined) updateData.code = code || null
+      if (generatedByAi !== undefined) updateData.generatedByAi = generatedByAi
 
-    return NextResponse.json(updated)
+      const [updated] = await tx
+        .update(lessonPlans)
+        .set(updateData)
+        .where(eq(lessonPlans.id, id))
+        .returning()
+
+      // Delete existing items
+      await tx
+        .delete(lessonPlanItems)
+        .where(eq(lessonPlanItems.lessonPlanId, id))
+
+      // Insert new items
+      const newItems = await tx
+        .insert(lessonPlanItems)
+        .values(
+          items.map((item: any) => ({
+            lessonPlanId: id,
+            developmentScope: item.developmentScope,
+            learningGoal: item.learningGoal,
+            activityContext: item.activityContext,
+            generatedByAi: item.generatedByAi || generatedByAi,
+          }))
+        )
+        .returning()
+
+      return {
+        ...updated,
+        items: newItems,
+      }
+    })
+
+    return NextResponse.json(result)
   } catch (error) {
     console.error("Error updating lesson plan:", error)
     return NextResponse.json(

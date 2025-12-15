@@ -91,12 +91,24 @@ export const lessonPlans = pgTable('lesson_plans', {
   id: uuid('id').primaryKey().defaultRandom(),
   classroomId: uuid('classroom_id').references(() => classrooms.id),
   date: date('date'),
-  title: varchar('title'), // Title of the lesson plan
+  title: varchar('title'), // Title of the lesson plan (overall theme for the day)
   code: varchar('code'), // Optional code/identifier for the lesson
-  generatedByAi: boolean('generated_by_ai'),
-  content: text('content'),
+  generatedByAi: boolean('generated_by_ai').default(false),
   createdBy: uuid('created_by').references(() => users.id),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});
+
+// Lesson Plan Items - Each lesson plan has 6 items (one for each development scope)
+export const lessonPlanItems = pgTable('lesson_plan_items', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  lessonPlanId: uuid('lesson_plan_id').references(() => lessonPlans.id, { onDelete: 'cascade' }),
+  developmentScope: developmentScopeEnum('development_scope'),
+  learningGoal: text('learning_goal'), // The learning objective for this scope
+  activityContext: text('activity_context'), // The activity/context to achieve the goal
+  generatedByAi: boolean('generated_by_ai').default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
 export const weeklyReports = pgTable('weekly_reports', {
@@ -123,7 +135,7 @@ export const monthlyReports = pgTable('monthly_reports', {
 export const usersRelations = relations(users, ({ many }) => ({
   classroomTeachers: many(classroomTeachers),
   parentChildren: many(parentChild),
-  activityAgenda: many(activityAgenda),
+  activityAgendas: many(activityAgenda),
   lessonPlans: many(lessonPlans),
   dailyAssessments: many(dailyAssessments),
 }));
@@ -131,8 +143,38 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const classroomsRelations = relations(classrooms, ({ many }) => ({
   teachers: many(classroomTeachers),
   students: many(students),
-  activityAgenda: many(activityAgenda),
+  activityAgendas: many(activityAgenda),
   lessonPlans: many(lessonPlans),
+}));
+
+export const activityAgendaRelations = relations(activityAgenda, ({ one }) => ({
+  classroom: one(classrooms, {
+    fields: [activityAgenda.classroomId],
+    references: [classrooms.id],
+  }),
+  creator: one(users, {
+    fields: [activityAgenda.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const lessonPlansRelations = relations(lessonPlans, ({ one, many }) => ({
+  classroom: one(classrooms, {
+    fields: [lessonPlans.classroomId],
+    references: [classrooms.id],
+  }),
+  creator: one(users, {
+    fields: [lessonPlans.createdBy],
+    references: [users.id],
+  }),
+  items: many(lessonPlanItems),
+}));
+
+export const lessonPlanItemsRelations = relations(lessonPlanItems, ({ one }) => ({
+  lessonPlan: one(lessonPlans, {
+    fields: [lessonPlanItems.lessonPlanId],
+    references: [lessonPlans.id],
+  }),
 }));
 
 export const classroomTeachersRelations = relations(classroomTeachers, ({ one }) => ({
@@ -197,5 +239,19 @@ export const dailyAssessmentsRelations = relations(dailyAssessments, ({ one }) =
   objective: one(learningObjectives, {
     fields: [dailyAssessments.objectiveId],
     references: [learningObjectives.id],
+  }),
+}));
+
+export const weeklyReportsRelations = relations(weeklyReports, ({ one }) => ({
+  student: one(students, {
+    fields: [weeklyReports.studentId],
+    references: [students.id],
+  }),
+}));
+
+export const monthlyReportsRelations = relations(monthlyReports, ({ one }) => ({
+  student: one(students, {
+    fields: [monthlyReports.studentId],
+    references: [students.id],
   }),
 }));

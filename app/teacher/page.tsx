@@ -41,7 +41,7 @@ export default async function TeacherPage() {
       icon: IconSchool,
       title: "Penilaian Peserta Didik",
       description: "Kelola penilaian dan perkembangan peserta didik",
-      href: "/teacher/assessment",
+      href: "/teacher/assesment",
     },
     {
       icon: IconChalkboardTeacher,

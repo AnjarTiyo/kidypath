@@ -71,39 +71,59 @@ export async function GET(request: NextRequest) {
 
     const [{ count }] = await countQuery
 
-    // Build data query
-    const dataQueryBuilder = db
-      .select({
-        id: lessonPlans.id,
-        classroomId: lessonPlans.classroomId,
-        classroomName: classrooms.name,
-        date: lessonPlans.date,
-        title: lessonPlans.title,
-        code: lessonPlans.code,
-        generatedByAi: lessonPlans.generatedByAi,
-        content: lessonPlans.content,
-        createdBy: lessonPlans.createdBy,
-        createdByName: users.name,
-        createdAt: lessonPlans.createdAt,
-      })
-      .from(lessonPlans)
-      .leftJoin(classrooms, eq(lessonPlans.classroomId, classrooms.id))
-      .leftJoin(users, eq(lessonPlans.createdBy, users.id))
+    // Use query builder to get lesson plans with items
+    const whereCondition = conditions.length > 0 ? and(...conditions) : undefined
+    
+    const lessonPlansList = await db.query.lessonPlans.findMany({
+      where: whereCondition,
+      with: {
+        items: {
+          orderBy: (items, { asc }) => [asc(items.createdAt)],
+        },
+        classroom: {
+          columns: {
+            name: true,
+          },
+        },
+        creator: {
+          columns: {
+            name: true,
+          },
+        },
+      },
+      orderBy: sortOrder === "asc" ? [asc(lessonPlans.date)] : [desc(lessonPlans.date)],
+      limit: pageSize,
+      offset: (page - 1) * pageSize,
+    })
 
-    // Apply where conditions
-    const dataQueryWithWhere = conditions.length > 0 
-      ? dataQueryBuilder.where(and(...conditions))
-      : dataQueryBuilder
+    // Format the response
+    const data = lessonPlansList.map(lp => ({
+      id: lp.id,
+      classroomId: lp.classroomId,
+      classroomName: lp.classroom?.name,
+      date: lp.date,
+      title: lp.title,
+      code: lp.code,
+      generatedByAi: lp.generatedByAi,
+      createdBy: lp.createdBy,
+      createdByName: lp.creator?.name,
+      createdAt: lp.createdAt,
+      updatedAt: lp.updatedAt,
+      items: lp.items,
+    }))
 
-    // Apply sorting
-    const dataQueryWithSort = sortOrder === "asc"
-      ? dataQueryWithWhere.orderBy(asc(lessonPlans.date))
-      : dataQueryWithWhere.orderBy(desc(lessonPlans.date))
-
-    // Apply pagination and execute
-    const data = await dataQueryWithSort
-      .limit(pageSize)
-      .offset((page - 1) * pageSize)
+    // Debug logging
+    if (data.length > 0) {
+      console.log(`[API] Returning ${data.length} lesson plan(s)`)
+      console.log(`[API] First lesson plan has ${data[0].items?.length || 0} items`)
+      if (data[0].items && data[0].items.length > 0) {
+        console.log(`[API] First item:`, {
+          scope: data[0].items[0].developmentScope,
+          hasGoal: !!data[0].items[0].learningGoal,
+          hasActivity: !!data[0].items[0].activityContext,
+        })
+      }
+    }
 
     const totalPages = Math.ceil(count / pageSize)
 
@@ -141,14 +161,35 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { classroomId, date, title, code, content, generatedByAi = false } = body
+    const { classroomId, date, title, code, items, generatedByAi = false } = body
 
     // Validation
-    if (!classroomId || !date || !title || !content) {
+    if (!classroomId || !date || !title || !items || !Array.isArray(items)) {
       return NextResponse.json(
-        { error: "Classroom ID, date, title, and content are required" },
+        { error: "Classroom ID, date, title, and items are required" },
         { status: 400 }
       )
+    }
+
+    // Validate that we have all 6 development scopes
+    const requiredScopes = ['religious_moral', 'physical_motor', 'cognitive', 'language', 'social_emotional', 'art']
+    const presentScopes = new Set(items.map((item: any) => item.developmentScope))
+    
+    if (items.length !== 6 || !requiredScopes.every(scope => presentScopes.has(scope))) {
+      return NextResponse.json(
+        { error: "Lesson plan must include all 6 development scopes" },
+        { status: 400 }
+      )
+    }
+
+    // Validate each item has required fields
+    for (const item of items) {
+      if (!item.learningGoal || !item.activityContext) {
+        return NextResponse.json(
+          { error: "Each item must have learningGoal and activityContext" },
+          { status: 400 }
+        )
+      }
     }
 
     // Verify classroom exists
@@ -205,21 +246,45 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create lesson plan
-    const [newLessonPlan] = await db
-      .insert(lessonPlans)
-      .values({
-        classroomId,
-        date,
-        title,
-        code: code || null,
-        content,
-        generatedByAi,
-        createdBy: session.user.id,
-      })
-      .returning()
+    // Create lesson plan and items in a transaction
+    const result = await db.transaction(async (tx) => {
+      // Insert lesson plan
+      const [newLessonPlan] = await tx
+        .insert(lessonPlans)
+        .values({
+          classroomId,
+          date,
+          title,
+          code: code || null,
+          generatedByAi,
+          createdBy: session.user.id,
+        })
+        .returning()
 
-    return NextResponse.json(newLessonPlan, { status: 201 })
+      // Import lessonPlanItems from schema
+      const { lessonPlanItems } = await import('@/lib/db/schema')
+
+      // Insert all lesson plan items
+      const newItems = await tx
+        .insert(lessonPlanItems)
+        .values(
+          items.map((item: any) => ({
+            lessonPlanId: newLessonPlan.id,
+            developmentScope: item.developmentScope,
+            learningGoal: item.learningGoal,
+            activityContext: item.activityContext,
+            generatedByAi: item.generatedByAi || generatedByAi,
+          }))
+        )
+        .returning()
+
+      return {
+        ...newLessonPlan,
+        items: newItems,
+      }
+    })
+
+    return NextResponse.json(result, { status: 201 })
   } catch (error) {
     console.error("Error creating lesson plan:", error)
     return NextResponse.json(

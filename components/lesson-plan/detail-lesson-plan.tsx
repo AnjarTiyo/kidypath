@@ -6,9 +6,20 @@ import { Button } from "../ui/button"
 import { Badge } from "../ui/badge"
 import { Skeleton } from "../ui/skeleton"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog"
-import { IconEdit, IconTrash, IconCalendar, IconUser, IconRobot, IconChalkboardTeacher } from "@tabler/icons-react"
+import { IconEdit, IconTrash, IconCalendar, IconUser, IconRobot, IconChalkboardTeacher, IconSparkles } from "@tabler/icons-react"
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
+import { getDevelopmentScopeLabel } from "@/lib/ai/lesson-plan-generator"
+
+type DevelopmentScope = 'religious_moral' | 'physical_motor' | 'cognitive' | 'language' | 'social_emotional' | 'art';
+
+interface LessonPlanItem {
+  id: string
+  developmentScope: DevelopmentScope
+  learningGoal: string
+  activityContext: string
+  generatedByAi?: boolean
+}
 
 interface LessonPlan {
   id: string
@@ -17,10 +28,10 @@ interface LessonPlan {
   date: string
   title: string
   code?: string | null
-  content: string
   generatedByAi?: boolean
   createdByName?: string
   createdAt?: string
+  items: LessonPlanItem[]
 }
 
 interface DetailLessonPlanProps {
@@ -110,11 +121,8 @@ export default function DetailLessonPlan({
               {format(selectedDate, "PPP", { locale: id })}
             </CardDescription>
           </div>
-          {/* <Button>
-            {lessonPlan.classroomName}
-          </Button> */}
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent>
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <p className="text-sm text-muted-foreground mb-4">
               Belum ada rencana pembelajaran untuk tanggal ini
@@ -131,33 +139,48 @@ export default function DetailLessonPlan({
   return (
     <>
       <Card>
-        <CardHeader className="border-b h-auto">
-          <div className="flex items-start justify-between">
-            <div className="space-y-1 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <CardTitle className="text-base">Aktivitas: {lessonPlan.title}</CardTitle>
+        <CardHeader >
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-2 flex-1 min-w-0">
+              <div className="flex items-start gap-2 flex-wrap">
+                <CardTitle className="text-lg">{lessonPlan.title}</CardTitle>
                 {lessonPlan.code && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs shrink-0">
                     {lessonPlan.code}
                   </Badge>
                 )}
                 {lessonPlan.generatedByAi && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-xs shrink-0">
                     <IconRobot className="mr-1 h-3 w-3" />
                     AI Generated
                   </Badge>
                 )}
               </div>
-              <CardDescription className="text-sm flex items-center gap-2">
-                <IconChalkboardTeacher className="h-4 w-4" />
-                {lessonPlan.classroomName || "Rombongan Belajar"}
-              </CardDescription>
+              
+              <div className="space-y-1.5 text-sm grid grid-cols-2 w-full text-muted-foreground text-xs">
+                <div className="flex items-center gap-2">
+                  <IconChalkboardTeacher className="h-4 w-4 shrink-0" />
+                  <span className="font-medium">{lessonPlan.classroomName || "Rombongan Belajar"}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <IconCalendar className="h-4 w-4 shrink-0" />
+                  <span>{format(new Date(lessonPlan.date), "EEEE, dd MMMM yyyy", { locale: id })}</span>
+                </div>
+                {lessonPlan.createdByName && (
+                  <div className="flex items-center gap-2">
+                    <IconUser className="h-4 w-4 shrink-0" />
+                    <span>Dibuat oleh: {lessonPlan.createdByName}</span>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex gap-2">
+            
+            <div className="flex gap-2 shrink-0">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onEdit(lessonPlan)}
+                title="Edit Rencana Pembelajaran"
               >
                 <IconEdit className="h-4 w-4" />
               </Button>
@@ -165,39 +188,81 @@ export default function DetailLessonPlan({
                 variant="outline"
                 size="sm"
                 onClick={() => setDeleteDialogOpen(true)}
+                title="Hapus Rencana Pembelajaran"
               >
                 <IconTrash className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <IconCalendar className="h-4 w-4" />
-              <span>{format(new Date(lessonPlan.date), "PPP", { locale: id })}</span>
+        
+        <CardContent className="p-0">
+          {lessonPlan.items && lessonPlan.items.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="text-left p-2 font-semibold text-xs w-8">#</th>
+                    <th className="text-left p-2 font-semibold text-xs">Aspek Perkembangan</th>
+                    <th className="text-left p-2 font-semibold text-xs">Tujuan Pembelajaran</th>
+                    <th className="text-left p-2 font-semibold text-xs">Konteks & Aktivitas</th>
+                    <th className="text-center p-2 font-semibold text-xs w-20">AI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lessonPlan.items.map((item, index) => (
+                    <tr 
+                      key={item.id || index} 
+                      className="border-b last:border-b-0 hover:bg-muted/30 transition-colors"
+                    >
+                      <td className="p-2 align-top">
+                        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary font-semibold text-xs">
+                          {index + 1}
+                        </div>
+                      </td>
+                      <td className="p-2 align-top">
+                        <span className="font-medium text-xs">
+                          {getDevelopmentScopeLabel(item.developmentScope)}
+                        </span>
+                      </td>
+                      <td className="p-2 align-top">
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {item.learningGoal}
+                        </p>
+                      </td>
+                      <td className="p-2 align-top">
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {item.activityContext}
+                        </p>
+                      </td>
+                      <td className="p-2 align-top text-center">
+                        {item.generatedByAi && (
+                          <Badge variant="secondary" className="text-xs">
+                            <IconSparkles className="h-3 w-3" />
+                          </Badge>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            {lessonPlan.createdByName && (
-              <div className="flex items-center gap-2">
-                <IconUser className="h-4 w-4" />
-                <span>{lessonPlan.createdByName}</span>
-              </div>
-            )}
-          </div>
-          <div className="prose prose-sm max-w-none mb-6">
-            <span className="font-semibold text-sm">Deskripsi:</span>
-            <div className="whitespace-pre-wrap text-sm text-justify">{lessonPlan.content}</div>
-          </div>
-          <div className="prose prose-sm max-w-none">
-            <span className="font-semibold text-sm">Media:</span>
-            {/* TODO: implement add media */}
-            <div className="whitespace-pre-wrap text-sm">-</div>
-          </div>
-          <div className="prose prose-sm max-w-none">
-            <span className="font-semibold text-sm">Referensi:</span>
-            {/* TODO: implement add media */}
-            <div className="whitespace-pre-wrap text-sm">-</div>
-          </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-sm text-muted-foreground">
+                Tidak ada data aspek perkembangan
+              </p>
+            </div>
+          )}
+
+          {/* Metadata */}
+          {lessonPlan.createdAt && (
+            <div className="px-6 py-4 border-t bg-muted/20">
+              <p className="text-xs text-muted-foreground">
+                Dibuat pada: {format(new Date(lessonPlan.createdAt), "dd MMMM yyyy, HH:mm", { locale: id })}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -22,6 +22,13 @@
       "when": 1765591511058,
       "tag": "0002_graceful_electro",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1765815874161,
+      "tag": "0003_fast_invisible_woman",
+      "breakpoints": true
     }
   ]
 }

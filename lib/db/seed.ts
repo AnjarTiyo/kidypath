@@ -28,14 +28,60 @@ async function seed() {
 
   // Seed development scopes
   console.log('📝 Seeding development scopes...');
-  await db.insert(schema.developmentScopes).values([
-    { name: 'religious_moral' },
-    { name: 'physical_motor' },
-    { name: 'cognitive' },
-    { name: 'language' },
-    { name: 'social_emotional' },
-    { name: 'art' },
-  ]).onConflictDoNothing();
+  const developmentScopesData = [
+    { name: 'religious_moral' as const },
+    { name: 'physical_motor' as const },
+    { name: 'cognitive' as const },
+    { name: 'language' as const },
+    { name: 'social_emotional' as const },
+    { name: 'art' as const },
+  ];
+  
+  await db.insert(schema.developmentScopes)
+    .values(developmentScopesData)
+    .onConflictDoNothing();
+
+  // Fetch inserted development scopes for learning objectives
+  const insertedScopes = await db.select().from(schema.developmentScopes);
+  const scopeMap = new Map(insertedScopes.map(scope => [scope.name, scope.id]));
+
+  // Seed sample learning objectives for each development scope
+  console.log('🎯 Seeding learning objectives...');
+  const learningObjectivesData = [
+    // Religious & Moral Values
+    { scopeId: scopeMap.get('religious_moral'), description: 'Anak mampu mengenal dan mengucapkan doa sehari-hari dengan baik' },
+    { scopeId: scopeMap.get('religious_moral'), description: 'Anak mampu menunjukkan perilaku santun dan berbagi dengan teman' },
+    { scopeId: scopeMap.get('religious_moral'), description: 'Anak mampu mengenal dan menyebutkan ciptaan Tuhan' },
+    
+    // Physical & Motor
+    { scopeId: scopeMap.get('physical_motor'), description: 'Anak mampu melakukan gerakan motorik kasar seperti berlari, melompat, dan melempar' },
+    { scopeId: scopeMap.get('physical_motor'), description: 'Anak mampu melakukan gerakan motorik halus seperti menggunting, menempel, dan mewarnai' },
+    { scopeId: scopeMap.get('physical_motor'), description: 'Anak mampu menjaga kebersihan diri dan lingkungan' },
+    
+    // Cognitive
+    { scopeId: scopeMap.get('cognitive'), description: 'Anak mampu mengenal konsep bilangan 1-10 dan melakukan penghitungan sederhana' },
+    { scopeId: scopeMap.get('cognitive'), description: 'Anak mampu mengelompokkan benda berdasarkan warna, bentuk, dan ukuran' },
+    { scopeId: scopeMap.get('cognitive'), description: 'Anak mampu memecahkan masalah sederhana dalam kehidupan sehari-hari' },
+    
+    // Language
+    { scopeId: scopeMap.get('language'), description: 'Anak mampu menyimak dan memahami cerita sederhana' },
+    { scopeId: scopeMap.get('language'), description: 'Anak mampu mengekspresikan pikiran dan perasaan dengan bahasa yang jelas' },
+    { scopeId: scopeMap.get('language'), description: 'Anak mampu mengenal huruf dan membaca kata sederhana' },
+    
+    // Social & Emotional
+    { scopeId: scopeMap.get('social_emotional'), description: 'Anak mampu berinteraksi dengan teman sebaya dan orang dewasa dengan baik' },
+    { scopeId: scopeMap.get('social_emotional'), description: 'Anak mampu mengenali dan mengekspresikan emosi dengan tepat' },
+    { scopeId: scopeMap.get('social_emotional'), description: 'Anak mampu bekerja sama dalam kegiatan kelompok' },
+    
+    // Art
+    { scopeId: scopeMap.get('art'), description: 'Anak mampu mengekspresikan kreativitas melalui berbagai karya seni' },
+    { scopeId: scopeMap.get('art'), description: 'Anak mampu bernyanyi dan mengikuti irama musik dengan baik' },
+    { scopeId: scopeMap.get('art'), description: 'Anak mampu menari dan mengekspresikan gerakan sesuai musik' },
+  ];
+
+  await db.insert(schema.learningObjectives)
+    .values(learningObjectivesData)
+    .onConflictDoNothing();
 
   // Seed users - one of each role
   console.log('👥 Seeding users...');

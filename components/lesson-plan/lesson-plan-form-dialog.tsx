@@ -13,19 +13,32 @@ import { id } from "date-fns/locale"
 import { CalendarIcon, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Textarea } from "../ui/textarea"
-import { IconSparkles, IconReload } from "@tabler/icons-react"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { IconSparkles } from "@tabler/icons-react"
 import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { getDevelopmentScopeLabel } from "@/lib/ai/lesson-plan-generator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
+
+type DevelopmentScope = 'religious_moral' | 'physical_motor' | 'cognitive' | 'language' | 'social_emotional' | 'art';
+
+interface LessonPlanItem {
+  id?: string
+  developmentScope: DevelopmentScope
+  learningGoal: string
+  activityContext: string
+  generatedByAi?: boolean
+}
 
 interface LessonPlan {
   id: string
   classroomId: string
   classroomName?: string
   date: string
-  title: string | null
+  title: string
   code?: string | null
-  content: string | null
   generatedByAi?: boolean
+  items: LessonPlanItem[]
 }
 
 interface Classroom {
@@ -54,21 +67,34 @@ export function LessonPlanFormDialog({
   const [classrooms, setClassrooms] = useState<Classroom[]>([])
   const [loadingClassrooms, setLoadingClassrooms] = useState(false)
 
+  const developmentScopes: DevelopmentScope[] = [
+    'religious_moral',
+    'physical_motor',
+    'cognitive',
+    'language',
+    'social_emotional',
+    'art'
+  ]
+
   const [formData, setFormData] = useState({
     classroomId: "",
     date: selectedDate || new Date(),
     title: "",
     code: "",
-    content: "",
+    items: developmentScopes.map(scope => ({
+      developmentScope: scope,
+      learningGoal: "",
+      activityContext: "",
+      generatedByAi: false,
+    })),
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [activeTab, setActiveTab] = useState<DevelopmentScope>('religious_moral')
   
   // AI generation states
   const [isGenerating, setIsGenerating] = useState(false)
-  const [showAiPopover, setShowAiPopover] = useState(false)
-  const [userPrompt, setUserPrompt] = useState("")
-  const [generatedContent, setGeneratedContent] = useState("")
+  const [generatedByAi, setGeneratedByAi] = useState(false)
 
   // Fetch classrooms when dialog opens
   useEffect(() => {
@@ -85,8 +111,19 @@ export function LessonPlanFormDialog({
         date: new Date(lessonPlan.date),
         title: lessonPlan.title || "",
         code: lessonPlan.code || "",
-        content: lessonPlan.content || "",
+        items: lessonPlan.items && lessonPlan.items.length > 0 
+          ? lessonPlan.items.map(item => ({
+              ...item,
+              generatedByAi: item.generatedByAi || false,
+            }))
+          : developmentScopes.map(scope => ({
+              developmentScope: scope,
+              learningGoal: "",
+              activityContext: "",
+              generatedByAi: false,
+            })),
       })
+      setGeneratedByAi(lessonPlan.generatedByAi || false)
     } else if (selectedDate) {
       setFormData(prev => ({
         ...prev,
@@ -138,9 +175,16 @@ export function LessonPlanFormDialog({
     if (!formData.title.trim()) {
       newErrors.title = "Judul rencana pembelajaran harus diisi"
     }
-    if (!formData.content.trim()) {
-      newErrors.content = "Konten rencana pembelajaran harus diisi"
-    }
+
+    // Validate all items
+    formData.items.forEach((item, index) => {
+      if (!item.learningGoal.trim()) {
+        newErrors[`goal_${item.developmentScope}`] = "Tujuan pembelajaran harus diisi"
+      }
+      if (!item.activityContext.trim()) {
+        newErrors[`activity_${item.developmentScope}`] = "Konteks/aktivitas harus diisi"
+      }
+    })
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -168,8 +212,8 @@ export function LessonPlanFormDialog({
           date: format(formData.date, "yyyy-MM-dd"),
           title: formData.title,
           code: formData.code || null,
-          content: formData.content,
-          generatedByAi: false,
+          items: formData.items,
+          generatedByAi: generatedByAi,
         }),
       })
 
@@ -195,12 +239,16 @@ export function LessonPlanFormDialog({
       date: new Date(),
       title: "",
       code: "",
-      content: "",
+      items: developmentScopes.map(scope => ({
+        developmentScope: scope,
+        learningGoal: "",
+        activityContext: "",
+        generatedByAi: false,
+      })),
     })
     setErrors({})
-    setShowAiPopover(false)
-    setUserPrompt("")
-    setGeneratedContent("")
+    setGeneratedByAi(false)
+    setActiveTab('religious_moral')
   }
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -221,50 +269,85 @@ export function LessonPlanFormDialog({
     setErrors({})
 
     try {
+      // Call the API endpoint to generate lesson plan
       const response = await fetch("/api/lesson-plans/content/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: formData.title,
-          userPrompt: userPrompt.trim() || undefined,
+          userPrompt: "", // Can be extended to accept user preferences
         }),
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        // Store generated content temporarily, don't apply it yet
-        setGeneratedContent(data.content)
-      } else {
+      if (!response.ok) {
         const error = await response.json()
-        setErrors({ content: error.error || "Gagal generate konten dengan AI" })
+        throw new Error(error.error || "Failed to generate lesson plan")
       }
+
+      const data = await response.json()
+      
+      // Map generated items to form data
+      const updatedItems = developmentScopes.map(scope => {
+        const generatedItem = data.items.find((item: any) => item.developmentScope === scope)
+        return {
+          developmentScope: scope,
+          learningGoal: generatedItem?.learningGoal || "",
+          activityContext: generatedItem?.activityContext || "",
+          generatedByAi: true,
+        }
+      })
+
+      setFormData({
+        ...formData,
+        items: updatedItems,
+      })
+      setGeneratedByAi(true)
     } catch (error) {
       console.error("Error generating content:", error)
-      setErrors({ content: "Terjadi kesalahan saat generate konten" })
+      setErrors({ submit: error instanceof Error ? error.message : "Terjadi kesalahan saat generate dengan AI" })
     } finally {
       setIsGenerating(false)
     }
   }
 
-  const handleApplyGeneratedContent = () => {
-    setFormData({ ...formData, content: generatedContent })
-    setShowAiPopover(false)
-    setGeneratedContent("")
-    setUserPrompt("")
+  const updateItem = (scope: DevelopmentScope, field: 'learningGoal' | 'activityContext', value: string) => {
+    setFormData({
+      ...formData,
+      items: formData.items.map(item =>
+        item.developmentScope === scope
+          ? { ...item, [field]: value }
+          : item
+      ),
+    })
+  }
+
+  const getItem = (scope: DevelopmentScope) => {
+    return formData.items.find(item => item.developmentScope === scope) || {
+      developmentScope: scope,
+      learningGoal: "",
+      activityContext: "",
+      generatedByAi: false,
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl w-full max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
               {lessonPlan ? "Edit Rencana Pembelajaran" : "Buat Rencana Pembelajaran"}
+              {generatedByAi && (
+                <Badge variant="secondary" className="text-xs">
+                  <IconSparkles className="mr-1 h-3 w-3" />
+                  AI Generated
+                </Badge>
+              )}
             </DialogTitle>
             <DialogDescription>
               {lessonPlan
-                ? "Perbarui rencana pembelajaran yang sudah ada"
-                : "Buat rencana pembelajaran baru untuk rombongan belajar"}
+                ? "Perbarui rencana pembelajaran dengan 6 aspek perkembangan"
+                : "Buat rencana pembelajaran baru untuk semua aspek perkembangan"}
             </DialogDescription>
           </DialogHeader>
 
@@ -339,187 +422,177 @@ export function LessonPlanFormDialog({
                   <p className="text-sm text-destructive">{errors.classroomId}</p>
                 )}
               </div>
-              {/* Code (Optional) */}
+
+              {/* Date Selection */}
               <div className="space-y-2">
-                <Label htmlFor="code">
-                  Kode (Opsional)
+                <Label>
+                  Tanggal <span className="text-destructive">*</span>
                 </Label>
-                <input
-                  id="code"
-                  type="text"
-                  placeholder="Contoh: LP-001 atau tema pembelajaran"
-                  value={formData.code}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setFormData({ ...formData, code: e.target.value })
-                  }
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                />
-                {errors.code && (
-                  <p className="text-sm text-destructive">{errors.code}</p>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.date && "text-muted-foreground"
+                      )}
+                      disabled={!!lessonPlan}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.date ? (
+                        format(formData.date, "PPP", { locale: id })
+                      ) : (
+                        <span>Pilih tanggal</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.date}
+                      onSelect={(date) =>
+                        date && setFormData({ ...formData, date })
+                      }
+                      locale={id}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                {errors.date && (
+                  <p className="text-sm text-destructive">{errors.date}</p>
                 )}
               </div>
             </div>
 
-            {/* Date Selection */}
-            <div className="space-y-2">
-              <Label>
-                Tanggal <span className="text-destructive">*</span>
-              </Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.date && "text-muted-foreground"
-                    )}
-                    disabled={!!lessonPlan}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.date ? (
-                      format(formData.date, "PPP", { locale: id })
-                    ) : (
-                      <span>Pilih tanggal</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.date}
-                    onSelect={(date) =>
-                      date && setFormData({ ...formData, date })
-                    }
-                    locale={id}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              {errors.date && (
-                <p className="text-sm text-destructive">{errors.date}</p>
-              )}
-            </div>
-
-            {/* Title */}
-            <div className="space-y-2">
-              <Label htmlFor="title">
-                Judul Rencana Pembelajaran <span className="text-destructive">*</span>
-              </Label>
-              <input
-                id="title"
-                type="text"
-                placeholder="Contoh: Mengenal Hewan dan Tumbuhan"
-                value={formData.title}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-              {errors.title && (
-                <p className="text-sm text-destructive">{errors.title}</p>
-              )}
-            </div>
-
-
-
-            {/* Content */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="content">
-                  Konten Rencana Pembelajaran <span className="text-destructive">*</span>
+            {/* Title & Code */}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="title">
+                  Tema Pembelajaran <span className="text-destructive">*</span>
                 </Label>
-                <Popover open={showAiPopover} onOpenChange={setShowAiPopover}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      disabled={!formData.title.trim()}
-                    >
-                      <IconSparkles className="mr-2 h-4 w-4" />
-                      Buat dengan AI
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80" align="end">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <h4 className="font-medium leading-none">Generate dengan AI</h4>
-                        <p className="text-sm text-muted-foreground">
-                          AI akan membuat konten berdasarkan judul pembelajaran
-                        </p>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="userPrompt" className="text-sm">
-                          Preferensi Anda (Opsional)
-                        </Label>
-                        <Input
-                          id="userPrompt"
-                          type="text"
-                          placeholder="Contoh: fokus pada aktivitas outdoor..."
-                          value={userPrompt}
-                          onChange={(e) => setUserPrompt(e.target.value)}
-                          disabled={isGenerating}
-                        />
-                      </div>
-
-                      {!generatedContent ? (
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={handleGenerateWithAI}
-                          disabled={isGenerating || !formData.title.trim()}
-                          className="w-full"
-                        >
-                          {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                          {isGenerating ? "Generating..." : "Generate"}
-                        </Button>
-                      ) : (
-                        <div className="space-y-3">
-                          <div className="rounded-md border bg-muted/50 p-3">
-                            <p className="text-sm whitespace-pre-wrap">{generatedContent}</p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              onClick={handleGenerateWithAI}
-                              disabled={isGenerating}
-                              className="flex-1"
-                            >
-                              <IconReload className={cn("mr-2 h-4 w-4", isGenerating && "animate-spin")} />
-                              Regenerate
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              onClick={handleApplyGeneratedContent}
-                              className="flex-1"
-                            >
-                              Aplikasikan
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                <Input
+                  id="title"
+                  type="text"
+                  placeholder="Contoh: Mengenal Hewan dan Tumbuhan"
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                />
+                {errors.title && (
+                  <p className="text-sm text-destructive">{errors.title}</p>
+                )}
               </div>
 
-              <Textarea
-                id="content"
-                placeholder="Masukkan rencana pembelajaran atau generate dengan AI..."
-                value={formData.content}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  setFormData({ ...formData, content: e.target.value })
-                }
-                rows={10}
-                className="resize-none"
-              />
-              {errors.content && (
-                <p className="text-sm text-destructive">{errors.content}</p>
-              )}
+              <div className="space-y-2">
+                <Label htmlFor="code">Kode (Opsional)</Label>
+                <Input
+                  id="code"
+                  type="text"
+                  placeholder="Contoh: LP-001"
+                  value={formData.code}
+                  onChange={(e) =>
+                    setFormData({ ...formData, code: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            {/* AI Generate Button */}
+            <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+              <div>
+                <p className="text-sm font-medium">Generate dengan AI</p>
+                <p className="text-xs text-muted-foreground">
+                  AI akan membuat tujuan dan aktivitas untuk semua 6 aspek perkembangan
+                </p>
+              </div>
+              <Button
+                type="button"
+                onClick={handleGenerateWithAI}
+                disabled={isGenerating || !formData.title.trim()}
+                size="sm"
+              >
+                {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <IconSparkles className="mr-2 h-4 w-4" />
+                Generate AI
+              </Button>
+            </div>
+
+            {/* Development Scopes Tabs */}
+            <div className="space-y-2">
+              <Label>
+                Aspek Perkembangan <span className="text-destructive">*</span>
+              </Label>
+              <Tabs value={activeTab} onValueChange={(value: string) => setActiveTab(value as DevelopmentScope)}>
+                <TabsList className="grid grid-cols-3 lg:grid-cols-6 h-auto">
+                  {developmentScopes.map((scope) => (
+                    <TabsTrigger
+                      key={scope}
+                      value={scope}
+                      className="text-xs py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                    >
+                      {getDevelopmentScopeLabel(scope).split(' ')[0]}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
+                {developmentScopes.map((scope) => {
+                  const item = getItem(scope)
+                  return (
+                    <TabsContent key={scope} value={scope} className="space-y-4">
+                      <Card>
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-semibold">{getDevelopmentScopeLabel(scope)}</h3>
+                            {item.generatedByAi && (
+                              <Badge variant="secondary" className="text-xs">
+                                <IconSparkles className="mr-1 h-3 w-3" />
+                                AI
+                              </Badge>
+                            )}
+                          </div>
+                          <CardDescription className="text-xs">
+                            Isi tujuan pembelajaran dan aktivitas untuk aspek ini
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor={`goal-${scope}`}>
+                              Tujuan Pembelajaran <span className="text-destructive">*</span>
+                            </Label>
+                            <Textarea
+                              id={`goal-${scope}`}
+                              placeholder="Contoh: Anak mampu mengenal dan menyebutkan 5 jenis hewan..."
+                              value={item.learningGoal}
+                              onChange={(e) => updateItem(scope, 'learningGoal', e.target.value)}
+                              rows={3}
+                            />
+                            {errors[`goal_${scope}`] && (
+                              <p className="text-sm text-destructive">{errors[`goal_${scope}`]}</p>
+                            )}
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor={`activity-${scope}`}>
+                              Konteks/Aktivitas <span className="text-destructive">*</span>
+                            </Label>
+                            <Textarea
+                              id={`activity-${scope}`}
+                              placeholder="Contoh: Anak mengamati gambar hewan, menyebutkan namanya, dan menirukan suaranya..."
+                              value={item.activityContext}
+                              onChange={(e) => updateItem(scope, 'activityContext', e.target.value)}
+                              rows={4}
+                            />
+                            {errors[`activity_${scope}`] && (
+                              <p className="text-sm text-destructive">{errors[`activity_${scope}`]}</p>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                  )
+                })}
+              </Tabs>
             </div>
 
             {errors.submit && (

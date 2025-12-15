@@ -10,6 +10,16 @@ import { format } from "date-fns"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
 import { Card, CardContent } from "@/components/ui/card"
 
+type DevelopmentScope = 'religious_moral' | 'physical_motor' | 'cognitive' | 'language' | 'social_emotional' | 'art';
+
+interface LessonPlanItem {
+  id: string
+  developmentScope: DevelopmentScope
+  learningGoal: string
+  activityContext: string
+  generatedByAi?: boolean
+}
+
 interface LessonPlan {
   id: string
   classroomId: string
@@ -17,10 +27,10 @@ interface LessonPlan {
   date: string
   title: string
   code?: string | null
-  content: string
   generatedByAi?: boolean
   createdByName?: string
   createdAt?: string
+  items: LessonPlanItem[]
 }
 
 export default function TeacherLessonPlanPage() {
