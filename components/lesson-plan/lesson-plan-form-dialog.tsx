@@ -13,7 +13,9 @@ import { id } from "date-fns/locale"
 import { CalendarIcon, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Textarea } from "../ui/textarea"
-import { IconSparkles } from "@tabler/icons-react"
+import { IconSparkles, IconReload } from "@tabler/icons-react"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Input } from "@/components/ui/input"
 
 interface LessonPlan {
   id: string
@@ -61,6 +63,12 @@ export function LessonPlanFormDialog({
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
+  
+  // AI generation states
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [showAiPopover, setShowAiPopover] = useState(false)
+  const [userPrompt, setUserPrompt] = useState("")
+  const [generatedContent, setGeneratedContent] = useState("")
 
   // Fetch classrooms when dialog opens
   useEffect(() => {
@@ -190,6 +198,9 @@ export function LessonPlanFormDialog({
       content: "",
     })
     setErrors({})
+    setShowAiPopover(false)
+    setUserPrompt("")
+    setGeneratedContent("")
   }
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -197,6 +208,49 @@ export function LessonPlanFormDialog({
       resetForm()
     }
     onOpenChange(newOpen)
+  }
+
+  const handleGenerateWithAI = async () => {
+    // Validate title before generating
+    if (!formData.title.trim()) {
+      setErrors({ title: "Judul harus diisi terlebih dahulu untuk generate dengan AI" })
+      return
+    }
+
+    setIsGenerating(true)
+    setErrors({})
+
+    try {
+      const response = await fetch("/api/lesson-plans/content/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: formData.title,
+          userPrompt: userPrompt.trim() || undefined,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        // Store generated content temporarily, don't apply it yet
+        setGeneratedContent(data.content)
+      } else {
+        const error = await response.json()
+        setErrors({ content: error.error || "Gagal generate konten dengan AI" })
+      }
+    } catch (error) {
+      console.error("Error generating content:", error)
+      setErrors({ content: "Terjadi kesalahan saat generate konten" })
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const handleApplyGeneratedContent = () => {
+    setFormData({ ...formData, content: generatedContent })
+    setShowAiPopover(false)
+    setGeneratedContent("")
+    setUserPrompt("")
   }
 
   return (
@@ -374,17 +428,88 @@ export function LessonPlanFormDialog({
                 <Label htmlFor="content">
                   Konten Rencana Pembelajaran <span className="text-destructive">*</span>
                 </Label>
-                <Button
-                  size={"sm"}
-                  variant={"outline"}
-                >
-                  <IconSparkles className="mr-2 h-4 w-4" />
-                  Buat dengan AI
-                </Button>
+                <Popover open={showAiPopover} onOpenChange={setShowAiPopover}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={!formData.title.trim()}
+                    >
+                      <IconSparkles className="mr-2 h-4 w-4" />
+                      Buat dengan AI
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80" align="end">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <h4 className="font-medium leading-none">Generate dengan AI</h4>
+                        <p className="text-sm text-muted-foreground">
+                          AI akan membuat konten berdasarkan judul pembelajaran
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="userPrompt" className="text-sm">
+                          Preferensi Anda (Opsional)
+                        </Label>
+                        <Input
+                          id="userPrompt"
+                          type="text"
+                          placeholder="Contoh: fokus pada aktivitas outdoor..."
+                          value={userPrompt}
+                          onChange={(e) => setUserPrompt(e.target.value)}
+                          disabled={isGenerating}
+                        />
+                      </div>
+
+                      {!generatedContent ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={handleGenerateWithAI}
+                          disabled={isGenerating || !formData.title.trim()}
+                          className="w-full"
+                        >
+                          {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          {isGenerating ? "Generating..." : "Generate"}
+                        </Button>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="rounded-md border bg-muted/50 p-3">
+                            <p className="text-sm whitespace-pre-wrap">{generatedContent}</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={handleGenerateWithAI}
+                              disabled={isGenerating}
+                              className="flex-1"
+                            >
+                              <IconReload className={cn("mr-2 h-4 w-4", isGenerating && "animate-spin")} />
+                              Regenerate
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={handleApplyGeneratedContent}
+                              className="flex-1"
+                            >
+                              Aplikasikan
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
+
               <Textarea
                 id="content"
-                placeholder="Masukkan rencana pembelajaran..."
+                placeholder="Masukkan rencana pembelajaran atau generate dengan AI..."
                 value={formData.content}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                   setFormData({ ...formData, content: e.target.value })

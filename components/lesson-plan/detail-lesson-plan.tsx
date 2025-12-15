@@ -184,9 +184,9 @@ export default function DetailLessonPlan({
               </div>
             )}
           </div>
-          <div className="prose prose-sm max-w-none mb-10">
+          <div className="prose prose-sm max-w-none mb-6">
             <span className="font-semibold text-sm">Deskripsi:</span>
-            <div className="whitespace-pre-wrap text-sm">{lessonPlan.content}</div>
+            <div className="whitespace-pre-wrap text-sm text-justify">{lessonPlan.content}</div>
           </div>
           <div className="prose prose-sm max-w-none">
             <span className="font-semibold text-sm">Media:</span>
