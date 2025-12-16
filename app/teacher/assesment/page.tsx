@@ -6,6 +6,7 @@ import { DateController } from "@/components/assessment/date-controller"
 import { IconHome, IconSchool } from "@tabler/icons-react"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
 import { Card, CardContent } from "@/components/ui/card"
+import { LessonPlanAssessmentTable } from "@/components/assessment"
 
 export default function StudentAssessmentPage() {
   const { user, classrooms, loading } = useCurrentUser()
@@ -114,9 +115,10 @@ export default function StudentAssessmentPage() {
         {/* Future components will be added here based on the selected date */}
         <Card>
           <CardContent className="py-8">
-            <p className="text-center text-muted-foreground">
-              Komponen penilaian untuk tanggal yang dipilih akan ditampilkan di sini
-            </p>
+            <LessonPlanAssessmentTable 
+              items={[]}
+              showEmptyState={false}
+            />
           </CardContent>
         </Card>
       </div>
