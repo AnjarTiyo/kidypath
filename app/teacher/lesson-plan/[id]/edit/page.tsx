@@ -55,7 +55,7 @@ interface LessonPlan {
 export default function EditLessonPlanPage() {
   const router = useRouter()
   const params = useParams()
-  const id = params.id as string
+  const lessonPlanId = params.id as string
   
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -90,15 +90,15 @@ export default function EditLessonPlanPage() {
 
   // Fetch lesson plan data
   useEffect(() => {
-    if (id) {
+    if (lessonPlanId) {
       fetchLessonPlan()
     }
-  }, [id])
+  }, [lessonPlanId])
 
   const fetchLessonPlan = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/lesson-plans/${id}`)
+      const response = await fetch(`/api/lesson-plans/${lessonPlanId}`)
       if (response.ok) {
         const data = await response.json()
         setLessonPlan(data)
@@ -168,18 +168,18 @@ export default function EditLessonPlanPage() {
     setSaving(true)
 
     try {
-      const response = await fetch(`/api/lesson-plans/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          date: format(formData.date, "yyyy-MM-dd"),
-          topic: formData.topic,
-          subtopic: formData.subtopic || null,
-          code: formData.code || null,
-          items: formData.items,
-          generatedByAi: generatedByAi,
-        }),
-      })
+    const response = await fetch(`/api/lesson-plans/${lessonPlanId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        date: format(formData.date, "yyyy-MM-dd"),
+        topic: formData.topic,
+        subtopic: formData.subtopic || null,
+        code: formData.code || null,
+        items: formData.items,
+        generatedByAi: generatedByAi,
+      }),
+    })
 
       if (response.ok) {
         router.push("/teacher/lesson-plan")
@@ -275,7 +275,7 @@ export default function EditLessonPlanPage() {
           breadcrumbs={[
             { label: "Beranda", href: "/teacher", icon: IconHome },
             { label: "Rencana Pembelajaran", href: "/teacher/lesson-plan", icon: IconChalkboardTeacher },
-            { label: "Edit", href: `/teacher/lesson-plan/${id}/edit`, icon: IconChalkboardTeacher },
+            { label: "Edit", href: `/teacher/lesson-plan/${lessonPlanId}/edit`, icon: IconChalkboardTeacher },
           ]}
         />
         <Card>
@@ -329,7 +329,7 @@ export default function EditLessonPlanPage() {
         breadcrumbs={[
           { label: "Beranda", href: "/teacher", icon: IconHome },
           { label: "Rencana Pembelajaran", href: "/teacher/lesson-plan", icon: IconChalkboardTeacher },
-          { label: "Edit", href: `/teacher/lesson-plan/${id}/edit`, icon: IconChalkboardTeacher },
+          { label: "Edit", href: `/teacher/lesson-plan/${lessonPlanId}/edit`, icon: IconChalkboardTeacher },
         ]}
       />
 
