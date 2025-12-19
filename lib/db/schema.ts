@@ -91,7 +91,8 @@ export const lessonPlans = pgTable('lesson_plans', {
   id: uuid('id').primaryKey().defaultRandom(),
   classroomId: uuid('classroom_id').references(() => classrooms.id),
   date: date('date'),
-  title: varchar('title'), // Title of the lesson plan (overall theme for the day)
+  topic: varchar('topic'), // Main topic/theme of the lesson plan
+  subtopic: varchar('subtopic'), // Subtopic of the lesson plan
   code: varchar('code'), // Optional code/identifier for the lesson
   generatedByAi: boolean('generated_by_ai').default(false),
   createdBy: uuid('created_by').references(() => users.id),

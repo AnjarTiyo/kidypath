@@ -12,7 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 interface LessonPlanData {
   id: string
-  title: string
+  topic: string
+  subtopic?: string | null
   code?: string
   generatedByAi?: boolean
   items: Array<{

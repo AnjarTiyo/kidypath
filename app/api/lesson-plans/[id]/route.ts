@@ -69,7 +69,8 @@ export async function GET(
       classroomId: lessonPlan.classroomId,
       classroomName: lessonPlan.classroom?.name,
       date: lessonPlan.date,
-      title: lessonPlan.title,
+      topic: lessonPlan.topic,
+      subtopic: lessonPlan.subtopic,
       code: lessonPlan.code,
       generatedByAi: lessonPlan.generatedByAi,
       createdBy: lessonPlan.createdBy,
@@ -117,11 +118,11 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
-    const { title, code, items, date, generatedByAi } = body
+    const { topic, subtopic, code, items, date, generatedByAi } = body
 
-    if (!title || !items || !Array.isArray(items)) {
+    if (!topic || !items || !Array.isArray(items)) {
       return NextResponse.json(
-        { error: "Title and items are required" },
+        { error: "Topic and items are required" },
         { status: 400 }
       )
     }
@@ -207,10 +208,11 @@ export async function PUT(
     const result = await db.transaction(async (tx) => {
       // Update lesson plan
       const updateData: any = { 
-        title,
+        topic,
         updatedAt: new Date(),
       }
       if (date !== undefined) updateData.date = date
+      if (subtopic !== undefined) updateData.subtopic = subtopic || null
       if (code !== undefined) updateData.code = code || null
       if (generatedByAi !== undefined) updateData.generatedByAi = generatedByAi
 

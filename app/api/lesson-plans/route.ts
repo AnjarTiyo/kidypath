@@ -102,7 +102,8 @@ export async function GET(request: NextRequest) {
       classroomId: lp.classroomId,
       classroomName: lp.classroom?.name,
       date: lp.date,
-      title: lp.title,
+      topic: lp.topic,
+      subtopic: lp.subtopic,
       code: lp.code,
       generatedByAi: lp.generatedByAi,
       createdBy: lp.createdBy,
@@ -161,12 +162,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { classroomId, date, title, code, items, generatedByAi = false } = body
+    const { classroomId, date, topic, subtopic, code, items, generatedByAi = false } = body
 
     // Validation
-    if (!classroomId || !date || !title || !items || !Array.isArray(items)) {
+    if (!classroomId || !date || !topic || !items || !Array.isArray(items)) {
       return NextResponse.json(
-        { error: "Classroom ID, date, title, and items are required" },
+        { error: "Classroom ID, date, topic, and items are required" },
         { status: 400 }
       )
     }
@@ -254,7 +255,8 @@ export async function POST(request: NextRequest) {
         .values({
           classroomId,
           date,
-          title,
+          topic,
+          subtopic: subtopic || null,
           code: code || null,
           generatedByAi,
           createdBy: session.user.id,

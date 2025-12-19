@@ -17,7 +17,8 @@ interface LessonPlanItem {
 interface LessonPlanCompactCardProps {
     lessonPlan: {
         id: string
-        title: string
+        topic: string
+        subtopic?: string | null
         code?: string
         generatedByAi?: boolean
         items: LessonPlanItem[]
@@ -68,7 +69,12 @@ export function LessonPlanCompactCard({
                 <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-sm truncate">{lessonPlan.title}</h3>
+                            <h3 className="font-semibold text-sm truncate">
+                                {lessonPlan.topic}
+                                {lessonPlan.subtopic && (
+                                    <span className="text-muted-foreground font-normal"> - {lessonPlan.subtopic}</span>
+                                )}
+                            </h3>
                             {lessonPlan.generatedByAi && (
                                 <IconSparkles className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
                             )}

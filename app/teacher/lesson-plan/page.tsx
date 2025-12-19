@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { PageHeader } from "@/components/layout/page-header"
 import LessonPlanCalendar from "@/components/lesson-plan/lesson-plan-calendar"
 import DetailLessonPlan from "@/components/lesson-plan/detail-lesson-plan"
-import { LessonPlanFormDialog } from "@/components/lesson-plan/lesson-plan-form-dialog"
 import { IconChalkboardTeacher, IconHome } from "@tabler/icons-react"
 import { format } from "date-fns"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
@@ -25,7 +25,8 @@ interface LessonPlan {
   classroomId: string
   classroomName?: string
   date: string
-  title: string
+  topic: string
+  subtopic?: string | null
   code?: string | null
   generatedByAi?: boolean
   createdByName?: string
@@ -34,12 +35,11 @@ interface LessonPlan {
 }
 
 export default function TeacherLessonPlanPage() {
+  const router = useRouter()
   const { user, classrooms, loading: userLoading } = useCurrentUser()
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [lessonPlan, setLessonPlan] = useState<LessonPlan | null>(null)
   const [loading, setLoading] = useState(false)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingLessonPlan, setEditingLessonPlan] = useState<LessonPlan | null>(null)
   const [lessonPlanDates, setLessonPlanDates] = useState<string[]>([])
   const [dayOffDates, setDayOffDates] = useState<string[]>([])
 
@@ -111,24 +111,11 @@ export default function TeacherLessonPlanPage() {
   }
 
   const handleCreateClick = () => {
-    setEditingLessonPlan(null)
-    setDialogOpen(true)
-  }
-
-  const handleEdit = (lp: LessonPlan) => {
-    setEditingLessonPlan(lp)
-    setDialogOpen(true)
+    router.push("/teacher/lesson-plan/new")
   }
 
   const handleDelete = (id: string) => {
     setLessonPlan(null)
-    fetchLessonPlanDates() // Refresh calendar
-  }
-
-  const handleSuccess = () => {
-    if (selectedDate) {
-      fetchLessonPlan(selectedDate)
-    }
     fetchLessonPlanDates() // Refresh calendar
   }
 
@@ -221,19 +208,10 @@ export default function TeacherLessonPlanPage() {
             selectedDate={selectedDate}
             lessonPlan={lessonPlan}
             loading={loading}
-            onEdit={handleEdit}
             onDelete={handleDelete}
           />
         </div>
       </div>
-
-      <LessonPlanFormDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        lessonPlan={editingLessonPlan}
-        selectedDate={selectedDate}
-        onSuccess={handleSuccess}
-      />
     </>
   )
 }

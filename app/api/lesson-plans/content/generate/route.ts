@@ -26,11 +26,11 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json()
-        const { title, userPrompt: userPreferences } = body
+        const { topic, subtopic, userPrompt: userPreferences } = body
 
-        if (!title || typeof title !== "string" || title.trim().length === 0) {
+        if (!topic || typeof topic !== "string" || topic.trim().length === 0) {
             return NextResponse.json(
-                { error: "Title is required" },
+                { error: "Topic is required" },
                 { status: 400 }
             )
         }
@@ -79,9 +79,9 @@ Respond with this exact JSON structure:
   ]
 }`
 
-        const userPrompt = `Create a daily lesson plan for the theme: "${title}".
+        const userPrompt = `Create a daily lesson plan for the theme: "${topic}"${subtopic ? ` with subtopic: "${subtopic}"` : ''}.
 
-Theme: ${title}
+Theme: ${topic}${subtopic ? `\nSubtopic: ${subtopic}` : ''}
 Age Group: 4-5 years (KB/TK A) or 5-6 years (TK B)
 ${userPreferences && userPreferences.trim().length > 0 ? `\nAdditional preferences: ${userPreferences}` : ''}
 

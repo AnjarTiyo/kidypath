@@ -35,7 +35,8 @@ interface LessonPlan {
   classroomId: string
   classroomName?: string
   date: string
-  title: string
+  topic: string
+  subtopic?: string | null
   code?: string | null
   generatedByAi?: boolean
   items: LessonPlanItem[]
@@ -79,7 +80,8 @@ export function LessonPlanFormDialog({
   const [formData, setFormData] = useState({
     classroomId: "",
     date: selectedDate || new Date(),
-    title: "",
+    topic: "",
+    subtopic: "",
     code: "",
     items: developmentScopes.map(scope => ({
       developmentScope: scope,
@@ -109,7 +111,8 @@ export function LessonPlanFormDialog({
       setFormData({
         classroomId: lessonPlan.classroomId,
         date: new Date(lessonPlan.date),
-        title: lessonPlan.title || "",
+        topic: lessonPlan.topic || "",
+        subtopic: lessonPlan.subtopic || "",
         code: lessonPlan.code || "",
         items: lessonPlan.items && lessonPlan.items.length > 0 
           ? lessonPlan.items.map(item => ({
@@ -172,8 +175,8 @@ export function LessonPlanFormDialog({
     if (!formData.date) {
       newErrors.date = "Tanggal harus dipilih"
     }
-    if (!formData.title.trim()) {
-      newErrors.title = "Judul rencana pembelajaran harus diisi"
+    if (!formData.topic.trim()) {
+      newErrors.topic = "Tema rencana pembelajaran harus diisi"
     }
 
     // Validate all items
@@ -210,7 +213,8 @@ export function LessonPlanFormDialog({
         body: JSON.stringify({
           classroomId: formData.classroomId,
           date: format(formData.date, "yyyy-MM-dd"),
-          title: formData.title,
+          topic: formData.topic,
+          subtopic: formData.subtopic || null,
           code: formData.code || null,
           items: formData.items,
           generatedByAi: generatedByAi,
@@ -237,7 +241,8 @@ export function LessonPlanFormDialog({
     setFormData({
       classroomId: "",
       date: new Date(),
-      title: "",
+      topic: "",
+      subtopic: "",
       code: "",
       items: developmentScopes.map(scope => ({
         developmentScope: scope,
@@ -259,9 +264,9 @@ export function LessonPlanFormDialog({
   }
 
   const handleGenerateWithAI = async () => {
-    // Validate title before generating
-    if (!formData.title.trim()) {
-      setErrors({ title: "Judul harus diisi terlebih dahulu untuk generate dengan AI" })
+    // Validate topic before generating
+    if (!formData.topic.trim()) {
+      setErrors({ topic: "Tema harus diisi terlebih dahulu untuk generate dengan AI" })
       return
     }
 
@@ -274,7 +279,8 @@ export function LessonPlanFormDialog({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: formData.title,
+          topic: formData.topic,
+          subtopic: formData.subtopic,
           userPrompt: "", // Can be extended to accept user preferences
         }),
       })
@@ -332,7 +338,7 @@ export function LessonPlanFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -464,38 +470,52 @@ export function LessonPlanFormDialog({
               </div>
             </div>
 
-            {/* Title & Code */}
+            {/* Topic & Subtopic */}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="title">
+                <Label htmlFor="topic">
                   Tema Pembelajaran <span className="text-destructive">*</span>
                 </Label>
                 <Input
-                  id="title"
+                  id="topic"
                   type="text"
                   placeholder="Contoh: Mengenal Hewan dan Tumbuhan"
-                  value={formData.title}
+                  value={formData.topic}
                   onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
+                    setFormData({ ...formData, topic: e.target.value })
                   }
                 />
-                {errors.title && (
-                  <p className="text-sm text-destructive">{errors.title}</p>
+                {errors.topic && (
+                  <p className="text-sm text-destructive">{errors.topic}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="code">Kode (Opsional)</Label>
+                <Label htmlFor="subtopic">Sub Tema (Opsional)</Label>
                 <Input
-                  id="code"
+                  id="subtopic"
                   type="text"
-                  placeholder="Contoh: LP-001"
-                  value={formData.code}
+                  placeholder="Contoh: Hewan Peliharaan"
+                  value={formData.subtopic}
                   onChange={(e) =>
-                    setFormData({ ...formData, code: e.target.value })
+                    setFormData({ ...formData, subtopic: e.target.value })
                   }
                 />
               </div>
+            </div>
+
+            {/* Code */}
+            <div className="space-y-2">
+              <Label htmlFor="code">Kode (Opsional)</Label>
+              <Input
+                id="code"
+                type="text"
+                placeholder="Contoh: LP-001"
+                value={formData.code}
+                onChange={(e) =>
+                  setFormData({ ...formData, code: e.target.value })
+                }
+              />
             </div>
 
             {/* AI Generate Button */}
@@ -509,7 +529,7 @@ export function LessonPlanFormDialog({
               <Button
                 type="button"
                 onClick={handleGenerateWithAI}
-                disabled={isGenerating || !formData.title.trim()}
+                disabled={isGenerating || !formData.topic.trim()}
                 size="sm"
               >
                 {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
