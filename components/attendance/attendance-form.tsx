@@ -19,8 +19,18 @@ interface AttendanceFormProps {
   classroomName: string
   date: Date
   type: "check_in" | "check_out"
+  editStudentId?: string // Optional: student to jump to for editing
   onSuccess?: () => void
   onComplete?: () => void
+  onProgressClick?: () => void // New: callback when progress badge is clicked
+}
+
+interface ExistingAttendance {
+  id: string
+  studentId: string
+  status: AttendanceStatus
+  mood: MoodType | null
+  note: string | null
 }
 
 export function AttendanceForm({
@@ -28,8 +38,10 @@ export function AttendanceForm({
   classroomName,
   date,
   type,
+  editStudentId,
   onSuccess,
   onComplete,
+  onProgressClick,
 }: AttendanceFormProps) {
   const [students, setStudents] = useState<Student[]>([])
   const [currentStudentIndex, setCurrentStudentIndex] = useState(0)
@@ -40,6 +52,7 @@ export function AttendanceForm({
   const [loadingStudents, setLoadingStudents] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [savedCount, setSavedCount] = useState(0)
+  const [existingAttendances, setExistingAttendances] = useState<Map<string, ExistingAttendance>>(new Map())
 
   const typeLabel = type === "check_in" ? "Check-In" : "Check-Out"
   const formattedDate = format(date, "EEEE, dd MMM yyyy", { locale: localeId })
@@ -47,37 +60,89 @@ export function AttendanceForm({
   const totalStudents = students.length
   const isLastStudent = currentStudentIndex === totalStudents - 1
 
-  // Fetch students
+  // Fetch students and existing attendances
   useEffect(() => {
-    const fetchStudents = async () => {
+    const fetchData = async () => {
       try {
         setLoadingStudents(true)
-        const response = await fetch(
+        
+        // Fetch students
+        const studentsResponse = await fetch(
           `/api/students?classroom=${classroomId}&pageSize=100`
         )
-        if (response.ok) {
-          const data = await response.json()
-          setStudents(data.data || [])
-          // Auto-select first student
-          setCurrentStudentIndex(0)
+        
+        // Fetch existing attendances for this date and type
+        const formattedDate = format(date, "yyyy-MM-dd")
+        const attendancesResponse = await fetch(
+          `/api/attendances?classroomId=${classroomId}&date=${formattedDate}&type=${type}`
+        )
+        
+        if (studentsResponse.ok) {
+          const studentsData = await studentsResponse.json()
+          const studentsList = studentsData.data || []
+          setStudents(studentsList)
+          
+          // Load existing attendances
+          if (attendancesResponse.ok) {
+            const attendancesData = await attendancesResponse.json()
+            const attendancesList = attendancesData.data || []
+            
+            // Map attendances by studentId
+            const attendancesMap = new Map<string, ExistingAttendance>()
+            attendancesList.forEach((att: any) => {
+              attendancesMap.set(att.studentId, {
+                id: att.id,
+                studentId: att.studentId,
+                status: att.status,
+                mood: att.mood,
+                note: att.note,
+              })
+            })
+            setExistingAttendances(attendancesMap)
+            setSavedCount(attendancesList.length)
+            
+            // If editing specific student, jump to that student
+            if (editStudentId) {
+              const index = studentsList.findIndex((s: Student) => s.id === editStudentId)
+              if (index !== -1) {
+                setCurrentStudentIndex(index)
+              }
+            } else {
+              // Auto-select first student without attendance
+              const firstUnsavedIndex = studentsList.findIndex(
+                (s: Student) => !attendancesMap.has(s.id)
+              )
+              setCurrentStudentIndex(firstUnsavedIndex !== -1 ? firstUnsavedIndex : 0)
+            }
+          } else {
+            setCurrentStudentIndex(0)
+          }
         }
       } catch (error) {
-        console.error("Error fetching students:", error)
+        console.error("Error fetching data:", error)
       } finally {
         setLoadingStudents(false)
       }
     }
 
-    fetchStudents()
-  }, [classroomId])
+    fetchData()
+  }, [classroomId, date, type, editStudentId])
 
-  // Reset form when student changes
+  // Load existing attendance data when student changes
   useEffect(() => {
-    setAttendanceStatus(null)
-    setMood(null)
-    setNote("")
+    if (selectedStudent && existingAttendances.has(selectedStudent.id)) {
+      const existing = existingAttendances.get(selectedStudent.id)!
+      setAttendanceStatus(existing.status)
+      setMood(existing.mood)
+      setNote(existing.note || "")
+    } else {
+      // Reset form for new student
+      setAttendanceStatus(null)
+      setMood(null)
+      setNote("")
+    }
     setError(null)
-  }, [currentStudentIndex])
+  }, [currentStudentIndex, selectedStudent, existingAttendances])
 
   const handlePreviousStudent = () => {
     if (currentStudentIndex > 0) {
@@ -139,14 +204,33 @@ export function AttendanceForm({
         return
       }
 
-      setSavedCount(savedCount + 1)
+      // Update existing attendances map
+      const updatedMap = new Map(existingAttendances)
+      updatedMap.set(selectedStudent.id, {
+        id: data.id,
+        studentId: selectedStudent.id,
+        status: finalStatus,
+        mood: finalMood,
+        note: note.trim() || null,
+      })
+      setExistingAttendances(updatedMap)
+      setSavedCount(updatedMap.size)
+      
       onSuccess?.()
 
       // Move to next student or complete
       if (isLastStudent) {
         onComplete?.()
       } else {
-        setCurrentStudentIndex(currentStudentIndex + 1)
+        // Jump to next unsaved student if exists
+        const nextUnsavedIndex = students.findIndex(
+          (s, idx) => idx > currentStudentIndex && !updatedMap.has(s.id)
+        )
+        if (nextUnsavedIndex !== -1) {
+          setCurrentStudentIndex(nextUnsavedIndex)
+        } else {
+          setCurrentStudentIndex(currentStudentIndex + 1)
+        }
       }
     } catch (error) {
       console.error("Error saving attendance:", error)
@@ -195,7 +279,18 @@ export function AttendanceForm({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
+              <Badge 
+                variant="outline" 
+                className={cn(
+                  "text-xs",
+                  onProgressClick && savedCount > 0 && "cursor-pointer hover:bg-accent"
+                )}
+                onClick={() => {
+                  if (onProgressClick && savedCount > 0) {
+                    onProgressClick()
+                  }
+                }}
+              >
                 {savedCount}/{totalStudents}
               </Badge>
               <Badge variant="outline" className="text-xs">{typeLabel}</Badge>

@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { IconCheck, IconEdit, IconLoader2 } from "@tabler/icons-react"
+import { IconCheck, IconEdit, IconLoader2, IconPlayerPlay } from "@tabler/icons-react"
 import { moodOptions } from "./mood-selector"
 import type { MoodType } from "./mood-selector"
 
@@ -30,7 +30,9 @@ interface AttendanceSummaryProps {
   date: string
   type: "check_in" | "check_out"
   attendances: AttendanceRecord[]
+  totalStudents?: number // New: to show completion status
   onEdit?: (studentId: string) => void
+  onContinue?: () => void // New: callback to continue attendance process
   loading?: boolean
 }
 
@@ -39,7 +41,9 @@ export function AttendanceSummary({
   date,
   type,
   attendances,
+  totalStudents,
   onEdit,
+  onContinue,
   loading = false,
 }: AttendanceSummaryProps) {
   const typeLabel = type === "check_in" ? "Check-In" : "Check-Out"
@@ -47,6 +51,7 @@ export function AttendanceSummary({
   const presentCount = attendances.filter(a => a.status === "present").length
   const sickCount = attendances.filter(a => a.status === "sick").length
   const permissionCount = attendances.filter(a => a.status === "permission").length
+  const isComplete = totalStudents ? attendances.length >= totalStudents : true
 
   const getMoodEmoji = (mood: MoodType | null) => {
     if (!mood) return "-"
@@ -91,12 +96,26 @@ export function AttendanceSummary({
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
               <IconCheck className="h-5 w-5 text-green-600" />
-              {typeLabel} Selesai!
+              {isComplete ? `${typeLabel} Selesai!` : `${typeLabel} Berlangsung`}
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Ringkasan kehadiran {classroomName}
+              {isComplete 
+                ? `Ringkasan kehadiran ${classroomName}`
+                : `${attendances.length}/${totalStudents || attendances.length} siswa sudah dicatat`
+              }
             </p>
           </div>
+          {!isComplete && onContinue && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={onContinue}
+              className="gap-2"
+            >
+              <IconPlayerPlay className="h-4 w-4" />
+              Lanjutkan
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

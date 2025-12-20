@@ -5,7 +5,7 @@ import { useParams } from "next/navigation"
 import { AttendanceForm, AttendanceSummary } from "@/components/attendance"
 import type { MoodType } from "@/components/attendance"
 import { Button } from "@/components/ui/button"
-import { IconLoader2, IconChevronLeft, IconChevronRight, IconRefresh } from "@tabler/icons-react"
+import { IconLoader2, IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
 import { format, addDays, subDays } from "date-fns"
 import { id as localeId } from "date-fns/locale"
 
@@ -31,9 +31,11 @@ export default function ClassCheckoutPage() {
   const [classroom, setClassroom] = useState<Classroom | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isCompleted, setIsCompleted] = useState(false)
+  const [showSummary, setShowSummary] = useState(false)
   const [attendances, setAttendances] = useState<AttendanceRecord[]>([])
   const [loadingSummary, setLoadingSummary] = useState(false)
+  const [editStudentId, setEditStudentId] = useState<string | undefined>(undefined)
+  const [totalStudents, setTotalStudents] = useState(0)
 
   useEffect(() => {
     const fetchClassroom = async () => {
@@ -43,6 +45,13 @@ export default function ClassCheckoutPage() {
         if (response.ok) {
           const data = await response.json()
           setClassroom(data)
+          
+          // Fetch total students count
+          const studentsResponse = await fetch(`/api/students?classroom=${classroomId}&pageSize=1`)
+          if (studentsResponse.ok) {
+            const studentsData = await studentsResponse.json()
+            setTotalStudents(studentsData.total || 0)
+          }
         } else {
           setError("Kelas tidak ditemukan")
         }
@@ -77,34 +86,37 @@ export default function ClassCheckoutPage() {
     }
   }
 
-  const handleComplete = async () => {
-    setIsCompleted(true)
+  const handleShowSummary = async () => {
+    setShowSummary(true)
     await fetchAttendances()
   }
 
-  const handleReset = () => {
-    setIsCompleted(false)
-    setAttendances([])
+  const handleContinue = () => {
+    setShowSummary(false)
+    setEditStudentId(undefined)
   }
 
   const handleEdit = (studentId: string) => {
-    // Reset to form mode and navigate to that student
-    setIsCompleted(false)
+    setEditStudentId(studentId)
+    setShowSummary(false)
   }
 
   const handlePreviousDay = () => {
     setSelectedDate(subDays(selectedDate, 1))
-    setIsCompleted(false)
+    setShowSummary(false)
+    setEditStudentId(undefined)
   }
 
   const handleNextDay = () => {
     setSelectedDate(addDays(selectedDate, 1))
-    setIsCompleted(false)
+    setShowSummary(false)
+    setEditStudentId(undefined)
   }
 
   const handleToday = () => {
     setSelectedDate(new Date())
-    setIsCompleted(false)
+    setShowSummary(false)
+    setEditStudentId(undefined)
   }
 
   const isToday = format(selectedDate, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd")
@@ -179,33 +191,26 @@ export default function ClassCheckoutPage() {
         </div>
       </div>
 
-      {isCompleted ? (
-        <div className="space-y-4">
-          <AttendanceSummary
-            classroomName={classroom.name}
-            date={format(selectedDate, "yyyy-MM-dd")}
-            type="check_out"
-            attendances={attendances}
-            onEdit={handleEdit}
-            loading={loadingSummary}
-          />
-          <Button
-            variant="outline"
-            onClick={handleReset}
-            className="w-full"
-            size="sm"
-          >
-            <IconRefresh className="mr-2 h-4 w-4" />
-            Input Ulang
-          </Button>
-        </div>
+      {showSummary ? (
+        <AttendanceSummary
+          classroomName={classroom.name}
+          date={format(selectedDate, "yyyy-MM-dd")}
+          type="check_out"
+          attendances={attendances}
+          totalStudents={totalStudents}
+          onEdit={handleEdit}
+          onContinue={handleContinue}
+          loading={loadingSummary}
+        />
       ) : (
         <AttendanceForm
           classroomId={classroomId}
           classroomName={classroom.name}
           date={selectedDate}
           type="check_out"
-          onComplete={handleComplete}
+          editStudentId={editStudentId}
+          onComplete={handleShowSummary}
+          onProgressClick={handleShowSummary}
         />
       )}
     </div>
