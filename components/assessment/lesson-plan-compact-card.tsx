@@ -2,132 +2,198 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { IconSparkles, IconChecklist, IconAlertCircle } from "@tabler/icons-react"
+import { IconCheck, IconX, IconClock, IconProgress, IconPlus, IconEdit } from "@tabler/icons-react"
 import { Progress } from "@/components/ui/progress"
+import { cn } from "@/lib/utils"
 
-interface LessonPlanItem {
-    id: string
-    developmentScope: string
-    learningGoal: string
-    activityContext: string
-    generatedByAi?: boolean
-}
-
-interface LessonPlanCompactCardProps {
-    lessonPlan: {
-        id: string
-        topic: string
-        subtopic?: string | null
-        code?: string
-        generatedByAi?: boolean
-        items: LessonPlanItem[]
+interface DailyStatusIndicatorProps {
+    lessonPlanStatus?: {
+        isCreated: boolean
+        topic?: string
+        subtopic?: string
     }
-    assessmentProgress: {
+    checkInStatus?: {
+        isConducted: boolean
+        completedCount?: number
+        totalStudents?: number
+    }
+    assessmentStatus?: {
+        completedCount: number
         totalStudents: number
-        assessedStudents: number
+        progressPercentage: number
     }
-    onAssess: () => void
+    checkOutStatus?: {
+        isConducted: boolean
+        completedCount?: number
+        totalStudents?: number
+    }
+    onCreateLessonPlan?: () => void
+    onEditLessonPlan?: () => void
+    onCheckIn?: () => void
+    onAssess?: () => void
+    onCheckOut?: () => void
 }
 
-const developmentScopeLabels: Record<string, string> = {
-    religious_moral: "NAM",
-    physical_motor: "FM",
-    cognitive: "Kog",
-    language: "Bhs",
-    social_emotional: "SE",
-    art: "Seni"
+interface StatusItemProps {
+    label: string
+    isComplete: boolean
+    showProgress?: boolean
+    completedCount?: number
+    totalCount?: number
+    progressPercentage?: number
+    subtitle?: string
+    onAction?: () => void
+    actionLabel?: string
 }
 
-const developmentScopeColors: Record<string, string> = {
-    religious_moral: "bg-purple-100 text-purple-700 border-purple-200",
-    physical_motor: "bg-green-100 text-green-700 border-green-200",
-    cognitive: "bg-blue-100 text-blue-700 border-blue-200",
-    language: "bg-yellow-100 text-yellow-700 border-yellow-200",
-    social_emotional: "bg-pink-100 text-pink-700 border-pink-200",
-    art: "bg-orange-100 text-orange-700 border-orange-200"
+function StatusItem({ 
+    label, 
+    isComplete, 
+    showProgress = false, 
+    completedCount, 
+    totalCount,
+    progressPercentage,
+    subtitle,
+    onAction,
+    actionLabel
+}: StatusItemProps) {
+    return (
+        <div className="flex items-start gap-3 py-3">
+            <div className={cn(
+                "mt-0.5 flex-shrink-0 rounded-full p-1",
+                isComplete ? "bg-green-100" : "bg-gray-100"
+            )}>
+                {isComplete ? (
+                    <IconCheck className="h-4 w-4 text-green-600" />
+                ) : (
+                    <IconClock className="h-4 w-4 text-gray-400" />
+                )}
+            </div>
+            
+            <div className="flex-1 min-w-0 flex flex-row items-start gap-10">
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium">{label}</p>
+                        {showProgress && totalCount !== undefined && completedCount !== undefined && (
+                            <span className="text-xs text-muted-foreground ml-2">
+                                {completedCount}/{totalCount}
+                            </span>
+                        )}
+                    </div>
+                    
+                    {subtitle && (
+                        <p className="text-xs text-muted-foreground truncate mt-0.5">{subtitle}</p>
+                    )}
+                    
+                    {showProgress && progressPercentage !== undefined && (
+                        <Progress value={progressPercentage} className="h-1.5 mt-1.5" />
+                    )}
+                    
+                    {!isComplete && !showProgress && (
+                        <p className="text-xs text-muted-foreground mt-0.5">Belum dilakukan</p>
+                    )}
+                </div>
+
+                {onAction && (
+                    <Button
+                        onClick={onAction}
+                        size="sm"
+                        variant={isComplete ? "outline" : "default"}
+                        className="h-7 text-xs flex-shrink-0 w-30"
+                    >
+                        {isComplete ? (
+                            <>
+                                <IconEdit className="h-3 w-3 mr-1" />
+                                {actionLabel || "Edit"}
+                            </>
+                        ) : (
+                            <>
+                                <IconPlus className="h-3 w-3 mr-1" />
+                                {actionLabel || "Mulai"}
+                            </>
+                        )}
+                    </Button>
+                )}
+            </div>
+        </div>
+    )
 }
 
 export function LessonPlanCompactCard({
-    lessonPlan,
-    assessmentProgress,
-    onAssess
-}: LessonPlanCompactCardProps) {
-    const progressPercentage = assessmentProgress.totalStudents > 0
-        ? (assessmentProgress.assessedStudents / assessmentProgress.totalStudents) * 100
-        : 0
-
-    const hasIncompleteAssessment = assessmentProgress.assessedStudents < assessmentProgress.totalStudents
+    lessonPlanStatus = { isCreated: false },
+    checkInStatus = { isConducted: false },
+    assessmentStatus = { completedCount: 0, totalStudents: 0, progressPercentage: 0 },
+    checkOutStatus = { isConducted: false },
+    onCreateLessonPlan,
+    onEditLessonPlan,
+    onCheckIn,
+    onAssess,
+    onCheckOut
+}: DailyStatusIndicatorProps) {
+    const allComplete = 
+        lessonPlanStatus?.isCreated && 
+        checkInStatus?.isConducted && 
+        assessmentStatus?.progressPercentage === 100 && 
+        checkOutStatus?.isConducted
 
     return (
         <Card className="overflow-hidden">
             <CardHeader className="border-b">
-                <CardTitle className="text-sm">Data Rencana Pembelajaran</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-                {/* Header */}
-                <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-sm truncate">
-                                {lessonPlan.topic}
-                                {lessonPlan.subtopic && (
-                                    <span className="text-muted-foreground font-normal"> - {lessonPlan.subtopic}</span>
-                                )}
-                            </h3>
-                            {lessonPlan.generatedByAi && (
-                                <IconSparkles className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
-                            )}
+                <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm">Status Harian</CardTitle>
+                    {allComplete && (
+                        <div className="flex items-center gap-1 text-green-600">
+                            <IconCheck className="h-4 w-4" />
+                            <span className="text-xs font-medium">Selesai</span>
                         </div>
-                        {lessonPlan.code && (
-                            <p className="text-xs text-muted-foreground">{lessonPlan.code}</p>
-                        )}
-                    </div>
+                    )}
                 </div>
-
-                {/* Development Scopes - Compact Pills */}
-                <div className="flex flex-wrap gap-1.5">
-                    {lessonPlan.items.map((item) => (
-                        <Badge
-                            key={item.id}
-                            variant="outline"
-                            className={`${developmentScopeColors[item.developmentScope] || ""} text-[10px] px-1.5 py-0.5 font-medium`}
-                        >
-                            {developmentScopeLabels[item.developmentScope] || item.developmentScope}
-                        </Badge>
-                    ))}
-                </div>
-
-                {/* Progress Bar */}
-                <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">Progres Penilaian</span>
-                        <span className="font-medium">
-                            {assessmentProgress.assessedStudents}/{assessmentProgress.totalStudents}
-                        </span>
-                    </div>
-                    <Progress value={progressPercentage} className="h-2" />
-                </div>
-
-                {/* CTA Button */}
-                {hasIncompleteAssessment && (
-                    <Button
-                        onClick={onAssess}
-                        className="w-full"
-                        size="sm"
-                        variant="default"
-                    >
-                        <IconChecklist className="h-4 w-4 mr-2" />
-                        Lakukan Penilaian
-                    </Button>
-                )}
-
-                {!hasIncompleteAssessment && assessmentProgress.totalStudents > 0 && (
-                    <div className="flex items-center justify-center gap-2 text-xs text-green-600 py-2">
-                        <IconChecklist className="h-4 w-4" />
-                        <span className="font-medium">Penilaian Selesai</span>
-                    </div>
-                )}
+            </CardHeader>
+            
+            <CardContent className="space-y-1 divide-y">
+                <StatusItem
+                    label="Rencana Pembelajaran"
+                    isComplete={lessonPlanStatus?.isCreated ?? false}
+                    subtitle={lessonPlanStatus?.isCreated && lessonPlanStatus?.topic 
+                        ? `${lessonPlanStatus.topic}${lessonPlanStatus.subtopic ? ` - ${lessonPlanStatus.subtopic}` : ''}`
+                        : undefined
+                    }
+                    onAction={lessonPlanStatus?.isCreated ? onEditLessonPlan : onCreateLessonPlan}
+                    actionLabel={lessonPlanStatus?.isCreated ? "Edit" : "Buat RPPH"}
+                />
+                
+                <StatusItem
+                    label="Check-in Harian"
+                    isComplete={checkInStatus?.isConducted ?? false}
+                    subtitle={checkInStatus?.isConducted 
+                        ? `${checkInStatus.completedCount || 0} siswa sudah check-in`
+                        : undefined
+                    }
+                    onAction={onCheckIn}
+                    actionLabel="Check-in"
+                />
+                
+                <StatusItem
+                    label="Penilaian Harian"
+                    isComplete={(assessmentStatus?.progressPercentage ?? 0) === 100}
+                    showProgress={true}
+                    completedCount={assessmentStatus?.completedCount ?? 0}
+                    totalCount={assessmentStatus?.totalStudents ?? 0}
+                    progressPercentage={assessmentStatus?.progressPercentage ?? 0}
+                    onAction={onAssess}
+                    actionLabel="Penilaian"
+                />
+                
+                <StatusItem
+                    label="Check-out Harian"
+                    isComplete={checkOutStatus?.isConducted ?? false}
+                    subtitle={checkOutStatus?.isConducted 
+                        ? `${checkOutStatus.completedCount || 0} siswa sudah check-out`
+                        : undefined
+                    }
+                    onAction={onCheckOut}
+                    actionLabel="Check-out"
+                />
             </CardContent>
         </Card>
     )

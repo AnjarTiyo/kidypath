@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { IconUser, IconChalkboard, IconFileText, IconHome, IconChecklist } from "@tabler/icons-react"
+import { IconUser, IconChalkboard, IconFileText, IconHome, IconChecklist, IconPlus } from "@tabler/icons-react"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,7 @@ import { CompactDateNavigation, LessonPlanCompactCard } from "@/components/asses
 import { PageHeader } from "@/components/layout/page-header"
 import { format } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
+import Link from "next/link"
 
 interface LessonPlanData {
   id: string
@@ -176,7 +177,7 @@ export default function StudentAssessmentPage() {
         />
         <div className="flex items-center gap-2">
           <IconUser className="h-4 w-4 text-muted-foreground" />
-          <span className="font-semibold text-sm">Guru {user?.name || "-"}</span>
+          <span className="font-semibold text-sm">Teacher {user?.name || "-"}</span>
         </div>
         <div className="flex items-center gap-2">
           <IconChalkboard className="h-3.5 w-3.5 text-muted-foreground" />
@@ -216,12 +217,28 @@ export default function StudentAssessmentPage() {
             {lessonPlans.map((plan) => (
               <LessonPlanCompactCard
                 key={plan.id}
-                lessonPlan={plan}
-                assessmentProgress={{
-                  totalStudents: 25, // TODO: Get from API
-                  assessedStudents: 0, // TODO: Get from API
+                lessonPlanStatus={{
+                  isCreated: true,
+                  topic: plan.topic,
+                  subtopic: plan.subtopic ?? undefined,
                 }}
+                checkInStatus={{
+                  isConducted: false, // TODO: Get from API
+                  completedCount: 0,
+                  totalStudents: 25,
+                }}
+                assessmentStatus={{
+                  completedCount: 0, // TODO: Get from API
+                  totalStudents: 25, // TODO: Get from API
+                  progressPercentage: 0,
+                }}
+                checkOutStatus={{
+                  isConducted: false, // TODO: Get from API
+                }}
+                onEditLessonPlan={() => console.log("Edit lesson plan", plan.id)}
+                onCheckIn={() => console.log("Check-in for", plan.id)}
                 onAssess={() => handleAssessLessonPlan(plan.id)}
+                onCheckOut={() => console.log("Check-out for", plan.id)}
               />
             ))}
 
@@ -252,9 +269,16 @@ export default function StudentAssessmentPage() {
                 <p className="text-sm text-muted-foreground">
                   Belum ada rencana pembelajaran untuk tanggal ini
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Silakan buat rencana pembelajaran terlebih dahulu
-                </p>
+                <Link href={"/teacher/lesson-plan/new"}>
+                <Button
+                  variant="default"
+                  className="h-7"
+                  size="sm"
+                >
+                  <IconPlus className="h-4 w-4 mr-2" />
+                  Buat Rencana Pembelajaran
+                </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
