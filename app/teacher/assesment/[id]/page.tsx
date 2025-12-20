@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { AssessmentSummary } from "@/components/assessment/assessment-summary"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { IconLoader2, IconChevronLeft, IconChevronRight, IconChalkboardTeacher, IconHome } from "@tabler/icons-react"
-import { format, addDays, subDays } from "date-fns"
+import { format, addDays, subDays, parseISO } from "date-fns"
 import { id as localeId } from "date-fns/locale"
 import { PageHeader } from "@/components/layout/page-header"
 
@@ -45,8 +45,23 @@ interface AssessmentRecord {
 export default function AssessmentPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const classroomId = params.id as string
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  
+  // Initialize selectedDate from URL query parameter or default to today
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const dateParam = searchParams.get('date')
+    if (dateParam) {
+      try {
+        return parseISO(dateParam)
+      } catch (error) {
+        console.error('Invalid date parameter:', dateParam)
+        return new Date()
+      }
+    }
+    return new Date()
+  })
+  
   const [classroom, setClassroom] = useState<Classroom | null>(null)
   const [lessonPlan, setLessonPlan] = useState<LessonPlan | null>(null)
   const [loading, setLoading] = useState(true)
@@ -130,15 +145,24 @@ export default function AssessmentPage() {
   }
 
   const handlePreviousDay = () => {
-    setSelectedDate(subDays(selectedDate, 1))
+    const newDate = subDays(selectedDate, 1)
+    setSelectedDate(newDate)
+    const dateStr = format(newDate, "yyyy-MM-dd")
+    router.push(`/teacher/assesment/${classroomId}?date=${dateStr}`, { scroll: false })
   }
 
   const handleNextDay = () => {
-    setSelectedDate(addDays(selectedDate, 1))
+    const newDate = addDays(selectedDate, 1)
+    setSelectedDate(newDate)
+    const dateStr = format(newDate, "yyyy-MM-dd")
+    router.push(`/teacher/assesment/${classroomId}?date=${dateStr}`, { scroll: false })
   }
 
   const handleToday = () => {
-    setSelectedDate(new Date())
+    const newDate = new Date()
+    setSelectedDate(newDate)
+    const dateStr = format(newDate, "yyyy-MM-dd")
+    router.push(`/teacher/assesment/${classroomId}?date=${dateStr}`, { scroll: false })
   }
 
   const isToday = format(selectedDate, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd")

@@ -195,10 +195,14 @@ export function LessonPlanCompactCard({
                 <StatusItem
                     label="Penilaian Harian"
                     isComplete={(assessmentStatus?.progressPercentage ?? 0) === 100}
-                    showProgress={true}
+                    showProgress={(assessmentStatus?.progressPercentage ?? 0) < 100}
                     completedCount={assessmentStatus?.completedCount ?? 0}
                     totalCount={assessmentStatus?.totalStudents ?? 0}
                     progressPercentage={assessmentStatus?.progressPercentage ?? 0}
+                    subtitle={(assessmentStatus?.progressPercentage ?? 0) === 100
+                        ? "Semua siswa sudah dinilai"
+                        : undefined
+                    }
                     onAction={onAssess}
                     actionLabel="Penilaian"
                 />

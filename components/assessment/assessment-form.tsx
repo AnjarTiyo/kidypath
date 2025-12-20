@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   Tooltip,
   TooltipContent,
@@ -682,44 +681,48 @@ export function AssessmentForm({
                                   {/* BB Checkbox */}
                                   <td className="px-0.5 sm:px-1 py-1 sm:py-1.5 align-middle text-center border-r">
                                     <div className="flex items-center justify-center">
-                                      <Checkbox
+                                      <input
+                                        type="checkbox"
                                         checked={row.score === "BB"}
-                                        onCheckedChange={() => updateAssessmentRow(index, "score", "BB")}
+                                        onChange={() => updateAssessmentRow(index, "score", "BB")}
                                         disabled={loading}
-                                        className="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                                        className="h-4 w-4 cursor-pointer"
                                       />
                                     </div>
                                   </td>
                                   {/* MB Checkbox */}
                                   <td className="px-0.5 sm:px-1 py-1 sm:py-1.5 align-middle text-center border-r">
                                     <div className="flex items-center justify-center">
-                                      <Checkbox
+                                      <input
+                                        type="checkbox"
                                         checked={row.score === "MB"}
-                                        onCheckedChange={() => updateAssessmentRow(index, "score", "MB")}
+                                        onChange={() => updateAssessmentRow(index, "score", "MB")}
                                         disabled={loading}
-                                        className="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                                        className="h-4 w-4 cursor-pointer"
                                       />
                                     </div>
                                   </td>
                                   {/* BSH Checkbox */}
                                   <td className="px-0.5 sm:px-1 py-1 sm:py-1.5 align-middle text-center border-r">
                                     <div className="flex items-center justify-center">
-                                      <Checkbox
+                                      <input
+                                        type="checkbox"
                                         checked={row.score === "BSH"}
-                                        onCheckedChange={() => updateAssessmentRow(index, "score", "BSH")}
+                                        onChange={() => updateAssessmentRow(index, "score", "BSH")}
                                         disabled={loading}
-                                        className="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                                        className="h-4 w-4 cursor-pointer"
                                       />
                                     </div>
                                   </td>
                                   {/* BSB Checkbox */}
                                   <td className="px-0.5 sm:px-1 py-1 sm:py-1.5 align-middle text-center border-r">
                                     <div className="flex items-center justify-center">
-                                      <Checkbox
+                                      <input
+                                        type="checkbox"
                                         checked={row.score === "BSB"}
-                                        onCheckedChange={() => updateAssessmentRow(index, "score", "BSB")}
+                                        onChange={() => updateAssessmentRow(index, "score", "BSB")}
                                         disabled={loading}
-                                        className="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                                        className="h-4 w-4 cursor-pointer"
                                       />
                                     </div>
                                   </td>
@@ -752,12 +755,13 @@ export function AssessmentForm({
                   </Label>
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <div className="flex items-center gap-1">
-                      <Checkbox
+                      <input
+                        type="checkbox"
                         id="generateSummary"
                         checked={generateSummaryChecked}
-                        onCheckedChange={(checked) => setGenerateSummaryChecked(checked as boolean)}
-                        disabled={loading || generatingSummary}
-                        className="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                        onChange={(e) => setGenerateSummaryChecked(e.target.checked)}
+                        disabled={loading || generatingSummary || summary.trim().length > 0}
+                        className="h-3 w-3 sm:h-3.5 sm:w-3.5 cursor-pointer disabled:cursor-not-allowed"
                       />
                       <Label
                         htmlFor="generateSummary"
@@ -787,6 +791,7 @@ export function AssessmentForm({
                   onChange={(e) => setSummary(e.target.value)}
                   disabled={loading || generatingSummary}
                   className="min-h-[60px] sm:min-h-[80px] text-[10px] sm:text-[11px] resize-none"
+                  rows={30}
                 />
               </div>
 

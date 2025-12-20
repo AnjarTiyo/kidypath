@@ -1,28 +1,31 @@
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
+"use client"
+
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 import { MenuCard, MenuCardProps, MenuGrid } from "@/components/layout/menu-card"
 import {
   IconUsers,
   IconChartBar,
   IconHome,
-  IconSpeakerphone,
   IconLayoutDashboard,
-  IconChalkboardTeacher,
   IconSchool,
-  IconCalendarEvent,
 } from "@tabler/icons-react"
 import { PageHeader } from "@/components/layout/page-header"
+import { useCurrentUser } from "@/lib/hooks/use-current-user"
+import { Card, CardContent } from "@/components/ui/card"
 
-export default async function TeacherPage() {
-  const session = await auth()
+export default function TeacherPage() {
+  const router = useRouter()
+  const { user, classrooms, loading: userLoading } = useCurrentUser()
 
-  if (!session?.user) {
-    redirect("/auth/login")
-  }
-
-  if (session.user.role !== "teacher") {
-    redirect("/unauthorized")
-  }
+  useEffect(() => {
+    if (!userLoading && !user) {
+      router.push("/auth/login")
+    }
+    if (!userLoading && user && user.role !== "teacher") {
+      router.push("/unauthorized")
+    }
+  }, [user, userLoading, router])
 
   const availableMenus: MenuCardProps[] = [
     {
@@ -57,12 +60,39 @@ export default async function TeacherPage() {
     },
   ]
 
+  if (userLoading) {
+    return (
+      <>
+        <PageHeader
+          title="Teacher Dashboard"
+          description="Memuat data..."
+          breadcrumbs={[
+            { label: "Beranda", href: "/teacher", icon: IconHome },
+          ]}
+        />
+        <Card>
+          <CardContent className="py-6">
+            <p className="text-center text-muted-foreground">Memuat data...</p>
+          </CardContent>
+        </Card>
+      </>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
+
+  const classroomNames = classrooms.length > 0 
+    ? classrooms.map(c => c.name).join(", ")
+    : "Belum ada kelas"
 
   return (
     <>
       <PageHeader
         title="Teacher Dashboard"
-        description={`Selamat Datang, Teacher ${session.user.name || session.user.email}!`}
+        description={`Selamat Datang, ${user.name || user.email}!`}
+        subDesc={`Kelas: ${classroomNames}`}
         breadcrumbs={[
           { label: "Beranda", href: "/teacher", icon: IconHome },
         ]}

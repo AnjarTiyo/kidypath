@@ -18,6 +18,7 @@ interface PageHeaderProps {
   title: string
   breadcrumbs?: BreadcrumbItem[]
   description?: string
+  subDesc?: string
   actions?: React.ReactNode
 }
 
@@ -25,6 +26,7 @@ export function PageHeader({
   title,
   breadcrumbs = [],
   description,
+  subDesc,
   actions,
 }: PageHeaderProps) {
   return (
@@ -64,6 +66,7 @@ export function PageHeader({
           {description && (
             <p className="text-muted-foreground text-xs sm:text-sm break-words">{description}</p>
           )}
+          {subDesc && <div className="text-muted-foreground text-xs sm:text-sm break-words">{subDesc}</div>}
         </div>
         {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
       </div>

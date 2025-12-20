@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { AttendanceForm, AttendanceSummary } from "@/components/attendance"
 import type { MoodType } from "@/components/attendance"
 import { Button } from "@/components/ui/button"
-import { IconLoader2, IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
-import { format, addDays, subDays } from "date-fns"
+import { IconLoader2, IconChevronLeft, IconChevronRight, IconArrowLeft } from "@tabler/icons-react"
+import { format, addDays, subDays, parseISO } from "date-fns"
 import { id as localeId } from "date-fns/locale"
 
 interface Classroom {
@@ -26,8 +26,24 @@ interface AttendanceRecord {
 
 export default function ClassCheckinPage() {
   const params = useParams()
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const classroomId = params.id as string
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  
+  // Initialize selectedDate from URL query parameter or default to today
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const dateParam = searchParams.get('date')
+    if (dateParam) {
+      try {
+        return parseISO(dateParam)
+      } catch (error) {
+        console.error('Invalid date parameter:', dateParam)
+        return new Date()
+      }
+    }
+    return new Date()
+  })
+  
   const [classroom, setClassroom] = useState<Classroom | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -102,21 +118,34 @@ export default function ClassCheckinPage() {
   }
 
   const handlePreviousDay = () => {
-    setSelectedDate(subDays(selectedDate, 1))
+    const newDate = subDays(selectedDate, 1)
+    setSelectedDate(newDate)
+    const dateStr = format(newDate, "yyyy-MM-dd")
+    router.push(`/teacher/class/${classroomId}/check-in?date=${dateStr}`, { scroll: false })
     setShowSummary(false)
     setEditStudentId(undefined)
   }
 
   const handleNextDay = () => {
-    setSelectedDate(addDays(selectedDate, 1))
+    const newDate = addDays(selectedDate, 1)
+    setSelectedDate(newDate)
+    const dateStr = format(newDate, "yyyy-MM-dd")
+    router.push(`/teacher/class/${classroomId}/check-in?date=${dateStr}`, { scroll: false })
     setShowSummary(false)
     setEditStudentId(undefined)
   }
 
   const handleToday = () => {
-    setSelectedDate(new Date())
+    const newDate = new Date()
+    setSelectedDate(newDate)
+    const dateStr = format(newDate, "yyyy-MM-dd")
+    router.push(`/teacher/class/${classroomId}/check-in?date=${dateStr}`, { scroll: false })
     setShowSummary(false)
     setEditStudentId(undefined)
+  }
+
+  const handleBack = () => {
+    router.back()
   }
 
   const isToday = format(selectedDate, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd")
@@ -145,9 +174,19 @@ export default function ClassCheckinPage() {
     <div className="max-w-4xl mx-auto space-y-4 p-4">
       {/* Compact Header with Date Navigation */}
       <div className="flex items-center justify-between gap-4">
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">Check-In Siswa</h1>
-          <p className="text-sm text-muted-foreground">{classroom.name}</p>
+        <div className="flex items-center gap-3 flex-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleBack}
+            className="h-8 w-8"
+          >
+            <IconArrowLeft className="h-4 w-4" />
+          </Button>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold">Check-In Siswa</h1>
+            <p className="text-sm text-muted-foreground">{classroom.name}</p>
+          </div>
         </div>
         
         <div className="flex items-center gap-2">

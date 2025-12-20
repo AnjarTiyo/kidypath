@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/layout/page-header"
 import { format } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 interface LessonPlanData {
   id: string
@@ -43,13 +44,23 @@ interface AttendanceData {
   }
 }
 
+interface AssessmentData {
+  classroomId: string
+  completedCount: number
+  totalStudents: number
+  progressPercentage: number
+}
+
 export default function StudentAssessmentPage() {
   const { user, classrooms, loading } = useCurrentUser()
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [lessonPlans, setLessonPlans] = useState<LessonPlanData[]>([])
   const [attendanceData, setAttendanceData] = useState<Map<string, AttendanceData>>(new Map())
+  const [assessmentData, setAssessmentData] = useState<Map<string, AssessmentData>>(new Map())
   const [loadingPlans, setLoadingPlans] = useState(false)
   const [loadingAttendance, setLoadingAttendance] = useState(false)
+  const [loadingAssessments, setLoadingAssessments] = useState(false)
+  const router = useRouter()
 
   // Fetch lesson plans for selected date
   useEffect(() => {
@@ -163,6 +174,78 @@ export default function StudentAssessmentPage() {
     }
   }, [selectedDate, classrooms, loading])
 
+  // Fetch assessment data for each classroom
+  useEffect(() => {
+    if (loading || classrooms.length === 0) {
+      return
+    }
+
+    const abortController = new AbortController()
+
+    const fetchAssessmentData = async () => {
+      setLoadingAssessments(true)
+      try {
+        const dateStr = format(selectedDate, "yyyy-MM-dd")
+        const assessmentMap = new Map<string, AssessmentData>()
+
+        // Fetch assessments and students for each classroom
+        await Promise.all(
+          classrooms.map(async (classroom) => {
+            try {
+              // Fetch students to get total count
+              const studentsResponse = await fetch(
+                `/api/students?classroom=${classroom.id}&pageSize=1000`,
+                { signal: abortController.signal }
+              )
+
+              // Fetch assessments for this classroom and date
+              const assessmentsResponse = await fetch(
+                `/api/assessments?classroomId=${classroom.id}&date=${dateStr}`,
+                { signal: abortController.signal }
+              )
+
+              if (studentsResponse.ok && assessmentsResponse.ok) {
+                const studentsData = await studentsResponse.json()
+                const assessmentsData = await assessmentsResponse.json()
+
+                const totalStudents = studentsData.total || studentsData.data?.length || 0
+                const completedCount = assessmentsData.total || assessmentsData.data?.length || 0
+                const progressPercentage = totalStudents > 0 
+                  ? Math.round((completedCount / totalStudents) * 100) 
+                  : 0
+
+                assessmentMap.set(classroom.id, {
+                  classroomId: classroom.id,
+                  completedCount,
+                  totalStudents,
+                  progressPercentage,
+                })
+              }
+            } catch (error) {
+              if (error instanceof Error && error.name !== 'AbortError') {
+                console.error(`Error fetching assessment data for classroom ${classroom.id}:`, error)
+              }
+            }
+          })
+        )
+
+        setAssessmentData(assessmentMap)
+      } catch (error) {
+        if (error instanceof Error && error.name !== 'AbortError') {
+          console.error("Error fetching assessment data:", error)
+        }
+      } finally {
+        setLoadingAssessments(false)
+      }
+    }
+
+    fetchAssessmentData()
+
+    return () => {
+      abortController.abort()
+    }
+  }, [selectedDate, classrooms, loading])
+
   // Show loading state
   if (loading) {
     return (
@@ -246,7 +329,7 @@ export default function StudentAssessmentPage() {
   }
 
   const handleAssessLessonPlan = (classroomId: string) => {
-    window.location.href = `/teacher/assesment/${classroomId}`
+    router.push(`/teacher/assesment/${classroomId}/new?date=${format(selectedDate, "yyyy-MM-dd")}`)
   }
 
   const handleGenerateDailyJournal = () => {
@@ -306,6 +389,7 @@ export default function StudentAssessmentPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {lessonPlans.map((plan) => {
               const attendance = attendanceData.get(plan.classroomId)
+              const assessment = assessmentData.get(plan.classroomId)
               const checkInConducted = (attendance?.checkIn.total || 0) > 0
               const checkOutConducted = (attendance?.checkOut.total || 0) > 0
 
@@ -320,17 +404,17 @@ export default function StudentAssessmentPage() {
                   checkInStatus={{
                     isConducted: checkInConducted,
                     completedCount: attendance?.checkIn.total || 0,
-                    totalStudents: 0, // TODO: Get actual student count
+                    totalStudents: assessment?.totalStudents || 0,
                   }}
                   assessmentStatus={{
-                    completedCount: 0, // TODO: Get from API
-                    totalStudents: 25, // TODO: Get from API
-                    progressPercentage: 0,
+                    completedCount: assessment?.completedCount || 0,
+                    totalStudents: assessment?.totalStudents || 0,
+                    progressPercentage: assessment?.progressPercentage || 0,
                   }}
                   checkOutStatus={{
                     isConducted: checkOutConducted,
                     completedCount: attendance?.checkOut.total || 0,
-                    totalStudents: 0, // TODO: Get actual student count
+                    totalStudents: assessment?.totalStudents || 0,
                   }}
                   onEditLessonPlan={() => console.log("Edit lesson plan", plan.id)}
                   onCheckIn={() => window.location.href = `/teacher/class/${plan.classroomId}/check-in`}
