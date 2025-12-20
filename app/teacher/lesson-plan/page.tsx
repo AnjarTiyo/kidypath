@@ -182,22 +182,22 @@ export default function TeacherLessonPlanPage() {
           { label: "Rencana Pembelajaran", href: "/teacher/lesson-plan", icon: IconChalkboardTeacher },
         ]}
       />
-      <div id="container" className="grid gap-3 lg:grid-cols-3">
-        <div className="lg:col-span-1 flex-wrap">
+      <div id="container" className="grid gap-3 lg:grid-cols-3 overflow-x-hidden">
+        <div className="lg:col-span-1 min-w-0">
           <LessonPlanCalendar
             selectedDate={selectedDate}
             onDateSelect={setSelectedDate}
-            onCreateClick={handleCreateClick}
             lessonPlanDates={lessonPlanDates}
             dayOffDates={dayOffDates}
           />
         </div>
-        <div className="lg:col-span-2 flex-wrap">
+        <div className="lg:col-span-2 min-w-0">
           <DetailLessonPlan
             selectedDate={selectedDate}
             lessonPlan={lessonPlan}
             loading={loading}
             onDelete={handleDelete}
+            onCreateClick={handleCreateClick}
           />
         </div>
       </div>

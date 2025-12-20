@@ -43,12 +43,12 @@ export default async function TeacherPage() {
       description: "Kelola penilaian dan perkembangan peserta didik",
       href: "/teacher/assesment",
     },
-    {
-      icon: IconChalkboardTeacher,
-      title: "Jurnal Harian",
-      description: "Catatan kegiatan harian tiap kelas",
-      href: "/teacher/journal",
-    },
+    // {
+    //   icon: IconChalkboardTeacher,
+    //   title: "Jurnal Harian",
+    //   description: "Catatan kegiatan harian tiap kelas",
+    //   href: "/teacher/journal",
+    // },
     {
       icon: IconChartBar,
       title: "Laporan",

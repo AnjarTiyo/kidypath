@@ -7,7 +7,7 @@ import { Button } from "../ui/button"
 import { Badge } from "../ui/badge"
 import { Skeleton } from "../ui/skeleton"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog"
-import { IconEdit, IconTrash, IconCalendar, IconUser, IconChalkboardTeacher, IconSparkles } from "@tabler/icons-react"
+import { IconEdit, IconTrash, IconCalendar, IconUser, IconChalkboardTeacher, IconSparkles, IconPlus } from "@tabler/icons-react"
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
 import { getDevelopmentScopeLabel } from "@/lib/ai/lesson-plan-generator"
@@ -41,6 +41,7 @@ interface DetailLessonPlanProps {
   lessonPlan: LessonPlan | null
   loading: boolean
   onDelete: (id: string) => void
+  onCreateClick: () => void
 }
 
 export default function DetailLessonPlan({
@@ -48,6 +49,7 @@ export default function DetailLessonPlan({
   lessonPlan,
   loading,
   onDelete,
+  onCreateClick,
 }: DetailLessonPlanProps) {
   const router = useRouter()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -122,13 +124,19 @@ export default function DetailLessonPlan({
           </CardDescription>
         </CardHeader>
         <CardContent className="py-8">
-          <div className="flex flex-col items-center justify-center text-center">
-            <p className="text-xs text-muted-foreground mb-2">
-              Belum ada rencana pembelajaran untuk tanggal ini
-            </p>
-            <p className="text-[10px] text-muted-foreground">
-              Klik tombol &quot;Buat Rencana Pembelajaran&quot; untuk membuat rencana baru
-            </p>
+          <div className="flex flex-col items-center justify-center text-center space-y-4">
+            <div>
+              <p className="text-xs text-muted-foreground mb-2">
+                Belum ada rencana pembelajaran untuk tanggal ini
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                Klik tombol di bawah untuk membuat rencana pembelajaran baru
+              </p>
+            </div>
+            <Button onClick={onCreateClick} size="sm">
+              <IconPlus className="mr-2 h-4 w-4" />
+              Buat Rencana Pembelajaran
+            </Button>
           </div>
         </CardContent>
       </Card>
