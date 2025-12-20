@@ -63,8 +63,7 @@ export function useCurrentUser() {
       try {
         const response = await fetch("/api/auth/me", {
           signal: abortController.signal,
-          // Add cache control to prevent unnecessary refetches
-          cache: 'force-cache',
+          cache: 'no-store',
         })
         if (response.ok) {
           const userData = await response.json()

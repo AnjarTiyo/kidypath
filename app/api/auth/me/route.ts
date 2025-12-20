@@ -4,12 +4,19 @@ import { db } from "@/lib/db"
 import { users, classrooms, classroomTeachers, students, parentChild } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Force no-cache headers
+  const headers = {
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+  }
+
   try {
     const session = await auth()
 
     if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers })
     }
 
     // Get user details
@@ -26,7 +33,7 @@ export async function GET() {
       .limit(1)
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+      return NextResponse.json({ error: "User not found" }, { status: 404, headers })
     }
 
     let relatedData = {}
@@ -68,15 +75,18 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json({
-      user,
-      ...relatedData,
-    })
+    return NextResponse.json(
+      {
+        user,
+        ...relatedData,
+      },
+      { headers }
+    )
   } catch (error) {
     console.error("Error fetching user data:", error)
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500, headers: { 'Cache-Control': 'no-store' } }
     )
   }
 }
