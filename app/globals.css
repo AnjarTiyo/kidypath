@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./responsive.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -126,6 +127,23 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  
+  /* Ensure images are responsive */
+  img {
+    @apply max-w-full h-auto;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    @apply scroll-smooth;
+  }
+  
+  /* Better text rendering on mobile */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 }
 

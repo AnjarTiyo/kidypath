@@ -245,9 +245,8 @@ export default function StudentAssessmentPage() {
     )
   }
 
-  const handleAssessLessonPlan = (lessonPlanId: string) => {
-    // Future implementation: Navigate to assessment page
-    console.log("Assess lesson plan:", lessonPlanId)
+  const handleAssessLessonPlan = (classroomId: string) => {
+    window.location.href = `/teacher/assesment/${classroomId}`
   }
 
   const handleGenerateDailyJournal = () => {
@@ -335,7 +334,7 @@ export default function StudentAssessmentPage() {
                   }}
                   onEditLessonPlan={() => console.log("Edit lesson plan", plan.id)}
                   onCheckIn={() => window.location.href = `/teacher/class/${plan.classroomId}/check-in`}
-                  onAssess={() => handleAssessLessonPlan(plan.id)}
+                  onAssess={() => handleAssessLessonPlan(plan.classroomId)}
                   onCheckOut={() => window.location.href = `/teacher/class/${plan.classroomId}/check-out`}
                 />
               )
@@ -363,7 +362,7 @@ export default function StudentAssessmentPage() {
           </div>
         ) : (
           <Card>
-            <CardContent className="py-12">
+            <CardContent className="py-8">
               <div className="text-center space-y-2">
                 <p className="text-sm text-muted-foreground">
                   Belum ada rencana pembelajaran untuk tanggal ini

@@ -28,24 +28,24 @@ export function PageHeader({
   actions,
 }: PageHeaderProps) {
   return (
-    <div className="space-y-4 pb-6 border-b">
+    <div className="space-y-3 sm:space-y-4 pb-4 sm:pb-6 border-b">
       {breadcrumbs.length > 0 && (
         <Breadcrumb>
-          <BreadcrumbList>
+          <BreadcrumbList className="flex-wrap">
             {breadcrumbs.map((item, index) => {
               const isLast = index === breadcrumbs.length - 1
 
               return (
-                <div key={index} className="flex items-center space-x-2">
+                <div key={index} className="flex items-center space-x-1 sm:space-x-2">
                   <BreadcrumbItem>
                     {isLast || !item.href ? (
-                      <BreadcrumbPage className="flex items-center gap-2 font-semibold">
-                        {item.icon && <item.icon className="h-3.5 w-3.5" />}
+                      <BreadcrumbPage className="flex items-center gap-1 sm:gap-2 font-semibold text-xs sm:text-sm">
+                        {item.icon && <item.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
                         {item.label}
                       </BreadcrumbPage>
                     ) : (
-                      <BreadcrumbLink href={item.href} className="flex items-center gap-2">
-                        {item.icon && <item.icon className="h-3.5 w-3.5" />}
+                      <BreadcrumbLink href={item.href} className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                        {item.icon && <item.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}
                         {item.label}
                       </BreadcrumbLink>
                     )}
@@ -58,14 +58,14 @@ export function PageHeader({
         </Breadcrumb>
       )}
 
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <h1 className="text-xl font-bold tracking-tight">{title}</h1>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+        <div className="space-y-1 min-w-0 flex-1">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight break-words">{title}</h1>
           {description && (
-            <p className="text-muted-foreground text-sm">{description}</p>
+            <p className="text-muted-foreground text-xs sm:text-sm break-words">{description}</p>
           )}
         </div>
-        {actions && <div className="flex items-center gap-2">{actions}</div>}
+        {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
       </div>
     </div>
   )

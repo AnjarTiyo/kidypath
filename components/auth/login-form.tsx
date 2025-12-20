@@ -27,16 +27,16 @@ export function LoginForm() {
 
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-2xl">Login</CardTitle>
-        <CardDescription>
+      <CardHeader className="space-y-1 sm:space-y-2">
+        <CardTitle className="text-xl sm:text-2xl">Login</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">
           Gunakan email dan password akun Anda untuk masuk ke Kidy Path.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="email" className="text-sm">Email</Label>
             <Input
               id="email"
               name="email"
@@ -44,10 +44,11 @@ export function LoginForm() {
               placeholder="your@email.com"
               required
               disabled={isPending}
+              className="h-10 sm:h-11"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="password" className="text-sm">Password</Label>
             <Input
               id="password"
               name="password"
@@ -55,14 +56,15 @@ export function LoginForm() {
               placeholder="••••••••"
               required
               disabled={isPending}
+              className="h-10 sm:h-11"
             />
           </div>
           {error && (
-            <div className="text-sm text-red-500">
+            <div className="text-xs sm:text-sm text-red-500 p-2 bg-red-50 rounded-md">
               {error}
             </div>
           )}
-          <Button type="submit" className="w-full" disabled={isPending}>
+          <Button type="submit" className="w-full h-10 sm:h-11 text-sm sm:text-base" disabled={isPending}>
             {isPending ? "Loading..." : "Masuk"}
           </Button>
         </form>
