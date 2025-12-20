@@ -12,6 +12,9 @@ export const developmentScopeEnum = pgEnum('development_scope', [
   'art'
 ]);
 export const assessmentScoreEnum = pgEnum('assessment_score', ['BB', 'MB', 'BSH', 'BSB']);
+export const attendanceTypeEnum = pgEnum('attendance_type', ['check_in', 'check_out']);
+export const attendanceStatusEnum = pgEnum('attendance_status', ['present', 'sick', 'permission']);
+export const moodEnum = pgEnum('mood', ['bahagia', 'sedih', 'marah', 'takut', 'jijik']);
 
 // Tables
 export const users = pgTable('users', {
@@ -132,6 +135,19 @@ export const monthlyReports = pgTable('monthly_reports', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
 
+export const attendances = pgTable('attendances', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  studentId: uuid('student_id').references(() => students.id, { onDelete: 'cascade' }),
+  classroomId: uuid('classroom_id').references(() => classrooms.id, { onDelete: 'cascade' }),
+  date: date('date'),
+  type: attendanceTypeEnum('type'), // check_in or check_out
+  status: attendanceStatusEnum('status'), // present, sick, permission
+  mood: moodEnum('mood'), // bahagia (sukacita), sedih, marah, takut (cemas), jijik (nullable for sick/permission)
+  note: text('note'),
+  recordedBy: uuid('recorded_by').references(() => users.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   classroomTeachers: many(classroomTeachers),
@@ -198,6 +214,7 @@ export const studentsRelations = relations(students, ({ one, many }) => ({
   dailyAssessments: many(dailyAssessments),
   weeklyReports: many(weeklyReports),
   monthlyReports: many(monthlyReports),
+  attendances: many(attendances),
 }));
 
 export const parentChildRelations = relations(parentChild, ({ one }) => ({
@@ -254,5 +271,20 @@ export const monthlyReportsRelations = relations(monthlyReports, ({ one }) => ({
   student: one(students, {
     fields: [monthlyReports.studentId],
     references: [students.id],
+  }),
+}));
+
+export const attendancesRelations = relations(attendances, ({ one }) => ({
+  student: one(students, {
+    fields: [attendances.studentId],
+    references: [students.id],
+  }),
+  classroom: one(classrooms, {
+    fields: [attendances.classroomId],
+    references: [classrooms.id],
+  }),
+  recordedBy: one(users, {
+    fields: [attendances.recordedBy],
+    references: [users.id],
   }),
 }));
