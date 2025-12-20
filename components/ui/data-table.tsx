@@ -178,7 +178,7 @@ export function DataTable<TData, TValue>({
         <div className="flex-1 text-sm text-muted-foreground">
           {manualPagination ? (
             <span className="text-xs">
-              Manampilkan {currentPageIndex * currentPageSize + 1} dari{" "}
+              Menampilkan {currentPageIndex * currentPageSize + 1} dari{" "}
                   {Math.min((currentPageIndex + 1) * currentPageSize, totalCount)}
             </span>
           ) : (

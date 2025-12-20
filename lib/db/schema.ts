@@ -81,7 +81,15 @@ export const dailyAssessments = pgTable('daily_assessments', {
   id: uuid('id').primaryKey().defaultRandom(),
   date: date('date'),
   studentId: uuid('student_id').references(() => students.id),
-  teacherId: uuid('teacher_id').references(() => users.id),
+  classroomId: uuid('classroom_id').references(() => classrooms.id),
+  summary: text('summary'), // Optional AI-generated summary
+  createdBy: uuid('created_by').references(() => users.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+});
+
+export const assessmentItems = pgTable('assessment_items', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  dailyAssessmentId: uuid('daily_assessment_id').references(() => dailyAssessments.id, { onDelete: 'cascade' }),
   scopeId: uuid('scope_id').references(() => developmentScopes.id),
   objectiveId: uuid('objective_id').references(() => learningObjectives.id),
   activityContext: text('activity_context'),
@@ -217,6 +225,37 @@ export const studentsRelations = relations(students, ({ one, many }) => ({
   attendances: many(attendances),
 }));
 
+export const dailyAssessmentsRelations = relations(dailyAssessments, ({ one, many }) => ({
+  student: one(students, {
+    fields: [dailyAssessments.studentId],
+    references: [students.id],
+  }),
+  classroom: one(classrooms, {
+    fields: [dailyAssessments.classroomId],
+    references: [classrooms.id],
+  }),
+  createdBy: one(users, {
+    fields: [dailyAssessments.createdBy],
+    references: [users.id],
+  }),
+  items: many(assessmentItems),
+}));
+
+export const assessmentItemsRelations = relations(assessmentItems, ({ one }) => ({
+  dailyAssessment: one(dailyAssessments, {
+    fields: [assessmentItems.dailyAssessmentId],
+    references: [dailyAssessments.id],
+  }),
+  scope: one(developmentScopes, {
+    fields: [assessmentItems.scopeId],
+    references: [developmentScopes.id],
+  }),
+  objective: one(learningObjectives, {
+    fields: [assessmentItems.objectiveId],
+    references: [learningObjectives.id],
+  }),
+}));
+
 export const parentChildRelations = relations(parentChild, ({ one }) => ({
   parent: one(users, {
     fields: [parentChild.parentId],
@@ -230,7 +269,7 @@ export const parentChildRelations = relations(parentChild, ({ one }) => ({
 
 export const developmentScopesRelations = relations(developmentScopes, ({ many }) => ({
   learningObjectives: many(learningObjectives),
-  dailyAssessments: many(dailyAssessments),
+  assessmentItems: many(assessmentItems),
 }));
 
 export const learningObjectivesRelations = relations(learningObjectives, ({ one, many }) => ({
@@ -238,26 +277,7 @@ export const learningObjectivesRelations = relations(learningObjectives, ({ one,
     fields: [learningObjectives.scopeId],
     references: [developmentScopes.id],
   }),
-  dailyAssessments: many(dailyAssessments),
-}));
-
-export const dailyAssessmentsRelations = relations(dailyAssessments, ({ one }) => ({
-  student: one(students, {
-    fields: [dailyAssessments.studentId],
-    references: [students.id],
-  }),
-  teacher: one(users, {
-    fields: [dailyAssessments.teacherId],
-    references: [users.id],
-  }),
-  scope: one(developmentScopes, {
-    fields: [dailyAssessments.scopeId],
-    references: [developmentScopes.id],
-  }),
-  objective: one(learningObjectives, {
-    fields: [dailyAssessments.objectiveId],
-    references: [learningObjectives.id],
-  }),
+  assessmentItems: many(assessmentItems),
 }));
 
 export const weeklyReportsRelations = relations(weeklyReports, ({ one }) => ({

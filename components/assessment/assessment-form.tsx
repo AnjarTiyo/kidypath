@@ -20,6 +20,7 @@ import {
   IconAlertCircle,
   IconChevronLeft,
   IconChevronRight,
+  IconSparkles,
 } from "@tabler/icons-react"
 import { StudentSelector, Student } from "@/components/attendance/student-selector"
 import { format } from "date-fns"
@@ -71,11 +72,14 @@ interface AssessmentRow {
 interface ExistingAssessment {
   id: string
   studentId: string
-  scopeId: string
-  objectiveId: string
-  activityContext: string
-  score: AssessmentScore
-  note: string | null
+  summary: string | null
+  items: {
+    scopeId: string
+    objectiveId: string
+    activityContext: string
+    score: AssessmentScore
+    note: string | null
+  }[]
 }
 
 const DEVELOPMENT_SCOPES: DevelopmentScope[] = [
@@ -122,12 +126,15 @@ export function AssessmentForm({
   const [loading, setLoading] = useState(false)
   const [loadingStudents, setLoadingStudents] = useState(true)
   const [loadingObjectives, setLoadingObjectives] = useState(true)
+  const [generatingSummary, setGeneratingSummary] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [savedCount, setSavedCount] = useState(0)
-  const [existingAssessments, setExistingAssessments] = useState<Map<string, ExistingAssessment[]>>(new Map())
+  const [existingAssessments, setExistingAssessments] = useState<Map<string, ExistingAssessment>>(new Map())
   const [learningObjectives, setLearningObjectives] = useState<LearningObjective[]>([])
   const [developmentScopes, setDevelopmentScopes] = useState<DevelopmentScope[]>([])
   const [assessmentRows, setAssessmentRows] = useState<AssessmentRow[]>([])
+  const [summary, setSummary] = useState<string>("")
+  const [generateSummaryChecked, setGenerateSummaryChecked] = useState(false)
 
   const formattedDate = format(date, "EEEE, dd MMM yyyy", { locale: localeId })
   const selectedStudent = students[currentStudentIndex] || null
@@ -211,19 +218,14 @@ export function AssessmentForm({
             const assessmentsData = await assessmentsResponse.json()
             const assessmentsList = assessmentsData.data || []
 
-            const assessmentsMap = new Map<string, ExistingAssessment[]>()
+            const assessmentsMap = new Map<string, ExistingAssessment>()
             assessmentsList.forEach((ass: any) => {
-              const existing = assessmentsMap.get(ass.studentId) || []
-              existing.push({
+              assessmentsMap.set(ass.studentId, {
                 id: ass.id,
                 studentId: ass.studentId,
-                scopeId: ass.scopeId,
-                objectiveId: ass.objectiveId,
-                activityContext: ass.activityContext,
-                score: ass.score,
-                note: ass.note,
+                summary: ass.summary,
+                items: ass.items || [],
               })
-              assessmentsMap.set(ass.studentId, existing)
             })
             setExistingAssessments(assessmentsMap)
 
@@ -261,15 +263,17 @@ export function AssessmentForm({
   useEffect(() => {
     if (selectedStudent && existingAssessments.has(selectedStudent.id)) {
       const existing = existingAssessments.get(selectedStudent.id)!
+      setSummary(existing.summary || "")
+      
       const updatedRows = assessmentRows.map(row => {
-        const existingRow = existing.find(e => e.scopeId === row.scopeId)
-        if (existingRow) {
+        const existingItem = existing.items.find(item => item.scopeId === row.scopeId)
+        if (existingItem) {
           return {
             ...row,
-            objectiveId: existingRow.objectiveId,
-            activityContext: existingRow.activityContext,
-            score: existingRow.score,
-            note: existingRow.note || "",
+            objectiveId: existingItem.objectiveId,
+            activityContext: existingItem.activityContext,
+            score: existingItem.score,
+            note: existingItem.note || "",
           }
         }
         return row
@@ -277,6 +281,7 @@ export function AssessmentForm({
       setAssessmentRows(updatedRows)
     } else if (lessonPlanItems.length > 0 && assessmentRows.length > 0) {
       // Reset to lesson plan defaults
+      setSummary("")
       const resetRows = lessonPlanItems.map((item, idx) => {
         const existingRow = assessmentRows[idx]
         return {
@@ -311,6 +316,43 @@ export function AssessmentForm({
     })
   }
 
+  const handleGenerateSummary = async () => {
+    if (!selectedStudent) return
+
+    setGeneratingSummary(true)
+    setError(null)
+
+    try {
+      const response = await fetch("/api/assessments/summary/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentName: selectedStudent.fullName,
+          date: format(date, "EEEE, dd MMMM yyyy", { locale: localeId }),
+          assessmentItems: assessmentRows.map(row => ({
+            scopeName: row.scopeName,
+            objectiveDescription: row.objectiveDescription,
+            activityContext: row.activityContext,
+            score: row.score,
+            note: row.note || null,
+          })),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to generate summary")
+      }
+
+      const data = await response.json()
+      setSummary(data.summary)
+    } catch (error) {
+      console.error("Error generating summary:", error)
+      setError("Gagal membuat ringkasan otomatis. Silakan tulis manual.")
+    } finally {
+      setGeneratingSummary(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -319,9 +361,7 @@ export function AssessmentForm({
       return
     }
 
-    // Validate all rows have required data (all should be populated from lesson plan)
-    // activityContext and score are from lesson plan defaults
-    // objectiveId should be populated from database learning objectives
+    // Validate all rows have required data
     const invalidRows = assessmentRows.filter(
       row => !row.objectiveId || !row.activityContext || !row.score
     )
@@ -335,43 +375,77 @@ export function AssessmentForm({
     setError(null)
 
     try {
-      // Save all assessment rows
-      const promises = assessmentRows.map(row =>
-        fetch("/api/assessments", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            studentId: selectedStudent.id,
-            date: format(date, "yyyy-MM-dd"),
+      // Generate summary if checkbox is checked and summary is empty
+      let finalSummary = summary
+      if (generateSummaryChecked && !summary.trim()) {
+        try {
+          const summaryResponse = await fetch("/api/assessments/summary/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              studentName: selectedStudent.fullName,
+              date: format(date, "EEEE, dd MMMM yyyy", { locale: localeId }),
+              assessmentItems: assessmentRows.map(row => ({
+                scopeName: row.scopeName,
+                objectiveDescription: row.objectiveDescription,
+                activityContext: row.activityContext,
+                score: row.score,
+                note: row.note || null,
+              })),
+            }),
+          })
+
+          if (summaryResponse.ok) {
+            const summaryData = await summaryResponse.json()
+            finalSummary = summaryData.summary
+            setSummary(finalSummary)
+          }
+        } catch (summaryError) {
+          console.error("Error generating summary:", summaryError)
+          // Continue without summary if generation fails
+        }
+      }
+
+      // Save assessment with all items
+      const response = await fetch("/api/assessments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId: selectedStudent.id,
+          classroomId: classroomId,
+          date: format(date, "yyyy-MM-dd"),
+          summary: finalSummary.trim() || null,
+          items: assessmentRows.map(row => ({
             scopeId: row.scopeId,
             objectiveId: row.objectiveId,
             activityContext: row.activityContext,
             score: row.score,
             note: row.note.trim() || null,
-          }),
-        })
-      )
+          })),
+        }),
+      })
 
-      const responses = await Promise.all(promises)
-      const allSuccess = responses.every(r => r.ok)
-
-      if (!allSuccess) {
-        setError("Terjadi kesalahan saat menyimpan beberapa penilaian")
+      if (!response.ok) {
+        setError("Terjadi kesalahan saat menyimpan penilaian")
         return
       }
 
+      const savedAssessment = await response.json()
+
       // Update existing assessments map
       const updatedMap = new Map(existingAssessments)
-      const studentAssessments = assessmentRows.map(row => ({
-        id: "", // Will be from response
+      updatedMap.set(selectedStudent.id, {
+        id: savedAssessment.id,
         studentId: selectedStudent.id,
-        scopeId: row.scopeId,
-        objectiveId: row.objectiveId,
-        activityContext: row.activityContext,
-        score: row.score,
-        note: row.note.trim() || null,
-      }))
-      updatedMap.set(selectedStudent.id, studentAssessments)
+        summary: finalSummary || null,
+        items: assessmentRows.map(row => ({
+          scopeId: row.scopeId,
+          objectiveId: row.objectiveId,
+          activityContext: row.activityContext,
+          score: row.score,
+          note: row.note.trim() || null,
+        })),
+      })
       setExistingAssessments(updatedMap)
       setSavedCount(updatedMap.size)
 
@@ -668,6 +742,52 @@ export function AssessmentForm({
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Summary Section */}
+              <div className="mb-2 sm:mb-3 space-y-1.5 sm:space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor="summary" className="text-[10px] sm:text-[11px] font-medium">
+                    Ringkasan Penilaian
+                  </Label>
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className="flex items-center gap-1">
+                      <Checkbox
+                        id="generateSummary"
+                        checked={generateSummaryChecked}
+                        onCheckedChange={(checked) => setGenerateSummaryChecked(checked as boolean)}
+                        disabled={loading || generatingSummary}
+                        className="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                      />
+                      <Label
+                        htmlFor="generateSummary"
+                        className="text-[9px] sm:text-[10px] text-muted-foreground cursor-pointer"
+                      >
+                        Generate AI
+                      </Label>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleGenerateSummary}
+                      disabled={loading || generatingSummary}
+                      className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2"
+                    >
+                      {generatingSummary && <IconLoader2 className="mr-1 h-2.5 w-2.5 sm:h-3 sm:w-3 animate-spin" />}
+                      {!generatingSummary && <IconSparkles className="mr-1 h-2.5 w-2.5 sm:h-3 sm:w-3" />}
+                      Generate
+                    </Button>
+                  </div>
+                </div>
+                <Textarea
+                  id="summary"
+                  placeholder="Ringkasan penilaian akan dibuat otomatis jika Generate Summary dicentang saat menyimpan, atau klik tombol Generate untuk membuat sekarang. Anda juga bisa menulis manual..."
+                  value={summary}
+                  onChange={(e) => setSummary(e.target.value)}
+                  disabled={loading || generatingSummary}
+                  className="min-h-[60px] sm:min-h-[80px] text-[10px] sm:text-[11px] resize-none"
+                />
               </div>
 
               {/* Error Message */}
