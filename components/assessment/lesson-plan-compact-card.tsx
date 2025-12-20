@@ -6,6 +6,18 @@ import { IconCheck, IconX, IconClock, IconProgress, IconPlus, IconEdit } from "@
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 
+interface StatusItemProps {
+    label: string;
+    isComplete: boolean;
+    showProgress?: boolean;
+    completedCount?: number;
+    totalCount?: number;
+    progressPercentage?: number;
+    subtitle?: string;
+    onAction?: () => void;
+    actionLabel?: string;
+}
+
 interface DailyStatusIndicatorProps {
     lessonPlanStatus?: {
         isCreated: boolean
@@ -89,7 +101,7 @@ function StatusItem({
                         <Progress value={progressPercentage} className="h-1.5 mt-1.5" />
                     )}
                     
-                    {!isComplete && !showProgress && (
+                    {!isComplete && !showProgress && !subtitle && (
                         <p className="text-xs text-muted-foreground mt-0.5">Belum dilakukan</p>
                     )}
                 </div>
@@ -98,14 +110,14 @@ function StatusItem({
                     <Button
                         onClick={onAction}
                         size="sm"
-                        variant={isComplete ? "outline" : "default"}
-                        className="h-7 text-xs flex-shrink-0 w-30"
+                        variant={isComplete ? "ghost" : "default"}
+                        className={cn(
+                            "h-7 text-xs flex-shrink-0",
+                            isComplete && "text-green-600 hover:text-green-700 hover:bg-green-50"
+                        )}
                     >
                         {isComplete ? (
-                            <>
-                                <IconEdit className="h-3 w-3 mr-1" />
-                                {actionLabel || "Edit"}
-                            </>
+                            <IconCheck className="h-4 w-4" />
                         ) : (
                             <>
                                 <IconPlus className="h-3 w-3 mr-1" />
@@ -165,8 +177,15 @@ export function LessonPlanCompactCard({
                 <StatusItem
                     label="Check-in Harian"
                     isComplete={checkInStatus?.isConducted ?? false}
+                    showProgress={!checkInStatus?.isConducted && (checkInStatus?.completedCount ?? 0) > 0}
+                    completedCount={checkInStatus?.completedCount ?? 0}
+                    totalCount={checkInStatus?.totalStudents ?? 0}
+                    progressPercentage={checkInStatus?.totalStudents 
+                        ? ((checkInStatus?.completedCount ?? 0) / checkInStatus.totalStudents) * 100 
+                        : 0
+                    }
                     subtitle={checkInStatus?.isConducted 
-                        ? `${checkInStatus.completedCount || 0} siswa sudah check-in`
+                        ? "Semua siswa sudah check-in"
                         : undefined
                     }
                     onAction={onCheckIn}
@@ -187,8 +206,15 @@ export function LessonPlanCompactCard({
                 <StatusItem
                     label="Check-out Harian"
                     isComplete={checkOutStatus?.isConducted ?? false}
+                    showProgress={!checkOutStatus?.isConducted && (checkOutStatus?.completedCount ?? 0) > 0}
+                    completedCount={checkOutStatus?.completedCount ?? 0}
+                    totalCount={checkOutStatus?.totalStudents ?? 0}
+                    progressPercentage={checkOutStatus?.totalStudents 
+                        ? ((checkOutStatus?.completedCount ?? 0) / checkOutStatus.totalStudents) * 100 
+                        : 0
+                    }
                     subtitle={checkOutStatus?.isConducted 
-                        ? `${checkOutStatus.completedCount || 0} siswa sudah check-out`
+                        ? "Semua siswa sudah check-out"
                         : undefined
                     }
                     onAction={onCheckOut}

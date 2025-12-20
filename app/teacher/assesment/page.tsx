@@ -13,6 +13,7 @@ import Link from "next/link"
 
 interface LessonPlanData {
   id: string
+  classroomId: string
   topic: string
   subtopic?: string | null
   code?: string
@@ -26,11 +27,29 @@ interface LessonPlanData {
   }>
 }
 
+interface AttendanceData {
+  classroomId: string
+  checkIn: {
+    total: number
+    present: number
+    sick: number
+    permission: number
+  }
+  checkOut: {
+    total: number
+    present: number
+    sick: number
+    permission: number
+  }
+}
+
 export default function StudentAssessmentPage() {
   const { user, classrooms, loading } = useCurrentUser()
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [lessonPlans, setLessonPlans] = useState<LessonPlanData[]>([])
+  const [attendanceData, setAttendanceData] = useState<Map<string, AttendanceData>>(new Map())
   const [loadingPlans, setLoadingPlans] = useState(false)
+  const [loadingAttendance, setLoadingAttendance] = useState(false)
 
   // Fetch lesson plans for selected date
   useEffect(() => {
@@ -71,6 +90,78 @@ export default function StudentAssessmentPage() {
       abortController.abort()
     }
   }, [selectedDate, classrooms.length, loading])
+
+  // Fetch attendance data for each classroom
+  useEffect(() => {
+    if (loading || classrooms.length === 0) {
+      return
+    }
+
+    const abortController = new AbortController()
+
+    const fetchAttendanceData = async () => {
+      setLoadingAttendance(true)
+      try {
+        const dateStr = format(selectedDate, "yyyy-MM-dd")
+        const attendanceMap = new Map<string, AttendanceData>()
+
+        // Fetch attendance for each classroom
+        await Promise.all(
+          classrooms.map(async (classroom) => {
+            try {
+              const response = await fetch(
+                `/api/attendances?classroomId=${classroom.id}&date=${dateStr}`,
+                { signal: abortController.signal }
+              )
+
+              if (response.ok) {
+                const data = await response.json()
+                const records = data.data || []
+
+                // Separate check-in and check-out
+                const checkInRecords = records.filter((r: any) => r.type === 'check_in')
+                const checkOutRecords = records.filter((r: any) => r.type === 'check_out')
+
+                attendanceMap.set(classroom.id, {
+                  classroomId: classroom.id,
+                  checkIn: {
+                    total: checkInRecords.length,
+                    present: checkInRecords.filter((r: any) => r.status === 'present').length,
+                    sick: checkInRecords.filter((r: any) => r.status === 'sick').length,
+                    permission: checkInRecords.filter((r: any) => r.status === 'permission').length,
+                  },
+                  checkOut: {
+                    total: checkOutRecords.length,
+                    present: checkOutRecords.filter((r: any) => r.status === 'present').length,
+                    sick: checkOutRecords.filter((r: any) => r.status === 'sick').length,
+                    permission: checkOutRecords.filter((r: any) => r.status === 'permission').length,
+                  },
+                })
+              }
+            } catch (error) {
+              if (error instanceof Error && error.name !== 'AbortError') {
+                console.error(`Error fetching attendance for classroom ${classroom.id}:`, error)
+              }
+            }
+          })
+        )
+
+        setAttendanceData(attendanceMap)
+      } catch (error) {
+        if (error instanceof Error && error.name !== 'AbortError') {
+          console.error("Error fetching attendance data:", error)
+        }
+      } finally {
+        setLoadingAttendance(false)
+      }
+    }
+
+    fetchAttendanceData()
+
+    return () => {
+      abortController.abort()
+    }
+  }, [selectedDate, classrooms, loading])
 
   // Show loading state
   if (loading) {
@@ -214,33 +305,41 @@ export default function StudentAssessmentPage() {
           </div>
         ) : lessonPlans.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {lessonPlans.map((plan) => (
-              <LessonPlanCompactCard
-                key={plan.id}
-                lessonPlanStatus={{
-                  isCreated: true,
-                  topic: plan.topic,
-                  subtopic: plan.subtopic ?? undefined,
-                }}
-                checkInStatus={{
-                  isConducted: false, // TODO: Get from API
-                  completedCount: 0,
-                  totalStudents: 25,
-                }}
-                assessmentStatus={{
-                  completedCount: 0, // TODO: Get from API
-                  totalStudents: 25, // TODO: Get from API
-                  progressPercentage: 0,
-                }}
-                checkOutStatus={{
-                  isConducted: false, // TODO: Get from API
-                }}
-                onEditLessonPlan={() => console.log("Edit lesson plan", plan.id)}
-                onCheckIn={() => console.log("Check-in for", plan.id)}
-                onAssess={() => handleAssessLessonPlan(plan.id)}
-                onCheckOut={() => console.log("Check-out for", plan.id)}
-              />
-            ))}
+            {lessonPlans.map((plan) => {
+              const attendance = attendanceData.get(plan.classroomId)
+              const checkInConducted = (attendance?.checkIn.total || 0) > 0
+              const checkOutConducted = (attendance?.checkOut.total || 0) > 0
+
+              return (
+                <LessonPlanCompactCard
+                  key={plan.id}
+                  lessonPlanStatus={{
+                    isCreated: true,
+                    topic: plan.topic,
+                    subtopic: plan.subtopic ?? undefined,
+                  }}
+                  checkInStatus={{
+                    isConducted: checkInConducted,
+                    completedCount: attendance?.checkIn.total || 0,
+                    totalStudents: 0, // TODO: Get actual student count
+                  }}
+                  assessmentStatus={{
+                    completedCount: 0, // TODO: Get from API
+                    totalStudents: 25, // TODO: Get from API
+                    progressPercentage: 0,
+                  }}
+                  checkOutStatus={{
+                    isConducted: checkOutConducted,
+                    completedCount: attendance?.checkOut.total || 0,
+                    totalStudents: 0, // TODO: Get actual student count
+                  }}
+                  onEditLessonPlan={() => console.log("Edit lesson plan", plan.id)}
+                  onCheckIn={() => window.location.href = `/teacher/class/${plan.classroomId}/check-in`}
+                  onAssess={() => handleAssessLessonPlan(plan.id)}
+                  onCheckOut={() => window.location.href = `/teacher/class/${plan.classroomId}/check-out`}
+                />
+              )
+            })}
 
             {/* Daily Journal CTA - Future Implementation */}
             <Card className="border-dashed bg-muted/30">
