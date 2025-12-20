@@ -29,7 +29,7 @@ interface Classroom {
 
 interface BasicInfoFormData {
     classroomId: string
-    date: Date
+    date: Date | undefined
     topic: string
     subtopic: string
     code: string
@@ -78,7 +78,7 @@ export function LessonPlanBasicInfoCard({
 
     return (
         <Card className="h-fit">
-            <CardHeader className="pb-3">
+            <CardHeader>
                 <div className="flex items-center justify-between">
                     <div>
                         <CardTitle className="text-base">Informasi Dasar</CardTitle>
@@ -246,9 +246,15 @@ export function LessonPlanBasicInfoCard({
                                 <Calendar
                                     mode="single"
                                     selected={formData.date}
-                                    onSelect={(date) => date && onFormChange({ date })}
+                                    onSelect={(date) => onFormChange({ date })}
+                                    defaultMonth={formData.date}
                                     locale={id}
-                                    initialFocus
+                                    modifiers={{
+                                        selected: formData.date ? [formData.date] : [],
+                                    }}
+                                    modifiersClassNames={{
+                                        selected: "bg-secondary text-white font-semibold hover:bg-secondary/80 hover:text-primary-foreground rounded-md",
+                                    }}
                                 />
                             </PopoverContent>
                         </Popover>

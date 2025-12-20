@@ -269,15 +269,15 @@ export default function StudentAssessmentPage() {
                 <p className="text-sm text-muted-foreground">
                   Belum ada rencana pembelajaran untuk tanggal ini
                 </p>
-                <Link href={"/teacher/lesson-plan/new"}>
-                <Button
-                  variant="default"
-                  className="h-7"
-                  size="sm"
-                >
-                  <IconPlus className="h-4 w-4 mr-2" />
-                  Buat Rencana Pembelajaran
-                </Button>
+                <Link href={`/teacher/lesson-plan/new?date=${format(selectedDate, "yyyy-MM-dd")}`}>
+                  <Button
+                    variant="default"
+                    className="h-7"
+                    size="sm"
+                  >
+                    <IconPlus className="h-4 w-4 mr-2" />
+                    Buat Rencana Pembelajaran
+                  </Button>
                 </Link>
               </div>
             </CardContent>

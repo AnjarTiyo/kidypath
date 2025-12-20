@@ -68,7 +68,7 @@ export default function LessonPlanCalendar({
             ],
           }}
           modifiersClassNames={{
-            hasLessonPlan: "bg-green-200 text-primary rounded-sm font-semibold",
+            hasLessonPlan: "bg-green-200 mx-1 text-primary rounded-sm font-semibold",
             dayOff: "text-red-500 font-semibold",
           }}
         />

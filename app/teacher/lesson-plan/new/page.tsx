@@ -1,14 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { PageHeader } from "@/components/layout/page-header"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
 import { LessonPlanBasicInfoCard } from "@/components/lesson-plan/lesson-plan-basic-info-card"
 import { LessonPlanAgendaCard } from "@/components/lesson-plan/lesson-plan-agenda-card"
-import { format } from "date-fns"
+import { format, parse } from "date-fns"
 import { 
   IconHome, 
   IconChalkboardTeacher,
@@ -33,6 +33,7 @@ interface Classroom {
 
 export default function NewLessonPlanPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, classrooms: userClassrooms, loading: loadingUser } = useCurrentUser()
   
   const [classrooms, setClassrooms] = useState<Classroom[]>([])
@@ -64,6 +65,19 @@ export default function NewLessonPlanPage() {
       generatedByAi: false,
     })),
   })
+
+  // Set initial date from URL params
+  useEffect(() => {
+    const dateParam = searchParams.get("date")
+    if (dateParam) {
+      try {
+        const parsedDate = parse(dateParam, "yyyy-MM-dd", new Date())
+        setFormData(prev => ({ ...prev, date: parsedDate }))
+      } catch (error) {
+        console.error("Invalid date parameter:", error)
+      }
+    }
+  }, [searchParams])
 
   // Fetch classrooms when component mounts
   useEffect(() => {

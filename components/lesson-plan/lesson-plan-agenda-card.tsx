@@ -47,11 +47,13 @@ export function LessonPlanAgendaCard({
 
   return (
     <Card className="h-fit">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Rincian Agenda</CardTitle>
-        <CardDescription className="text-xs">
-          Isi tujuan pembelajaran dan aktivitas untuk setiap aspek perkembangan
-        </CardDescription>
+      <CardHeader>
+        <div className="flex flex-col gap-1">
+          <CardTitle className="text-md">Rincian Agenda</CardTitle>
+          <CardDescription className="text-xs">
+            Isi tujuan pembelajaran dan aktivitas untuk setiap aspek perkembangan
+          </CardDescription>
+        </div>
       </CardHeader>
       <CardContent className="p-0">
         <div className="border-t">
@@ -68,12 +70,12 @@ export function LessonPlanAgendaCard({
                 {developmentScopes.map((scope) => {
                   const item = getItem(scope)
                   return (
-                    <tr 
+                    <tr
                       key={scope}
                       className={cn(
                         "border-b last:border-b-0",
-                        errors[`goal_${scope}`] || errors[`activity_${scope}`] 
-                          ? "bg-destructive/5" 
+                        errors[`goal_${scope}`] || errors[`activity_${scope}`]
+                          ? "bg-destructive/5"
                           : ""
                       )}
                     >

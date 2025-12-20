@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { PageHeader } from "@/components/layout/page-header"
 import LessonPlanCalendar from "@/components/lesson-plan/lesson-plan-calendar"
 import DetailLessonPlan from "@/components/lesson-plan/detail-lesson-plan"
-import { IconChalkboardTeacher, IconHome } from "@tabler/icons-react"
+import { IconChalkboardTeacher, IconHome, IconNoteOff } from "@tabler/icons-react"
 import { format } from "date-fns"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
 import { Card, CardContent } from "@/components/ui/card"
@@ -111,7 +111,8 @@ export default function TeacherLessonPlanPage() {
   }
 
   const handleCreateClick = () => {
-    router.push("/teacher/lesson-plan/new")
+    const dateParam = selectedDate ? `?date=${format(selectedDate, "yyyy-MM-dd")}` : ""
+    router.push(`/teacher/lesson-plan/new${dateParam}`)
   }
 
   const handleDelete = (id: string) => {
@@ -155,19 +156,7 @@ export default function TeacherLessonPlanPage() {
         <Card className="border-yellow-200 bg-yellow-50">
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
-              <svg
-                className="h-6 w-6 text-yellow-600 flex-shrink-0 mt-0.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
+              <IconNoteOff className="h-6 w-6 text-yellow-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <h3 className="font-semibold text-yellow-900 mb-1">
                   Belum Ada Rombongan Belajar
