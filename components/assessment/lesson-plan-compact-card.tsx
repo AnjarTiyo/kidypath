@@ -142,6 +142,12 @@ export function LessonPlanCompactCard({
     onAssess,
     onCheckOut
 }: DailyStatusIndicatorProps) {
+    console.log("🎴 LessonPlanCompactCard Props:")
+    console.log("  lessonPlanStatus:", lessonPlanStatus)
+    console.log("  checkInStatus:", checkInStatus)
+    console.log("  assessmentStatus:", assessmentStatus)
+    console.log("  checkOutStatus:", checkOutStatus)
+
     const allComplete = 
         lessonPlanStatus?.isCreated && 
         checkInStatus?.isConducted && 

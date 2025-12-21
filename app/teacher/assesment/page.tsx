@@ -116,10 +116,15 @@ export default function StudentAssessmentPage() {
         const dateStr = format(selectedDate, "yyyy-MM-dd")
         const attendanceMap = new Map<string, AttendanceData>()
 
+        console.log("🔍 Fetching attendance for date:", dateStr)
+        console.log("🔍 Classrooms:", classrooms)
+
         // Fetch attendance for each classroom
         await Promise.all(
           classrooms.map(async (classroom) => {
             try {
+              console.log(`📊 Fetching attendance for classroom: ${classroom.id} (${classroom.name})`)
+              
               const response = await fetch(
                 `/api/attendances?classroomId=${classroom.id}&date=${dateStr}`,
                 { signal: abortController.signal }
@@ -129,9 +134,14 @@ export default function StudentAssessmentPage() {
                 const data = await response.json()
                 const records = data.data || []
 
+                console.log(`✅ Attendance records for ${classroom.name}:`, records.length, "records")
+                console.log(`   Raw data:`, records)
+
                 // Separate check-in and check-out
                 const checkInRecords = records.filter((r: any) => r.type === 'check_in')
                 const checkOutRecords = records.filter((r: any) => r.type === 'check_out')
+
+                console.log(`   Check-in: ${checkInRecords.length}, Check-out: ${checkOutRecords.length}`)
 
                 attendanceMap.set(classroom.id, {
                   classroomId: classroom.id,
@@ -148,6 +158,8 @@ export default function StudentAssessmentPage() {
                     permission: checkOutRecords.filter((r: any) => r.status === 'permission').length,
                   },
                 })
+              } else {
+                console.error(`❌ Failed to fetch attendance for ${classroom.name}, status:`, response.status)
               }
             } catch (error) {
               if (error instanceof Error && error.name !== 'AbortError') {
@@ -157,6 +169,7 @@ export default function StudentAssessmentPage() {
           })
         )
 
+        console.log("📈 Final attendance map:", attendanceMap)
         setAttendanceData(attendanceMap)
       } catch (error) {
         if (error instanceof Error && error.name !== 'AbortError') {
@@ -392,6 +405,12 @@ export default function StudentAssessmentPage() {
               const assessment = assessmentData.get(plan.classroomId)
               const checkInConducted = (attendance?.checkIn.total || 0) > 0
               const checkOutConducted = (attendance?.checkOut.total || 0) > 0
+
+              console.log(`🎯 Rendering card for classroom ${plan.classroomId}`)
+              console.log(`   Attendance data:`, attendance)
+              console.log(`   Assessment data:`, assessment)
+              console.log(`   checkInConducted:`, checkInConducted)
+              console.log(`   checkOutConducted:`, checkOutConducted)
 
               return (
                 <LessonPlanCompactCard
