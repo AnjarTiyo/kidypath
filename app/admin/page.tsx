@@ -1,5 +1,6 @@
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
+"use client";
+
+import { useRouter } from "next/navigation"
 import { MenuCard, MenuCardProps, MenuGrid } from "@/components/layout/menu-card"
 import {
   IconUsers,
@@ -10,19 +11,28 @@ import {
   IconChalkboardTeacher,
   IconSchool,
   IconCalendarEvent,
+  IconBook,
 } from "@tabler/icons-react"
 import { PageHeader } from "@/components/layout/page-header"
+import { useCurrentUser } from "@/lib/hooks/use-current-user";
+import { useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default async function AdminPage() {
-  const session = await auth()
+export default function AdminPage() {
+  const { user, loading: userLoading } = useCurrentUser()
+  const router = useRouter()
+  const isUserCurriculumCoordinator = user?.isCurriculumCoordinator || false
 
-  if (!session?.user) {
-    redirect("/auth/login")
-  }
 
-  if (session.user.role !== "admin") {
-    redirect("/unauthorized")
-  }
+  useEffect(() => {
+    if (!userLoading && !user) {
+      router.push("/auth/login")
+    }
+    if (!userLoading && user && user.role !== "admin") {
+      router.push("/unauthorized")
+    }
+  }, [user, userLoading, router])
 
   const availableMenus: MenuCardProps[] = [
     {
@@ -67,14 +77,43 @@ export default async function AdminPage() {
       description: "Lihat dan kelola pengumuman sekolah",
       href: "/admin/announcement",
     },
+    {
+      icon: IconBook,
+      title: "Manajemen Kurikulum",
+      description: "Kelola kurikulum dan topik pembelajaran",
+      href: "/curriculum",
+      hidden: !isUserCurriculumCoordinator, // Only show if user is curriculum coordinator
+    }
   ]
 
+  if (userLoading) {
+    return (
+      <>
+        <PageHeader
+          title="Admin Dashboard"
+          description="Memuat data..."
+          breadcrumbs={[
+            { label: "Beranda", href: "/admin", icon: IconHome },
+          ]}
+        />
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(4)].map((_, index) => (
+            <Skeleton key={index} className="h-32 w-full rounded-md" />
+          ))}
+        </div>
+      </>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
 
   return (
     <>
       <PageHeader
         title="Admin Dashboard"
-        description={`Selamat Datang, ${session.user.name || session.user.email}!`}
+        description={`Selamat Datang, ${user!.name || user!.email}!`}
         breadcrumbs={[
           { label: "Beranda", href: "/admin", icon: IconHome },
         ]}

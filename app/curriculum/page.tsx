@@ -22,28 +22,37 @@ const AVAILABLE_MENUS: MenuCardProps[] = [
     icon: IconLayoutDashboard,
     title: "Manajemen Topik",
     description: "Ringkasan data, aktivitas, dan statistik harian",
-    href: "/teacher/curriculum/topics",
+    href: "/curriculum/topics",
     // roles: ["curriculum_coordinator", "admin"], // Accessible by teacher and admin
   },
   {
     icon: IconCalendar,
     title: "Agenda Kegiatan",
     description: "Ringkasan data, aktivitas, dan statistik harian",
-    href: "/teacher/curriculum/agenda",
+    href: "/curriculum/agenda",
     // roles: ["curriculum_coordinator", "admin"], // Accessible by teacher and admin
   },
   {
     icon: IconUser,
     title: "Manajemen Guru Piket",
     description: "Ringkasan data, aktivitas, dan statistik harian",
-    href: "/teacher/curriculum/teacher-duty",
+    href: "/curriculum/teacher-duty",
     // roles: ["curriculum_coordinator", "admin"], // Accessible by teacher and admin
   },
 ]
 
 export default function CurriculumManagementPage() {
-  const router = useRouter()
   const { user, loading: userLoading } = useCurrentUser()
+  const router = useRouter()
+  const isCurriculumCoordinator = useMemo(() => {
+    return user?.isCurriculumCoordinator || user?.role === "admin"
+  }, [user])
+
+  useEffect(() => {
+    if (!userLoading && !isCurriculumCoordinator) {
+      router.replace("/unauthorized")
+    }
+  }, [userLoading, isCurriculumCoordinator, router])
 
   // Early return for loading state
   if (userLoading) {
@@ -53,8 +62,8 @@ export default function CurriculumManagementPage() {
           title="Manajemen Kurikulum"
           description="Memuat data..."
           breadcrumbs={[
-            { label: "Beranda", href: "/teacher", icon: IconHome },
-            { label: "Manajemen Kurikulum", href: "/teacher/curriculum", icon: IconSchool },
+            { label: "Beranda", href: "/", icon: IconHome },
+            { label: "Manajemen Kurikulum", href: "/curriculum", icon: IconSchool },
           ]}
         />
         <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -83,8 +92,8 @@ export default function CurriculumManagementPage() {
         title="Manajemen Kurikulum"
         description={`Selamat Datang, ${user!.name || user!.email}!`}
         breadcrumbs={[
-          { label: "Beranda", href: "/teacher", icon: IconHome },
-          { label: "Manajemen Kurikulum", href: "/teacher/curriculum", icon: IconSchool },
+          { label: "Beranda", href: "/", icon: IconHome },
+          { label: "Manajemen Kurikulum", href: "/curriculum", icon: IconSchool },
         ]}
       />
 

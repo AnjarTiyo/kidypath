@@ -2,7 +2,7 @@ import { pgTable, uuid, varchar, text, timestamp, date, integer, boolean, pgEnum
 import { relations } from 'drizzle-orm';
 
 // Enums
-export const userRoleEnum = pgEnum('user_role', ['admin', 'teacher', 'parent']);
+export const userRoleEnum = pgEnum('user_role', ['admin', 'teacher', 'parent', 'curriculum']);
 export const developmentScopeEnum = pgEnum('development_scope', [
   'religious_moral',
   'physical_motor',
@@ -164,6 +164,9 @@ export const usersRelations = relations(users, ({ many }) => ({
   activityAgendas: many(activityAgenda),
   lessonPlans: many(lessonPlans),
   dailyAssessments: many(dailyAssessments),
+  semesterTopics: many(semesterTopics),
+  monthlyTopics: many(monthlyTopics),
+  weeklyTopics: many(weeklyTopics),
 }));
 
 export const classroomsRelations = relations(classrooms, ({ many }) => ({
@@ -306,6 +309,71 @@ export const attendancesRelations = relations(attendances, ({ one }) => ({
   }),
   recordedBy: one(users, {
     fields: [attendances.recordedBy],
+    references: [users.id],
+  }),
+}));
+
+// Curriculum tables
+export const semesterTopics = pgTable('semester_topics', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title').notNull(),
+  description: text('description'),
+  academicYear: varchar('academic_year'),
+  semesterNumber: integer('semester_number'),
+  createdBy: uuid('created_by').references(() => users.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});
+
+export const monthlyTopics = pgTable('monthly_topics', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  semesterTopicId: uuid('semester_topic_id').references(() => semesterTopics.id, { onDelete: 'cascade' }),
+  title: varchar('title').notNull(),
+  description: text('description'),
+  monthNumber: integer('month_number'),
+  createdBy: uuid('created_by').references(() => users.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});
+
+export const weeklyTopics = pgTable('weekly_topics', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  monthlyTopicId: uuid('monthly_topic_id').references(() => monthlyTopics.id, { onDelete: 'cascade' }),
+  title: varchar('title').notNull(),
+  description: text('description'),
+  weekNumber: integer('week_number'),
+  createdBy: uuid('created_by').references(() => users.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});
+
+export const semesterTopicsRelations = relations(semesterTopics, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [semesterTopics.createdBy],
+    references: [users.id],
+  }),
+  monthlyTopics: many(monthlyTopics),
+}));
+
+export const monthlyTopicsRelations = relations(monthlyTopics, ({ one, many }) => ({
+  semesterTopic: one(semesterTopics, {
+    fields: [monthlyTopics.semesterTopicId],
+    references: [semesterTopics.id],
+  }),
+  creator: one(users, {
+    fields: [monthlyTopics.createdBy],
+    references: [users.id],
+  }),
+  weeklyTopics: many(weeklyTopics),
+}));
+
+export const weeklyTopicsRelations = relations(weeklyTopics, ({ one }) => ({
+  monthlyTopic: one(monthlyTopics, {
+    fields: [weeklyTopics.monthlyTopicId],
+    references: [monthlyTopics.id],
+  }),
+  creator: one(users, {
+    fields: [weeklyTopics.createdBy],
     references: [users.id],
   }),
 }));

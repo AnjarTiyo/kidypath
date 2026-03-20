@@ -64,7 +64,7 @@ export default function TeacherPage() {
       icon: IconBook,
       title: "Manajemen Kurikulum",
       description: "Kelola topik pembelajaran dan kalender pendidikan",
-      href: "/teacher/curriculum",
+      href: "/curriculum",
       hidden: !!!isUserCurriculumCoordinator, // Hidden for now, can be enabled later
     }
   ]

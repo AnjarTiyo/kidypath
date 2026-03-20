@@ -17,7 +17,6 @@ import {
     IconSparkles,
     IconLoader2,
     IconDeviceFloppy,
-    IconArrowLeft
 } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 
