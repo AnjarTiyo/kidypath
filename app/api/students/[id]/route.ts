@@ -153,7 +153,7 @@ export async function PATCH(
     }
 
     // Build update object
-    const updateData: any = {}
+    const updateData: Partial<typeof students.$inferInsert> = {}
     if (fullName !== undefined) updateData.fullName = fullName
     if (birthDate !== undefined) updateData.birthDate = birthDate || null
     if (gender !== undefined) updateData.gender = gender

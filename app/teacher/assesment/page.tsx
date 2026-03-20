@@ -51,6 +51,11 @@ interface AssessmentData {
   progressPercentage: number
 }
 
+interface AttendanceRecord {
+  type: "check_in" | "check_out"
+  status: "present" | "sick" | "permission" | string
+}
+
 export default function StudentAssessmentPage() {
   const { user, classrooms, loading } = useCurrentUser()
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
@@ -131,15 +136,15 @@ export default function StudentAssessmentPage() {
               )
 
               if (response.ok) {
-                const data = await response.json()
+                const data: { data?: AttendanceRecord[] } = await response.json()
                 const records = data.data || []
 
                 console.log(`✅ Attendance records for ${classroom.name}:`, records.length, "records")
                 console.log(`   Raw data:`, records)
 
                 // Separate check-in and check-out
-                const checkInRecords = records.filter((r: any) => r.type === 'check_in')
-                const checkOutRecords = records.filter((r: any) => r.type === 'check_out')
+                const checkInRecords = records.filter((record) => record.type === 'check_in')
+                const checkOutRecords = records.filter((record) => record.type === 'check_out')
 
                 console.log(`   Check-in: ${checkInRecords.length}, Check-out: ${checkOutRecords.length}`)
 
@@ -147,15 +152,15 @@ export default function StudentAssessmentPage() {
                   classroomId: classroom.id,
                   checkIn: {
                     total: checkInRecords.length,
-                    present: checkInRecords.filter((r: any) => r.status === 'present').length,
-                    sick: checkInRecords.filter((r: any) => r.status === 'sick').length,
-                    permission: checkInRecords.filter((r: any) => r.status === 'permission').length,
+                    present: checkInRecords.filter((record) => record.status === 'present').length,
+                    sick: checkInRecords.filter((record) => record.status === 'sick').length,
+                    permission: checkInRecords.filter((record) => record.status === 'permission').length,
                   },
                   checkOut: {
                     total: checkOutRecords.length,
-                    present: checkOutRecords.filter((r: any) => r.status === 'present').length,
-                    sick: checkOutRecords.filter((r: any) => r.status === 'sick').length,
-                    permission: checkOutRecords.filter((r: any) => r.status === 'permission').length,
+                    present: checkOutRecords.filter((record) => record.status === 'present').length,
+                    sick: checkOutRecords.filter((record) => record.status === 'sick').length,
+                    permission: checkOutRecords.filter((record) => record.status === 'permission').length,
                   },
                 })
               } else {

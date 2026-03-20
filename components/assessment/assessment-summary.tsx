@@ -46,6 +46,8 @@ interface AssessmentRecord {
   note: string | null
 }
 
+type FilterStatus = "all" | "assessed" | "not-assessed"
+
 const SCORE_LABELS: Record<string, string> = {
   BB: "Belum Berkembang",
   MB: "Mulai Berkembang",
@@ -93,7 +95,7 @@ export function AssessmentSummary({
   loading = false,
 }: AssessmentSummaryProps) {
   const [searchQuery, setSearchQuery] = useState("")
-  const [filterStatus, setFilterStatus] = useState<"all" | "assessed" | "not-assessed">("all")
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>("all")
 
   // Group assessments by student
   const studentAssessments = assessments.reduce((acc, assessment) => {
@@ -159,14 +161,19 @@ export function AssessmentSummary({
               <div>
                 <CardTitle className="text-base">Ringkasan Penilaian</CardTitle>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {classroomName} • {date}
+                  Rombel: <span className="uppercase">{classroomName}</span> • {date}
                 </p>
               </div>
             </div>
           </CardHeader>
           <CardContent className="px-3 pb-3">
             <div className="text-center py-4">
-              <div className="text-4xl font-bold mb-1">{completedCount}/{totalStudents}</div>
+              {/* <div className="text-4xl font-bold mb-1">{completedCount} <span className="text-md">dari</span> {totalStudents}</div> */}
+              <div className="flex flex-row gap-3 items-center mb-1 justify-center">
+                <span className="text-3xl font-bold">{completedCount} </span>
+                <span>dari</span>
+                <span className="text-3xl text-primary font-bold">{totalStudents}</span>
+              </div>
               <div className="text-xs text-muted-foreground mb-3">Siswa Dinilai</div>
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
@@ -216,7 +223,7 @@ export function AssessmentSummary({
                   className="h-8 text-xs pl-8"
                 />
               </div>
-              <Select value={filterStatus} onValueChange={(value: any) => setFilterStatus(value)}>
+              <Select value={filterStatus} onValueChange={(value: string) => setFilterStatus(value as FilterStatus)}>
                 <SelectTrigger className="h-8 w-[140px] text-xs">
                   <SelectValue />
                 </SelectTrigger>

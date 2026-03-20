@@ -4,6 +4,37 @@ import { db } from '@/lib/db';
 import { dailyAssessments, assessmentItems, students, developmentScopes, learningObjectives } from '@/lib/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 
+interface AssessmentItemRecord {
+  id: string;
+  dailyAssessmentId: string | null;
+  scopeId: string | null;
+  scopeName: string | null;
+  objectiveId: string | null;
+  objectiveDescription: string | null;
+  activityContext: string | null;
+  score: string | null;
+  note: string | null;
+  createdAt: Date | null;
+}
+
+type AssessmentScore = 'BB' | 'MB' | 'BSH' | 'BSB';
+
+interface AssessmentRequestItem {
+  scopeId: string;
+  objectiveId: string;
+  activityContext: string;
+  score: AssessmentScore;
+  note?: string | null;
+}
+
+interface AssessmentRequestBody {
+  studentId: string;
+  classroomId: string;
+  date: string;
+  summary?: string | null;
+  items: AssessmentRequestItem[];
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
@@ -54,7 +85,7 @@ export async function GET(request: NextRequest) {
 
     // Get assessment items for each daily assessment
     const assessmentIds = dailyAssessmentsData.map(a => a.id);
-    let assessmentItemsData: any[] = [];
+    let assessmentItemsData: AssessmentItemRecord[] = [];
     
     if (assessmentIds.length > 0) {
       assessmentItemsData = await db
@@ -107,7 +138,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body: AssessmentRequestBody = await request.json();
     const {
       studentId,
       classroomId,
@@ -171,7 +202,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert assessment items
-    const itemsToInsert = items.map((item: any) => ({
+    const itemsToInsert: Array<typeof assessmentItems.$inferInsert> = items.map((item) => ({
       dailyAssessmentId,
       scopeId: item.scopeId,
       objectiveId: item.objectiveId,

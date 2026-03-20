@@ -52,7 +52,7 @@ export function StudentSelector({
           className="w-full justify-between"
           disabled={disabled}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 uppercase">
             <IconUser className="h-4 w-4" />
             {selectedStudent ? selectedStudent.fullName : "Pilih siswa..."}
           </div>

@@ -33,6 +33,10 @@ interface ExistingAttendance {
   note: string | null
 }
 
+interface AttendancesResponse {
+  data?: ExistingAttendance[]
+}
+
 export function AttendanceForm({
   classroomId,
   classroomName,
@@ -84,12 +88,12 @@ export function AttendanceForm({
           
           // Load existing attendances
           if (attendancesResponse.ok) {
-            const attendancesData = await attendancesResponse.json()
+            const attendancesData: AttendancesResponse = await attendancesResponse.json()
             const attendancesList = attendancesData.data || []
             
             // Map attendances by studentId
             const attendancesMap = new Map<string, ExistingAttendance>()
-            attendancesList.forEach((att: any) => {
+            attendancesList.forEach((att) => {
               attendancesMap.set(att.studentId, {
                 id: att.id,
                 studentId: att.studentId,

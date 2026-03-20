@@ -25,6 +25,7 @@ import { StudentSelector, Student } from "@/components/attendance/student-select
 import { format } from "date-fns"
 import { id as localeId } from "date-fns/locale"
 import { cn } from "@/lib/utils"
+import { Separator } from "../ui/separator"
 
 interface AssessmentFormProps {
   classroomId: string
@@ -79,6 +80,10 @@ interface ExistingAssessment {
     score: AssessmentScore
     note: string | null
   }[]
+}
+
+interface AssessmentsResponse {
+  data?: ExistingAssessment[]
 }
 
 const DEVELOPMENT_SCOPES: DevelopmentScope[] = [
@@ -214,11 +219,11 @@ export function AssessmentForm({
           setStudents(studentsList)
 
           if (assessmentsResponse.ok) {
-            const assessmentsData = await assessmentsResponse.json()
+            const assessmentsData: AssessmentsResponse = await assessmentsResponse.json()
             const assessmentsList = assessmentsData.data || []
 
             const assessmentsMap = new Map<string, ExistingAssessment>()
-            assessmentsList.forEach((ass: any) => {
+            assessmentsList.forEach((ass) => {
               assessmentsMap.set(ass.studentId, {
                 id: ass.id,
                 studentId: ass.studentId,
@@ -511,9 +516,8 @@ export function AssessmentForm({
           <div className="space-y-1.5 sm:space-y-2 mb-2 sm:mb-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div className="text-[10px] sm:text-xs min-w-0">
-                  <div className="font-medium truncate">{classroomName}</div>
-                  <div className="text-muted-foreground truncate">{formattedDate}</div>
+                <div className="text-sm min-w-0 font-semibold">
+                  <span>Progress Penilaian Keseluruhan</span>
                 </div>
               </div>
               <Badge
@@ -528,7 +532,7 @@ export function AssessmentForm({
                   }
                 }}
               >
-                {savedCount}/{totalStudents}
+                {savedCount} dari {totalStudents} siswa
               </Badge>
             </div>
 
@@ -540,9 +544,10 @@ export function AssessmentForm({
               </span>
             </div>
           </div>
-
+          <Separator />
           {/* Compact Student Navigation */}
-          <div className="mb-2 sm:mb-3">
+          <div className="mb-2 mt-2 sm:mb-3">
+            <div className="text-sm mb-2 font-semibold">Siswa</div>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <Button
                 type="button"

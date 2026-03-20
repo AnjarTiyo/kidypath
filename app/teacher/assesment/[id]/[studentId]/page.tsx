@@ -5,7 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { AssessmentForm, LessonPlanItem } from "@/components/assessment/assessment-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { IconLoader2, IconArrowLeft, IconTriangle } from "@tabler/icons-react"
+import { IconLoader2, IconArrowLeft, IconTriangle, IconBuilding } from "@tabler/icons-react"
 import { format } from "date-fns"
 import { id as localeId } from "date-fns/locale"
 
@@ -129,7 +129,9 @@ export default function AssessmentFormPage() {
           
           <div className="flex-1 min-w-0">
             <h1 className="text-base sm:text-lg font-bold truncate">Penilaian Harian</h1>
-            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{classroom.name}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center truncate">
+              <IconBuilding className="inline h-3 w-3 mr-1" />
+              {classroom.name}</p>
           </div>
 
           <div className="text-right shrink-0">

@@ -42,6 +42,10 @@ interface LessonPlan {
   items: LessonPlanItem[]
 }
 
+interface GeneratedLessonPlanResponse {
+  items: Array<Pick<LessonPlanItem, "developmentScope" | "learningGoal" | "activityContext">>
+}
+
 interface Classroom {
   id: string
   name: string
@@ -290,11 +294,11 @@ export function LessonPlanFormDialog({
         throw new Error(error.error || "Failed to generate lesson plan")
       }
 
-      const data = await response.json()
+      const data: GeneratedLessonPlanResponse = await response.json()
       
       // Map generated items to form data
       const updatedItems = developmentScopes.map(scope => {
-        const generatedItem = data.items.find((item: any) => item.developmentScope === scope)
+        const generatedItem = data.items.find((item) => item.developmentScope === scope)
         return {
           developmentScope: scope,
           learningGoal: generatedItem?.learningGoal || "",

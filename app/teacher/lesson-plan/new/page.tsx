@@ -25,6 +25,10 @@ interface LessonPlanItem {
   generatedByAi?: boolean
 }
 
+interface GeneratedLessonPlanResponse {
+  items: Array<Pick<LessonPlanItem, "developmentScope" | "learningGoal" | "activityContext">>
+}
+
 interface Classroom {
   id: string
   name: string
@@ -149,9 +153,7 @@ export default function NewLessonPlanPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
+  const submitLessonPlan = async () => {
     if (!validate()) {
       return
     }
@@ -188,6 +190,11 @@ export default function NewLessonPlanPage() {
     }
   }
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    await submitLessonPlan()
+  }
+
   const handleGenerateWithAI = async (prompt?: string) => {
     // Validate topic before generating
     if (!formData.topic.trim()) {
@@ -214,11 +221,11 @@ export default function NewLessonPlanPage() {
         throw new Error(error.error || "Failed to generate lesson plan")
       }
 
-      const data = await response.json()
+      const data: GeneratedLessonPlanResponse = await response.json()
       
       // Map generated items to form data
       const updatedItems = developmentScopes.map(scope => {
-        const generatedItem = data.items.find((item: any) => item.developmentScope === scope)
+        const generatedItem = data.items.find((item) => item.developmentScope === scope)
         return {
           developmentScope: scope,
           learningGoal: generatedItem?.learningGoal || "",
@@ -346,7 +353,7 @@ export default function NewLessonPlanPage() {
             errors={errors}
             onFormChange={(data) => setFormData({ ...formData, ...data })}
             onGenerateWithAI={handleGenerateWithAI}
-            onSave={() => handleSubmit(new Event('submit') as any)}
+            onSave={submitLessonPlan}
             onCancel={() => router.push("/teacher/lesson-plan")}
           />
 

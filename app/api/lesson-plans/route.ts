@@ -4,6 +4,23 @@ import { db } from "@/lib/db"
 import { lessonPlans, classrooms, users, classroomTeachers } from "@/lib/db/schema"
 import { desc, asc, sql, or, ilike, eq, and, inArray } from "drizzle-orm"
 
+interface LessonPlanRequestItem {
+  developmentScope: string
+  learningGoal: string
+  activityContext: string
+  generatedByAi?: boolean
+}
+
+interface LessonPlanCreateBody {
+  classroomId: string
+  date: string
+  topic: string
+  subtopic?: string | null
+  code?: string | null
+  items: LessonPlanRequestItem[]
+  generatedByAi?: boolean
+}
+
 // GET - List lesson plans with filtering
 export async function GET(request: NextRequest) {
   try {
@@ -161,7 +178,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    const body = await request.json()
+    const body: LessonPlanCreateBody = await request.json()
     const { classroomId, date, topic, subtopic, code, items, generatedByAi = false } = body
 
     // Validation
@@ -174,7 +191,7 @@ export async function POST(request: NextRequest) {
 
     // Validate that we have all 6 development scopes
     const requiredScopes = ['religious_moral', 'physical_motor', 'cognitive', 'language', 'social_emotional', 'art']
-    const presentScopes = new Set(items.map((item: any) => item.developmentScope))
+    const presentScopes = new Set(items.map((item) => item.developmentScope))
     
     if (items.length !== 6 || !requiredScopes.every(scope => presentScopes.has(scope))) {
       return NextResponse.json(
@@ -270,7 +287,7 @@ export async function POST(request: NextRequest) {
       const newItems = await tx
         .insert(lessonPlanItems)
         .values(
-          items.map((item: any) => ({
+          items.map((item) => ({
             lessonPlanId: newLessonPlan.id,
             developmentScope: item.developmentScope,
             learningGoal: item.learningGoal,

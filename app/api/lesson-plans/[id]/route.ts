@@ -4,6 +4,22 @@ import { db } from "@/lib/db"
 import { lessonPlans, classrooms, users, classroomTeachers } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
 
+interface LessonPlanRequestItem {
+  developmentScope: string
+  learningGoal: string
+  activityContext: string
+  generatedByAi?: boolean
+}
+
+interface LessonPlanUpdateBody {
+  topic: string
+  subtopic?: string | null
+  code?: string | null
+  items: LessonPlanRequestItem[]
+  date?: string
+  generatedByAi?: boolean
+}
+
 // GET - Get single lesson plan
 export async function GET(
   request: NextRequest,
@@ -117,7 +133,7 @@ export async function PUT(
     }
 
     const { id } = await params
-    const body = await request.json()
+    const body: LessonPlanUpdateBody = await request.json()
     const { topic, subtopic, code, items, date, generatedByAi } = body
 
     if (!topic || !items || !Array.isArray(items)) {
@@ -129,7 +145,7 @@ export async function PUT(
 
     // Validate that we have all 6 development scopes
     const requiredScopes = ['religious_moral', 'physical_motor', 'cognitive', 'language', 'social_emotional', 'art']
-    const presentScopes = new Set(items.map((item: any) => item.developmentScope))
+    const presentScopes = new Set(items.map((item) => item.developmentScope))
     
     if (items.length !== 6 || !requiredScopes.every(scope => presentScopes.has(scope))) {
       return NextResponse.json(
@@ -207,7 +223,7 @@ export async function PUT(
     // Update lesson plan and items in a transaction
     const result = await db.transaction(async (tx) => {
       // Update lesson plan
-      const updateData: any = { 
+      const updateData: Partial<typeof lessonPlans.$inferInsert> = {
         topic,
         updatedAt: new Date(),
       }
@@ -231,7 +247,7 @@ export async function PUT(
       const newItems = await tx
         .insert(lessonPlanItems)
         .values(
-          items.map((item: any) => ({
+          items.map((item) => ({
             lessonPlanId: id,
             developmentScope: item.developmentScope,
             learningGoal: item.learningGoal,

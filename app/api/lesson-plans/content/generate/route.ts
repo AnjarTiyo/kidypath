@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from "next/server"
 import Groq from "groq-sdk"
 import { auth } from "@/auth"
 
+interface GeneratedLessonPlanItem {
+    developmentScope: string
+    learningGoal: string
+    activityContext: string
+}
+
+interface GeneratedLessonPlanResponse {
+    items?: GeneratedLessonPlanItem[]
+}
+
 const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY,
 })
@@ -127,9 +137,9 @@ Generate learning goals and activities for ALL 6 development scopes. Make sure a
         }
 
         // Parse the JSON response
-        let parsedData
+        let parsedData: GeneratedLessonPlanResponse
         try {
-            parsedData = JSON.parse(generatedContent)
+            parsedData = JSON.parse(generatedContent) as GeneratedLessonPlanResponse
         } catch (parseError) {
             console.error("Failed to parse AI response as JSON:", generatedContent)
             return NextResponse.json(
@@ -151,7 +161,7 @@ Generate learning goals and activities for ALL 6 development scopes. Make sure a
         }
 
         // Verify all scopes are present
-        const presentScopes = new Set(items.map((item: any) => item.developmentScope))
+        const presentScopes = new Set(items.map((item) => item.developmentScope))
         const missingScopes = requiredScopes.filter(scope => !presentScopes.has(scope))
         
         if (missingScopes.length > 0) {
