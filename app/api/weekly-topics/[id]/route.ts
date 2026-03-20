@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
-import { auth } from '@/auth';
+import { auth, isCurriculumCoordinatorSession } from '@/auth';
 import { db } from '@/lib/db';
 import { weeklyTopics } from '@/lib/db/schema';
 
@@ -9,7 +9,7 @@ type Params = { params: Promise<{ id: string }> };
 async function authorize() {
   const session = await auth();
   if (!session?.user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
-  if (!['admin', 'curriculum'].includes(session.user.role ?? ''))
+  if (!['admin', 'teacher'].includes(session.user.role ?? '') && !isCurriculumCoordinatorSession(session))
     return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
   return { session };
 }

@@ -19,6 +19,7 @@ import {
     IconDeviceFloppy,
 } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
+import { CurrentTopicsPayload } from "@/lib/types/current-topics"
 
 interface Classroom {
     id: string
@@ -47,6 +48,9 @@ interface LessonPlanBasicInfoCardProps {
     onGenerateWithAI: (prompt?: string) => void
     onSave: () => void
     onCancel: () => void
+    currentTopics: CurrentTopicsPayload | null
+    topicsLoading: boolean
+    topicsError?: string | null
 }
 
 export function LessonPlanBasicInfoCard({
@@ -62,6 +66,9 @@ export function LessonPlanBasicInfoCard({
     onGenerateWithAI,
     onSave,
     onCancel,
+    currentTopics,
+    topicsLoading,
+    topicsError,
 }: LessonPlanBasicInfoCardProps) {
     const [aiPromptOpen, setAiPromptOpen] = useState(false)
     const [aiPrompt, setAiPrompt] = useState("")
@@ -74,6 +81,73 @@ export function LessonPlanBasicInfoCard({
         setAiPromptOpen(false)
         setAiPrompt("")
     }
+
+    const topicDateLabel = formData.date
+        ? format(formData.date, "dd MMM yyyy", { locale: id })
+        : "Belum memilih tanggal"
+
+    const hasTopicDate = Boolean(formData.date)
+
+    const semesterMeta = currentTopics?.semester
+        ? [
+            currentTopics.semester.semesterNumber ? `Semester ${currentTopics.semester.semesterNumber}` : undefined,
+            currentTopics.semester.academicYear,
+          ]
+            .filter(Boolean)
+            .join(" • ")
+        : undefined
+
+    const monthlyMeta = currentTopics?.monthly
+        ? [
+            currentTopics.monthly.month,
+            currentTopics.monthly.monthNumber ? `Bulan ke-${currentTopics.monthly.monthNumber}` : undefined,
+          ]
+            .filter(Boolean)
+            .join(" • ")
+        : undefined
+
+    const weeklyMeta = currentTopics?.weekly?.weekNumber
+        ? `Minggu ${currentTopics.weekly.weekNumber}`
+        : undefined
+
+    const semesterTopic = currentTopics?.semester
+        ? { title: currentTopics.semester.title, description: currentTopics.semester.description }
+        : null
+
+    const monthlyTopic = currentTopics?.monthly
+        ? { title: currentTopics.monthly.title, description: currentTopics.monthly.description }
+        : null
+
+    const weeklyTopic = currentTopics?.weekly
+        ? { title: currentTopics.weekly.title, description: currentTopics.weekly.description }
+        : null
+
+    const renderTopicBlock = (
+        label: string,
+        topic: { title: string; description: string | null } | null,
+        meta?: string
+    ) => (
+        <div className="space-y-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                {label}
+            </p>
+            {topic ? (
+                <>
+                    {meta && <p className="text-[10px] text-muted-foreground">{meta}</p>}
+                    <p className="text-sm font-semibold leading-snug">{topic.title}</p>
+                    {topic.description && (
+                        <p className="text-[10px] text-muted-foreground">
+                            {topic.description}
+                        </p>
+                    )}
+                </>
+            ) : (
+                <p className="text-[10px] text-muted-foreground">
+                    Belum tersedia topik {label.toLowerCase()}
+                </p>
+            )}
+        </div>
+    )
 
     return (
         <Card className="h-fit">
@@ -262,6 +336,35 @@ export function LessonPlanBasicInfoCard({
                         )}
                     </div>
 
+                </div>
+
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                            Topik kurikulum
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">{topicDateLabel}</p>
+                    </div>
+                    {!hasTopicDate && (
+                        <p className="text-[10px] text-muted-foreground">
+                            Pilih tanggal agar topik semester, bulanan, dan mingguan dapat ditampilkan.
+                        </p>
+                    )}
+                    {hasTopicDate && topicsLoading && (
+                        <p className="text-[10px] text-muted-foreground">
+                            Memuat topik untuk tanggal terpilih...
+                        </p>
+                    )}
+                    {hasTopicDate && topicsError && (
+                        <p className="text-[10px] text-destructive">{topicsError}</p>
+                    )}
+                    {hasTopicDate && !topicsLoading && !topicsError && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {renderTopicBlock("Topik Semester", semesterTopic, semesterMeta)}
+                            {renderTopicBlock("Topik Bulanan", monthlyTopic, monthlyMeta)}
+                            {renderTopicBlock("Topik Mingguan", weeklyTopic, weeklyMeta)}
+                        </div>
+                    )}
                 </div>
                 {/* Topic */}
                 <div className="space-y-1.5">

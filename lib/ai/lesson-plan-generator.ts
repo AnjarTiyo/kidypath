@@ -5,6 +5,9 @@
  * and activities for all development scopes.
  */
 
+import { buildTopicContextSection } from "@/lib/helpers/topic-helpers"
+import { CurrentTopicsPayload } from "@/lib/types/current-topics"
+
 type DevelopmentScope = 'religious_moral' | 'physical_motor' | 'cognitive' | 'language' | 'social_emotional' | 'art';
 
 export interface LessonPlanItemData {
@@ -24,17 +27,19 @@ export interface GeneratedLessonPlan {
  * @param theme - The theme or topic for the daily lesson plan
  * @param ageGroup - The age group of students (e.g., "4-5 years", "5-6 years")
  * @param classroomContext - Additional context about the classroom
+ * @param currentTopics - Optional curriculum topics that inform the prompt
  * @returns A complete lesson plan with items for all development scopes
  */
 export async function generateLessonPlan(
   theme: string,
   ageGroup: string = "4-5 years",
-  classroomContext?: string
+  classroomContext?: string,
+  currentTopics?: CurrentTopicsPayload | null
 ): Promise<GeneratedLessonPlan> {
   // TODO: Integrate with actual AI service (OpenAI, Anthropic, etc.)
   // For now, return a template structure
   
-  const prompt = buildLessonPlanPrompt(theme, ageGroup, classroomContext);
+  const prompt = buildLessonPlanPrompt(theme, ageGroup, classroomContext, currentTopics);
   
   // Placeholder: In production, call your AI service here
   // const aiResponse = await callAIService(prompt);
@@ -49,8 +54,10 @@ export async function generateLessonPlan(
 function buildLessonPlanPrompt(
   theme: string,
   ageGroup: string,
-  classroomContext?: string
+  classroomContext?: string,
+  currentTopics?: CurrentTopicsPayload | null
 ): string {
+  const topicContext = buildTopicContextSection(currentTopics)
   return `
 You are an expert early childhood education curriculum designer for Indonesian kindergarten (PAUD/TK).
 
@@ -58,6 +65,8 @@ Create a comprehensive daily lesson plan with the following details:
 - Theme: ${theme}
 - Age Group: ${ageGroup}
 ${classroomContext ? `- Classroom Context: ${classroomContext}` : ''}
+${topicContext ? `- Topik kurikulum saat ini:
+${topicContext}` : ''}
 
 The lesson plan must include activities for ALL 6 development scopes required by Indonesian curriculum:
 

@@ -1,4 +1,5 @@
 import NextAuth from "next-auth"
+import type { Session } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { db } from "@/lib/db"
 import { users } from "@/lib/db/schema"
@@ -59,6 +60,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.role = user.role;
         token.id = user.id;
+        token.isCurriculumCoordinator = user.isCurriculumCoordinator ?? false;
       }
       return token;
     },
@@ -66,6 +68,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user) {
         session.user.role = token.role as string;
         session.user.id = token.id as string;
+        session.user.isCurriculumCoordinator = Boolean(token.isCurriculumCoordinator);
       }
       return session;
     },
@@ -79,3 +82,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   debug: process.env.NODE_ENV === 'development',
 })
+
+export function isCurriculumCoordinatorSession(session?: Session | null) {
+  return Boolean(session?.user?.isCurriculumCoordinator)
+}

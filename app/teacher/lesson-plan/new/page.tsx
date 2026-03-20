@@ -15,6 +15,7 @@ import {
   IconAlertCircle,
   IconArrowLeft
 } from "@tabler/icons-react"
+import { CurrentTopicsPayload, CurrentTopicsResponse } from "@/lib/types/current-topics"
 
 type DevelopmentScope = 'religious_moral' | 'physical_motor' | 'cognitive' | 'language' | 'social_emotional' | 'art';
 
@@ -46,6 +47,9 @@ export default function NewLessonPlanPage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedByAi, setGeneratedByAi] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [currentTopics, setCurrentTopics] = useState<CurrentTopicsPayload | null>(null)
+  const [topicsLoading, setTopicsLoading] = useState(false)
+  const [topicsError, setTopicsError] = useState<string | null>(null)
 
   const developmentScopes: DevelopmentScope[] = [
     'religious_moral',
@@ -102,6 +106,46 @@ export default function NewLessonPlanPage() {
       }
     }
   }, [user, userClassrooms, formData.classroomId])
+
+  useEffect(() => {
+    if (!formData.date) {
+      setCurrentTopics(null)
+      setTopicsError(null)
+      return
+    }
+
+    const controller = new AbortController()
+    const fetchCurrentTopics = async () => {
+      setTopicsLoading(true)
+      setTopicsError(null)
+
+      try {
+        const response = await fetch(
+          `/api/current-topics?date=${format(formData.date, "yyyy-MM-dd")}`,
+          { signal: controller.signal }
+        )
+
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}))
+          throw new Error(body.error ?? "Gagal memuat topik")
+        }
+
+        const data: CurrentTopicsResponse = await response.json()
+        setCurrentTopics(data.data)
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return
+        }
+        setCurrentTopics(null)
+        setTopicsError(error instanceof Error ? error.message : "Gagal memuat topik")
+      } finally {
+        setTopicsLoading(false)
+      }
+    }
+
+    fetchCurrentTopics()
+    return () => controller.abort()
+  }, [formData.date])
 
   const fetchClassrooms = async () => {
     // For teachers, use classrooms from the hook
@@ -213,6 +257,7 @@ export default function NewLessonPlanPage() {
           topic: formData.topic,
           subtopic: formData.subtopic,
           userPrompt: prompt || "",
+          currentTopics,
         }),
       })
 
@@ -355,6 +400,9 @@ export default function NewLessonPlanPage() {
             onGenerateWithAI={handleGenerateWithAI}
             onSave={submitLessonPlan}
             onCancel={() => router.push("/teacher/lesson-plan")}
+            currentTopics={currentTopics}
+            topicsLoading={topicsLoading}
+            topicsError={topicsError}
           />
 
           {/* Right Column: Detailed Agenda */}

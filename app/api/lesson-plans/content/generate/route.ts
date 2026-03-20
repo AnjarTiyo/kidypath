@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import Groq from "groq-sdk"
 import { auth } from "@/auth"
+import { buildTopicContextSection } from "@/lib/helpers/topic-helpers"
+import { CurrentTopicsPayload } from "@/lib/types/current-topics"
 
 interface GeneratedLessonPlanItem {
     developmentScope: string
@@ -10,6 +12,13 @@ interface GeneratedLessonPlanItem {
 
 interface GeneratedLessonPlanResponse {
     items?: GeneratedLessonPlanItem[]
+}
+
+interface GenerateLessonPlanPayload {
+    topic: string
+    subtopic?: string | null
+    userPrompt?: string
+    currentTopics?: CurrentTopicsPayload | null
 }
 
 const groq = new Groq({
@@ -35,8 +44,8 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const body = await request.json()
-        const { topic, subtopic, userPrompt: userPreferences } = body
+        const body = (await request.json()) as GenerateLessonPlanPayload
+        const { topic, subtopic, userPrompt: userPreferences, currentTopics } = body
 
         if (!topic || typeof topic !== "string" || topic.trim().length === 0) {
             return NextResponse.json(
@@ -45,7 +54,6 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Check if Groq API key is configured
         if (!process.env.GROQ_API_KEY) {
             return NextResponse.json(
                 { error: "Groq API key is not configured" },
@@ -53,7 +61,6 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Build the comprehensive prompt for all 6 development scopes
         const systemPrompt = `You are an expert early childhood education curriculum designer for Indonesian kindergarten (PAUD/TK). 
 
 You MUST create a comprehensive daily lesson plan that covers ALL 6 development scopes (aspek perkembangan) required by Indonesian curriculum.
@@ -89,15 +96,16 @@ Respond with this exact JSON structure:
   ]
 }`
 
+        const topicContext = buildTopicContextSection(currentTopics)
+        const topicContextSection = topicContext ? `\nKonteks kurikulum saat ini:\n${topicContext}\n` : ''
         const userPrompt = `Create a daily lesson plan for the theme: "${topic}"${subtopic ? ` with subtopic: "${subtopic}"` : ''}.
 
 Theme: ${topic}${subtopic ? `\nSubtopic: ${subtopic}` : ''}
 Age Group: 4-5 years (KB/TK A) or 5-6 years (TK B)
-${userPreferences && userPreferences.trim().length > 0 ? `\nAdditional preferences: ${userPreferences}` : ''}
+${topicContextSection}${userPreferences && userPreferences.trim().length > 0 ? `\nAdditional preferences: ${userPreferences}` : ''}
 
 Generate learning goals and activities for ALL 6 development scopes. Make sure all activities are practical and can be done in a classroom setting.`
 
-        // Call Groq API (use non-streaming response so `choices` is available)
         const chatCompletion = await groq.chat.completions.create({
             messages: [
                 {
@@ -109,15 +117,14 @@ Generate learning goals and activities for ALL 6 development scopes. Make sure a
                     content: userPrompt,
                 },
             ],
-            model: "llama-3.3-70b-versatile", // Using a more capable model
+            model: "llama-3.3-70b-versatile",
             temperature: 0.7,
-            max_tokens: 2000, // Increased for comprehensive response
+            max_tokens: 2000,
             top_p: 1,
             stream: false,
-            response_format: { type: "json_object" }, // Ensure JSON response
+            response_format: { type: "json_object" },
         })
 
-        // Check if response has the expected structure
         if (!chatCompletion.choices || !Array.isArray(chatCompletion.choices) || chatCompletion.choices.length === 0) {
             console.error("Invalid response structure from Groq API:", chatCompletion)
             return NextResponse.json(
@@ -136,7 +143,6 @@ Generate learning goals and activities for ALL 6 development scopes. Make sure a
             )
         }
 
-        // Parse the JSON response
         let parsedData: GeneratedLessonPlanResponse
         try {
             parsedData = JSON.parse(generatedContent) as GeneratedLessonPlanResponse
@@ -148,7 +154,6 @@ Generate learning goals and activities for ALL 6 development scopes. Make sure a
             )
         }
 
-        // Validate that we have all 6 development scopes
         const requiredScopes = ['religious_moral', 'physical_motor', 'cognitive', 'language', 'social_emotional', 'art']
         const items = parsedData.items || []
         
@@ -160,7 +165,6 @@ Generate learning goals and activities for ALL 6 development scopes. Make sure a
             )
         }
 
-        // Verify all scopes are present
         const presentScopes = new Set(items.map((item) => item.developmentScope))
         const missingScopes = requiredScopes.filter(scope => !presentScopes.has(scope))
         
@@ -179,7 +183,6 @@ Generate learning goals and activities for ALL 6 development scopes. Make sure a
     } catch (error) {
         console.error("Error generating lesson plan content:", error)
 
-        // Handle Groq API specific errors
         if (error instanceof Error) {
             return NextResponse.json(
                 { error: error.message || "Failed to generate content" },

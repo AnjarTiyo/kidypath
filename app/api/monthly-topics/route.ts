@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { auth, isCurriculumCoordinatorSession } from '@/auth';
 import { db } from '@/lib/db';
 import { monthlyTopics } from '@/lib/db/schema';
 
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  if (!['admin', 'curriculum'].includes(session.user.role ?? ''))
+  if (!['admin', 'teacher'].includes(session.user.role ?? '') && !isCurriculumCoordinatorSession(session))
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const body = await request.json().catch(() => null);
