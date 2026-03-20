@@ -1,0 +1,107 @@
+"use client"
+
+import { useRouter } from "next/navigation"
+import { useEffect, useMemo } from "react"
+import { MenuCard, MenuCardProps, MenuGrid, filterMenusByRole } from "@/components/layout/menu-card"
+import {
+  IconUsers,
+  IconChartBar,
+  IconHome,
+  IconLayoutDashboard,
+  IconSchool,
+  IconUser,
+  IconCalendar,
+} from "@tabler/icons-react"
+import { PageHeader } from "@/components/layout/page-header"
+import { useCurrentUser } from "@/lib/hooks/use-current-user"
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+
+const AVAILABLE_MENUS: MenuCardProps[] = [
+  {
+    icon: IconLayoutDashboard,
+    title: "Manajemen Topik",
+    description: "Ringkasan data, aktivitas, dan statistik harian",
+    href: "/teacher/curriculum/topics",
+    roles: ["curriculum_coordinator", "admin"], // Accessible by teacher and admin
+  },
+  {
+    icon: IconCalendar,
+    title: "Kalender Pendidikan",
+    description: "Ringkasan data, aktivitas, dan statistik harian",
+    href: "/teacher/dashboard",
+    roles: ["curriculum_coordinator", "admin"], // Accessible by teacher and admin
+  },
+  {
+    icon: IconUser,
+    title: "Manajemen Guru Piket",
+    description: "Ringkasan data, aktivitas, dan statistik harian",
+    href: "/teacher/dashboard",
+    roles: ["curriculum_coordinator", "admin"], // Accessible by teacher and admin
+  },
+]
+
+export default function CurriculumManagementPage() {
+  const router = useRouter()
+  const { user, classrooms, loading: userLoading } = useCurrentUser()
+
+  // Filter menus based on current user's role (MUST be before any conditional returns)
+  const filteredMenus = useMemo(() => {
+    return filterMenusByRole(AVAILABLE_MENUS, user?.role)
+  }, [user?.role])
+
+  // Early return for loading state
+  if (userLoading) {
+    return (
+      <>
+        <PageHeader
+          title="Manajemen Kurikulum"
+          description="Memuat data..."
+          breadcrumbs={[
+            { label: "Beranda", href: "/teacher", icon: IconHome },
+          ]}
+        />
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(4)].map((_, index) => (
+            <Card key={index}>
+              <CardContent className="p-4 sm:p-5 md:p-6">
+                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                  <Skeleton className="h-12 w-12 sm:h-13 sm:w-13 md:h-14 md:w-14 shrink-0 rounded-lg" />
+                  <div className="flex-1 space-y-2 min-w-0 w-full">
+                    <Skeleton className="h-4 sm:h-5 w-3/4" />
+                    <Skeleton className="h-3 sm:h-4 w-full" />
+                    <Skeleton className="h-3 sm:h-4 w-5/6" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </>
+    )
+  }
+
+  // Early return for no user (middleware should handle this, but keep as safety check)
+  if (!user) {
+    router.push("/auth/login")
+    return null
+  }
+
+  return (
+    <>
+      <PageHeader
+        title="Manajemen Kurikulum"
+        description={`Selamat Datang, ${user.name || user.email}!`}
+        breadcrumbs={[
+          { label: "Beranda", href: "/teacher", icon: IconHome },
+        ]}
+      />
+
+      <MenuGrid>
+        {filteredMenus.map((menu, index) => (
+          <MenuCard key={index} {...menu} />
+        ))}
+      </MenuGrid>
+    </>
+  )
+}
