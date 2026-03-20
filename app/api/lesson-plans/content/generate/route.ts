@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Build the comprehensive prompt for all 6 development scopes
-        let systemPrompt = `You are an expert early childhood education curriculum designer for Indonesian kindergarten (PAUD/TK). 
+        const systemPrompt = `You are an expert early childhood education curriculum designer for Indonesian kindergarten (PAUD/TK). 
 
 You MUST create a comprehensive daily lesson plan that covers ALL 6 development scopes (aspek perkembangan) required by Indonesian curriculum.
 
