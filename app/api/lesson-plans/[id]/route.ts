@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { lessonPlans, classrooms, users, classroomTeachers } from "@/lib/db/schema"
+import { DevelopmentScope, DEVELOPMENT_SCOPES } from "@/lib/types/development-scope"
 import { eq, and } from "drizzle-orm"
 
 interface LessonPlanRequestItem {
-  developmentScope: string
+  developmentScope: DevelopmentScope
   learningGoal: string
   activityContext: string
   generatedByAi?: boolean
@@ -144,7 +145,7 @@ export async function PUT(
     }
 
     // Validate that we have all 6 development scopes
-    const requiredScopes = ['religious_moral', 'physical_motor', 'cognitive', 'language', 'social_emotional', 'art']
+    const requiredScopes = DEVELOPMENT_SCOPES
     const presentScopes = new Set(items.map((item) => item.developmentScope))
     
     if (items.length !== 6 || !requiredScopes.every(scope => presentScopes.has(scope))) {
@@ -253,6 +254,7 @@ export async function PUT(
             learningGoal: item.learningGoal,
             activityContext: item.activityContext,
             generatedByAi: item.generatedByAi || generatedByAi,
+            createdAt: new Date(),
           }))
         )
         .returning()

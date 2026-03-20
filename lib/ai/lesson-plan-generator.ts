@@ -7,8 +7,7 @@
 
 import { buildTopicContextSection } from "@/lib/helpers/topic-helpers"
 import { CurrentTopicsPayload } from "@/lib/types/current-topics"
-
-type DevelopmentScope = 'religious_moral' | 'physical_motor' | 'cognitive' | 'language' | 'social_emotional' | 'art';
+import { DevelopmentScope, DEVELOPMENT_SCOPES } from "@/lib/types/development-scope"
 
 export interface LessonPlanItemData {
   developmentScope: DevelopmentScope;
@@ -121,14 +120,7 @@ Format your response as a JSON object with this structure:
  * Generate a template lesson plan (fallback when AI is not available)
  */
 function generateTemplateLessonPlan(theme: string): GeneratedLessonPlan {
-  const developmentScopes: DevelopmentScope[] = [
-    'religious_moral',
-    'physical_motor',
-    'cognitive',
-    'language',
-    'social_emotional',
-    'art'
-  ];
+  const developmentScopes = DEVELOPMENT_SCOPES;
 
   const templates = {
     religious_moral: {
@@ -171,14 +163,7 @@ function generateTemplateLessonPlan(theme: string): GeneratedLessonPlan {
  * Validate that a lesson plan has all required development scopes
  */
 export function validateLessonPlan(lessonPlan: GeneratedLessonPlan): boolean {
-  const requiredScopes: DevelopmentScope[] = [
-    'religious_moral',
-    'physical_motor',
-    'cognitive',
-    'language',
-    'social_emotional',
-    'art'
-  ];
+  const requiredScopes = DEVELOPMENT_SCOPES;
 
   const presentScopes = new Set(lessonPlan.items.map(item => item.developmentScope));
 

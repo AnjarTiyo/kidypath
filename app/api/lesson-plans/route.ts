@@ -3,9 +3,10 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { lessonPlans, classrooms, users, classroomTeachers } from "@/lib/db/schema"
 import { desc, asc, sql, or, ilike, eq, and, inArray } from "drizzle-orm"
+import { DEVELOPMENT_SCOPES, DevelopmentScope } from "@/lib/types/development-scope"
 
 interface LessonPlanRequestItem {
-  developmentScope: string
+  developmentScope: DevelopmentScope
   learningGoal: string
   activityContext: string
   generatedByAi?: boolean
@@ -190,7 +191,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate that we have all 6 development scopes
-    const requiredScopes = ['religious_moral', 'physical_motor', 'cognitive', 'language', 'social_emotional', 'art']
+    const requiredScopes = DEVELOPMENT_SCOPES
     const presentScopes = new Set(items.map((item) => item.developmentScope))
     
     if (items.length !== 6 || !requiredScopes.every(scope => presentScopes.has(scope))) {
