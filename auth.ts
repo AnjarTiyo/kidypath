@@ -45,6 +45,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             email: user.email ?? "",
             name: user.name ?? "",
             role: user.role ?? "parent",
+            isCurriculumCoordinator: user.isCurriculumCoordinator || false, // Include curriculum coordinator flag
           };
         } catch (error) {
           console.error("Auth error:", error);

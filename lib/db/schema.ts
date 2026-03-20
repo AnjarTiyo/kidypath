@@ -23,6 +23,7 @@ export const users = pgTable('users', {
   email: varchar('email').unique(),
   passwordHash: varchar('password_hash'),
   role: userRoleEnum('role'),
+  isCurriculumCoordinator: boolean('is_curriculum_coordinator').default(false), // New field to indicate curriculum coordinator role
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });

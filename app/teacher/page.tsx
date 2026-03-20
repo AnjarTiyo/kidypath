@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { MenuCard, MenuCardProps, MenuGrid } from "@/components/layout/menu-card"
 import {
   IconUsers,
@@ -9,6 +9,7 @@ import {
   IconHome,
   IconLayoutDashboard,
   IconSchool,
+  IconBook,
 } from "@tabler/icons-react"
 import { PageHeader } from "@/components/layout/page-header"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
@@ -17,6 +18,7 @@ import { Card, CardContent } from "@/components/ui/card"
 export default function TeacherPage() {
   const router = useRouter()
   const { user, classrooms, loading: userLoading } = useCurrentUser()
+  const isUserCurriculumCoordinator = user?.isCurriculumCoordinator || false
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -58,6 +60,13 @@ export default function TeacherPage() {
       description: "Lihat laporan harian, mingguan, dan bulanan",
       href: "/teacher/report",
     },
+    {
+      icon: IconBook,
+      title: "Manajemen Kurikulum",
+      description: "Kelola topik pembelajaran dan kalender pendidikan",
+      href: "/teacher/curriculum",
+      hidden: !!!isUserCurriculumCoordinator, // Hidden for now, can be enabled later
+    }
   ]
 
   if (userLoading) {

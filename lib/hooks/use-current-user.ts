@@ -23,6 +23,7 @@ interface UserData {
   name: string | null
   email: string | null
   role: string | null
+  isCurriculumCoordinator?: boolean
   createdAt?: string
 }
 
@@ -117,6 +118,7 @@ export function useCurrentUser() {
     user: data?.user || null,
     classrooms: data?.classrooms || [],
     children: data?.children || [],
+    isCurriculumCoordinator: data?.user?.isCurriculumCoordinator, // Placeholder, can be derived from user role if needed
     loading,
     error,
     refetch,

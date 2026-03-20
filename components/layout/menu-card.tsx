@@ -11,6 +11,7 @@ export interface MenuCardProps {
   className?: string
   iconClassName?: string
   disabled?: boolean
+  hidden?: boolean
 }
 
 export function MenuCard({
@@ -22,7 +23,12 @@ export function MenuCard({
   className,
   iconClassName,
   disabled = false,
+  hidden = false,
 }: MenuCardProps) {
+  if (hidden) {
+    return null
+  }
+
   const content = (
     <div
       className={cn(

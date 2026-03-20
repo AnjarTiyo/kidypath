@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo } from "react"
-import { MenuCard, MenuCardProps, MenuGrid, filterMenusByRole } from "@/components/layout/menu-card"
+import { MenuCard, MenuCardProps, MenuGrid } from "@/components/layout/menu-card"
 import {
   IconUsers,
   IconChartBar,
@@ -23,32 +23,27 @@ const AVAILABLE_MENUS: MenuCardProps[] = [
     title: "Manajemen Topik",
     description: "Ringkasan data, aktivitas, dan statistik harian",
     href: "/teacher/curriculum/topics",
-    roles: ["curriculum_coordinator", "admin"], // Accessible by teacher and admin
+    // roles: ["curriculum_coordinator", "admin"], // Accessible by teacher and admin
   },
   {
     icon: IconCalendar,
-    title: "Kalender Pendidikan",
+    title: "Agenda Kegiatan",
     description: "Ringkasan data, aktivitas, dan statistik harian",
-    href: "/teacher/dashboard",
-    roles: ["curriculum_coordinator", "admin"], // Accessible by teacher and admin
+    href: "/teacher/curriculum/agenda",
+    // roles: ["curriculum_coordinator", "admin"], // Accessible by teacher and admin
   },
   {
     icon: IconUser,
     title: "Manajemen Guru Piket",
     description: "Ringkasan data, aktivitas, dan statistik harian",
-    href: "/teacher/dashboard",
-    roles: ["curriculum_coordinator", "admin"], // Accessible by teacher and admin
+    href: "/teacher/curriculum/teacher-duty",
+    // roles: ["curriculum_coordinator", "admin"], // Accessible by teacher and admin
   },
 ]
 
 export default function CurriculumManagementPage() {
   const router = useRouter()
-  const { user, classrooms, loading: userLoading } = useCurrentUser()
-
-  // Filter menus based on current user's role (MUST be before any conditional returns)
-  const filteredMenus = useMemo(() => {
-    return filterMenusByRole(AVAILABLE_MENUS, user?.role)
-  }, [user?.role])
+  const { user, loading: userLoading } = useCurrentUser()
 
   // Early return for loading state
   if (userLoading) {
@@ -59,6 +54,7 @@ export default function CurriculumManagementPage() {
           description="Memuat data..."
           breadcrumbs={[
             { label: "Beranda", href: "/teacher", icon: IconHome },
+            { label: "Manajemen Kurikulum", href: "/teacher/curriculum", icon: IconSchool },
           ]}
         />
         <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -81,25 +77,20 @@ export default function CurriculumManagementPage() {
     )
   }
 
-  // Early return for no user (middleware should handle this, but keep as safety check)
-  if (!user) {
-    router.push("/auth/login")
-    return null
-  }
-
   return (
     <>
       <PageHeader
         title="Manajemen Kurikulum"
-        description={`Selamat Datang, ${user.name || user.email}!`}
+        description={`Selamat Datang, ${user!.name || user!.email}!`}
         breadcrumbs={[
           { label: "Beranda", href: "/teacher", icon: IconHome },
+          { label: "Manajemen Kurikulum", href: "/teacher/curriculum", icon: IconSchool },
         ]}
       />
 
       <MenuGrid>
-        {filteredMenus.map((menu, index) => (
-          <MenuCard key={index} {...menu} />
+        {AVAILABLE_MENUS.map((menu: MenuCardProps) => (
+          <MenuCard key={menu.href} {...menu} />
         ))}
       </MenuGrid>
     </>

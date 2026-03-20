@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { users, classrooms, classroomTeachers, students, parentChild } from "@/lib/db/schema"
-import { eq } from "drizzle-orm"
+import { eq, is } from "drizzle-orm"
 
 export async function GET(request: Request) {
   // Force no-cache headers
@@ -26,6 +26,7 @@ export async function GET(request: Request) {
         name: users.name,
         email: users.email,
         role: users.role,
+        isCurriculumCoordinator: users.isCurriculumCoordinator,
         createdAt: users.createdAt,
       })
       .from(users)
