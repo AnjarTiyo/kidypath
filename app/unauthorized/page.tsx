@@ -12,11 +12,6 @@ export default async function UnauthorizedPage() {
         <p className="text-muted-foreground">
           You don&apos;t have permission to access this page.
         </p>
-        {session?.user && (
-          <p className="text-sm text-muted-foreground">
-            Your current role: <span className="font-semibold">{session.user.role}</span>
-          </p>
-        )}
         <div className="flex gap-4 justify-center">
           <Button asChild>
             <Link href="/">Go to Dashboard</Link>

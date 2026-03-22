@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
-import { IconChartTreemap, IconHome } from "@tabler/icons-react";
+import { IconChartTreemap, IconHome, IconSchool } from "@tabler/icons-react";
 import {
     MainTopicCard,
     AddMainTopicCard,
@@ -78,7 +78,8 @@ export default function TopicsManagementPage() {
                 title="Topik"
                 description="Kelola topik utama, bulanan, dan mingguan"
                 breadcrumbs={[
-                    { label: "Beranda", href: "/curriculum", icon: IconHome },
+                    { label: "Beranda", href: "/", icon: IconHome },
+                    { label: "Manajemen Kurikulum", href: "/curriculum", icon: IconSchool },
                     { label: "Manajemen Topik", href: "/curriculum/topics", icon: IconChartTreemap },
                 ]}
             />

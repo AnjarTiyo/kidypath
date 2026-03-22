@@ -5,7 +5,7 @@ declare module "next-auth" {
     user: {
       id: string
       role: string
-      isCurriculumCoordinator?: boolean
+      isCurriculumCoordinator: boolean
     } & DefaultSession["user"]
   }
 

@@ -88,7 +88,7 @@ function StatusItem({
                         <p className="text-sm font-medium">{label}</p>
                         {showProgress && totalCount !== undefined && completedCount !== undefined && (
                             <span className="text-xs text-muted-foreground ml-2">
-                                {completedCount}/{totalCount}
+                                {completedCount} dari {totalCount}
                             </span>
                         )}
                     </div>

@@ -11,6 +11,7 @@ import { format } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { LoadingState } from "@/components/layout/loading-state"
 
 interface LessonPlanData {
   id: string
@@ -266,25 +267,7 @@ export default function StudentAssessmentPage() {
 
   // Show loading state
   if (loading) {
-    return (
-      <>
-        <PageHeader
-          title="Penilaian Peserta Didik"
-          description="Memuat data..."
-          breadcrumbs={[
-            { label: "Beranda", href: "/teacher", icon: IconHome },
-            { label: "Penilaian", href: "/teacher/assesment", icon: IconChecklist },
-          ]}
-        />
-        <div className="space-y-4">
-          <div className="p-4 border rounded-lg">
-            <Skeleton className="h-6 w-48 mb-2" />
-            <Skeleton className="h-4 w-32" />
-          </div>
-          <Skeleton className="h-32 w-full" />
-        </div>
-      </>
-    )
+    return <LoadingState message="Memuat data..." />
   }
 
   // Show warning if teacher has no assigned classrooms
@@ -396,12 +379,6 @@ export default function StudentAssessmentPage() {
               const assessment = assessmentData.get(plan.classroomId)
               const checkInConducted = (attendance?.checkIn.total || 0) > 0
               const checkOutConducted = (attendance?.checkOut.total || 0) > 0
-
-              console.log(`🎯 Rendering card for classroom ${plan.classroomId}`)
-              console.log(`   Attendance data:`, attendance)
-              console.log(`   Assessment data:`, assessment)
-              console.log(`   checkInConducted:`, checkInConducted)
-              console.log(`   checkOutConducted:`, checkOutConducted)
 
               return (
                 <LessonPlanCompactCard
