@@ -135,10 +135,10 @@ export function AddMainTopicCard({ onClick }: { onClick: () => void }) {
     return (
         <div className="flex-shrink-0 w-[30%]">
             <Card
-                className="flex items-center justify-center hover:shadow-lg transition-shadow bg-transparent border-dashed border-2 hover:border-primary cursor-pointer min-h-[200px]"
+                className="flex items-center justify-center hover:shadow-lg transition-shadow bg-transparent border-dashed border-2 hover:border-primary cursor-pointer my-4"
                 onClick={onClick}
             >
-                <span className="text-base text-muted-foreground">+ Tambah Topik Utama (Semester)</span>
+                <span className="text-base text-muted-foreground font-semibold text-primary">+ Tambah Topik Utama (Semester)</span>
             </Card>
         </div>
     );

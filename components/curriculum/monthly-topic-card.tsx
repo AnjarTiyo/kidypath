@@ -113,10 +113,10 @@ export function AddMonthlyTopicCard({ onClick }: { onClick: () => void }) {
     return (
         <div className="flex-shrink-0 w-[30%]">
             <Card
-                className="flex items-center justify-center hover:shadow-md transition-shadow bg-transparent border-dashed border-2 hover:border-blue-500 cursor-pointer min-h-[120px]"
+                className="flex items-center justify-center hover:shadow-md transition-shadow bg-transparent border-dashed border-2 hover:border-blue-500 cursor-pointer my-4"
                 onClick={onClick}
             >
-                <span className="text-sm text-muted-foreground">+ Tambah Topik Bulanan</span>
+                <span className="text-sm text-muted-foreground font-semibold text-primary">+ Tambah Topik Bulanan</span>
             </Card>
         </div>
     );

@@ -63,10 +63,10 @@ export function AddWeeklyTopicCard({ onClick }: { onClick: () => void }) {
     return (
         <div className="flex-shrink-0 w-[30%]">
             <Card
-                className="flex items-center justify-center hover:shadow-sm transition-shadow bg-transparent border-dashed border hover:border-green-500 cursor-pointer h-16"
+                className="flex items-center justify-center hover:shadow-sm transition-shadow bg-transparent border-dashed border hover:border-green-500 cursor-pointer my-4"
                 onClick={onClick}
             >
-                <span className="text-xs text-muted-foreground">+ Tambah Topik Mingguan</span>
+                <span className="text-xs text-muted-foreground font-semibold text-primary">+ Tambah Topik Mingguan</span>
             </Card>
         </div>
     );
