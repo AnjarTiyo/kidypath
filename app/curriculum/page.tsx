@@ -30,6 +30,7 @@ const AVAILABLE_MENUS: MenuCardProps[] = [
     title: "Agenda Kegiatan",
     description: "Ringkasan data, aktivitas, dan statistik harian",
     href: "/curriculum/agenda",
+    disabled: true,
     // roles: ["curriculum_coordinator", "admin"], // Accessible by teacher and admin
   },
   {
