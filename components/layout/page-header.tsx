@@ -20,6 +20,7 @@ interface PageHeaderProps {
   description?: string
   subDesc?: string
   actions?: React.ReactNode
+  border?: boolean
 }
 
 export function PageHeader({
@@ -28,9 +29,10 @@ export function PageHeader({
   description,
   subDesc,
   actions,
+  border = true,
 }: PageHeaderProps) {
   return (
-    <div className="space-y-3 sm:space-y-4 pb-4 sm:pb-6 border-b">
+    <div className={`space-y-3 sm:space-y-4 pb-4 sm:pb-6 ${border ? "border-b" : ""}`}>
       {breadcrumbs.length > 0 && (
         <Breadcrumb>
           <BreadcrumbList className="flex-wrap">

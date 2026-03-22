@@ -73,20 +73,31 @@ export default function TeacherPage() {
     return null
   }
 
-  const classroomNames = classrooms.length > 0 
+  const classroomNames = classrooms.length > 0
     ? classrooms.map(c => c.name).join(", ")
     : "Belum ada kelas"
 
   return (
     <>
-      <PageHeader
-        title="Teacher Dashboard"
-        description={`Selamat Datang, ${user.name || user.email}!`}
-        subDesc={`Kelas: ${classroomNames}`}
-        breadcrumbs={[
-          { label: "Beranda", href: "/teacher", icon: IconHome },
-        ]}
-      />
+      <div className="flex flex-row justify-between items-center border-b">
+        <PageHeader
+          title="Aplikasi Teacher"
+          description={`Selamat Datang, ${user.name || user.email}!`}
+          subDesc={`Kelas: ${classroomNames}`}
+          breadcrumbs={[
+            { label: "Beranda", href: "/teacher", icon: IconHome },
+          ]}
+          border={false}
+        />
+        <div className="text-md text-muted-foreground">
+          {new Date().toLocaleDateString("id-ID", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </div>
+      </div>
 
       <MenuGrid>
         {availableMenus.map((menu, index) => (
