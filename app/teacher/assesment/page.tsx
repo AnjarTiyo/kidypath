@@ -380,12 +380,6 @@ export default function StudentAssessmentPage() {
               const checkInConducted = (attendance?.checkIn.total || 0) > 0
               const checkOutConducted = (attendance?.checkOut.total || 0) > 0
 
-              console.log(`🎯 Rendering card for classroom ${plan.classroomId}`)
-              console.log(`   Attendance data:`, attendance)
-              console.log(`   Assessment data:`, assessment)
-              console.log(`   checkInConducted:`, checkInConducted)
-              console.log(`   checkOutConducted:`, checkOutConducted)
-
               return (
                 <LessonPlanCompactCard
                   key={plan.id}
