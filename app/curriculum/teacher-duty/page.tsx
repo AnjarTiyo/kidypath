@@ -11,6 +11,7 @@ import { useTeacherDuty, type TeacherData } from "@/lib/hooks/use-teacher-duty"
 import { DutyTeacherCard, TeacherListCard, DutyConfirmDialog } from "@/components/teacher-duty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { LoadingState } from "@/components/layout/loading-state"
 
 export default function TeacherDutyManagementPage() {
     const router = useRouter()
@@ -44,18 +45,7 @@ export default function TeacherDutyManagementPage() {
     }, [allTeachers, search])
 
     if (status === "loading") {
-        return (
-            <div className="space-y-4">
-                {[...Array(2)].map((_, i) => (
-                    <Card key={i}>
-                        <CardContent className="p-4">
-                            <Skeleton className="h-5 w-1/3 mb-2" />
-                            <Skeleton className="h-4 w-2/3" />
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-        )
+        return <LoadingState message="Memuat data guru piket ..." />
     }
 
     return (
@@ -137,16 +127,7 @@ export default function TeacherDutyManagementPage() {
 
                     <CardContent>
                         {loading ? (
-                            <div className="space-y-3">
-                                {[...Array(4)].map((_, i) => (
-                                    <Card key={i}>
-                                        <CardContent className="p-4">
-                                            <Skeleton className="h-5 w-1/3 mb-2" />
-                                            <Skeleton className="h-4 w-2/3" />
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
+                            <LoadingState message="Memuat data guru ..." className="relative" />
                         ) : filteredTeachers.length === 0 ? (
                             <Card className="border-dashed border-2">
                                 <CardContent className="p-6 flex items-center justify-center">

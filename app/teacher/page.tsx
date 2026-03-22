@@ -1,19 +1,19 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { MenuCard, MenuCardProps, MenuGrid } from "@/components/layout/menu-card"
 import {
-  IconUsers,
   IconChartBar,
   IconHome,
   IconLayoutDashboard,
   IconSchool,
   IconBook,
+  IconChalkboardTeacher,
 } from "@tabler/icons-react"
 import { PageHeader } from "@/components/layout/page-header"
+import { LoadingState } from "@/components/layout/loading-state"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
-import { Card, CardContent } from "@/components/ui/card"
 
 export default function TeacherPage() {
   const router = useRouter()
@@ -35,9 +35,10 @@ export default function TeacherPage() {
       title: "Dasbor",
       description: "Ringkasan data, aktivitas, dan statistik harian",
       href: "/teacher/dashboard",
+      disabled: true
     },
     {
-      icon: IconUsers,
+      icon: IconChalkboardTeacher,
       title: "Rencana Pembelajaran",
       description: "Kelola agenda dan rencana pembelajaran harian",
       href: "/teacher/lesson-plan",
@@ -48,17 +49,12 @@ export default function TeacherPage() {
       description: "Kelola penilaian dan perkembangan peserta didik",
       href: "/teacher/assesment",
     },
-    // {
-    //   icon: IconChalkboardTeacher,
-    //   title: "Jurnal Harian",
-    //   description: "Catatan kegiatan harian tiap kelas",
-    //   href: "/teacher/journal",
-    // },
     {
       icon: IconChartBar,
       title: "Laporan",
       description: "Lihat laporan harian, mingguan, dan bulanan",
       href: "/teacher/report",
+      disabled: true,
     },
     {
       icon: IconBook,
@@ -70,22 +66,7 @@ export default function TeacherPage() {
   ]
 
   if (userLoading) {
-    return (
-      <>
-        <PageHeader
-          title="Teacher Dashboard"
-          description="Memuat data..."
-          breadcrumbs={[
-            { label: "Beranda", href: "/teacher", icon: IconHome },
-          ]}
-        />
-        <Card>
-          <CardContent className="py-6">
-            <p className="text-center text-muted-foreground">Memuat data...</p>
-          </CardContent>
-        </Card>
-      </>
-    )
+    return <LoadingState message="Memuat data..." />
   }
 
   if (!user) {

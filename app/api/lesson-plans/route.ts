@@ -131,19 +131,6 @@ export async function GET(request: NextRequest) {
       items: lp.items,
     }))
 
-    // Debug logging
-    if (data.length > 0) {
-      console.log(`[API] Returning ${data.length} lesson plan(s)`)
-      console.log(`[API] First lesson plan has ${data[0].items?.length || 0} items`)
-      if (data[0].items && data[0].items.length > 0) {
-        console.log(`[API] First item:`, {
-          scope: data[0].items[0].developmentScope,
-          hasGoal: !!data[0].items[0].learningGoal,
-          hasActivity: !!data[0].items[0].activityContext,
-        })
-      }
-    }
-
     const totalPages = Math.ceil(count / pageSize)
 
     return NextResponse.json({

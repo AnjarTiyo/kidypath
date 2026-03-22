@@ -18,6 +18,7 @@ import { useCurrentUser } from "@/lib/hooks/use-current-user";
 import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingState } from "@/components/layout/loading-state";
 
 export default function AdminPage() {
   const { user, loading: userLoading } = useCurrentUser()
@@ -87,22 +88,7 @@ export default function AdminPage() {
   ]
 
   if (userLoading) {
-    return (
-      <>
-        <PageHeader
-          title="Admin Dashboard"
-          description="Memuat data..."
-          breadcrumbs={[
-            { label: "Beranda", href: "/admin", icon: IconHome },
-          ]}
-        />
-        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {[...Array(4)].map((_, index) => (
-            <Skeleton key={index} className="h-32 w-full rounded-md" />
-          ))}
-        </div>
-      </>
-    )
+    return <LoadingState message="Memuat data..." />
   }
 
   if (!user) {

@@ -4,8 +4,6 @@ import { useRouter } from "next/navigation"
 import { useEffect, useMemo } from "react"
 import { MenuCard, MenuCardProps, MenuGrid } from "@/components/layout/menu-card"
 import {
-  IconUsers,
-  IconChartBar,
   IconHome,
   IconLayoutDashboard,
   IconSchool,
@@ -14,8 +12,7 @@ import {
 } from "@tabler/icons-react"
 import { PageHeader } from "@/components/layout/page-header"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
-import { Card, CardContent } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { LoadingState } from "@/components/layout/loading-state"
 
 const AVAILABLE_MENUS: MenuCardProps[] = [
   {
@@ -57,34 +54,7 @@ export default function CurriculumManagementPage() {
 
   // Early return for loading state
   if (userLoading) {
-    return (
-      <>
-        <PageHeader
-          title="Manajemen Kurikulum"
-          description="Memuat data..."
-          breadcrumbs={[
-            { label: "Beranda", href: "/", icon: IconHome },
-            { label: "Manajemen Kurikulum", href: "/curriculum", icon: IconSchool },
-          ]}
-        />
-        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {[...Array(4)].map((_, index) => (
-            <Card key={index}>
-              <CardContent className="p-4 sm:p-5 md:p-6">
-                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-                  <Skeleton className="h-12 w-12 sm:h-13 sm:w-13 md:h-14 md:w-14 shrink-0 rounded-lg" />
-                  <div className="flex-1 space-y-2 min-w-0 w-full">
-                    <Skeleton className="h-4 sm:h-5 w-3/4" />
-                    <Skeleton className="h-3 sm:h-4 w-full" />
-                    <Skeleton className="h-3 sm:h-4 w-5/6" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </>
-    )
+    return <LoadingState message="Memuat data..." />
   }
 
   return (

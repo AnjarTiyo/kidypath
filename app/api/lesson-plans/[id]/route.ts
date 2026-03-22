@@ -97,16 +97,6 @@ export async function GET(
       items: lessonPlan.items,
     }
 
-    // Debug logging
-    console.log(`[API][GET ${id}] Lesson plan has ${response.items?.length || 0} items`)
-    if (response.items && response.items.length > 0) {
-      console.log(`[API][GET ${id}] First item:`, {
-        scope: response.items[0].developmentScope,
-        hasGoal: !!response.items[0].learningGoal,
-        hasActivity: !!response.items[0].activityContext,
-      })
-    }
-
     return NextResponse.json(response)
   } catch (error) {
     console.error("Error fetching lesson plan:", error)
