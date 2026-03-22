@@ -1,0 +1,129 @@
+"use client";
+
+import { useRouter } from "next/navigation"
+import { MenuCard, MenuCardProps, MenuGrid } from "@/components/layout/menu-card"
+import {
+  IconUsers,
+  IconChartBar,
+  IconHome,
+  IconSpeakerphone,
+  IconLayoutDashboard,
+  IconChalkboardTeacher,
+  IconSchool,
+  IconCalendarEvent,
+  IconBook,
+} from "@tabler/icons-react"
+import { PageHeader } from "@/components/layout/page-header"
+import { useCurrentUser } from "@/lib/hooks/use-current-user";
+import { useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export default function AdminPage() {
+  const { user, loading: userLoading } = useCurrentUser()
+  const router = useRouter()
+  const isUserCurriculumCoordinator = user?.isCurriculumCoordinator || false
+
+
+  useEffect(() => {
+    if (!userLoading && !user) {
+      router.push("/auth/login")
+    }
+    if (!userLoading && user && user.role !== "admin") {
+      router.push("/unauthorized")
+    }
+  }, [user, userLoading, router])
+
+  const availableMenus: MenuCardProps[] = [
+    {
+      icon: IconLayoutDashboard,
+      title: "Dasbor",
+      description: "Lihat ringkasan sistem dan statistik",
+      href: "/admin/dashboard",
+    },
+    {
+      icon: IconUsers,
+      title: "Manajemen Pengguna",
+      description: "Kelola akun pengguna, guru, dan orang tua",
+      href: "/admin/user",
+    },
+    {
+      icon: IconChalkboardTeacher,
+      title: "Manajemen Rombongan Belajar",
+      description: "Kelola Rombongan Belajar",
+      href: "/admin/classroom",
+    },
+    {
+      icon: IconSchool,
+      title: "Manajemen Peserta Didik",
+      description: "Kelola akun peserta didik",
+      href: "/admin/student",
+    },
+    {
+      icon: IconChartBar,
+      title: "Laporan",
+      description: "Lihat laporan dan analitik sistem",
+      href: "/admin/report",
+    },
+    {
+      icon: IconCalendarEvent,
+      title: "Manajemen Agenda",
+      description: "Kelola agenda",
+      href: "/admin/agenda",
+    },
+    {
+      icon: IconSpeakerphone,
+      title: "Pengumuman",
+      description: "Lihat dan kelola pengumuman sekolah",
+      href: "/admin/announcement",
+    },
+    {
+      icon: IconBook,
+      title: "Manajemen Kurikulum",
+      description: "Kelola kurikulum dan topik pembelajaran",
+      href: "/curriculum",
+      hidden: !isUserCurriculumCoordinator, // Only show if user is curriculum coordinator
+    }
+  ]
+
+  if (userLoading) {
+    return (
+      <>
+        <PageHeader
+          title="Admin Dashboard"
+          description="Memuat data..."
+          breadcrumbs={[
+            { label: "Beranda", href: "/admin", icon: IconHome },
+          ]}
+        />
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(4)].map((_, index) => (
+            <Skeleton key={index} className="h-32 w-full rounded-md" />
+          ))}
+        </div>
+      </>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
+
+  return (
+    <>
+      <PageHeader
+        title="Admin Dashboard"
+        description={`Selamat Datang, ${user!.name || user!.email}!`}
+        breadcrumbs={[
+          { label: "Beranda", href: "/admin", icon: IconHome },
+        ]}
+      />
+
+      <MenuGrid>
+        {availableMenus.map((menu, index) => (
+          <MenuCard key={index} {...menu} />
+        ))}
+      </MenuGrid>
+    </>
+  )
+}
