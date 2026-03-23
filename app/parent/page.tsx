@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
+import Link from "next/link"
 
 export default async function ParentPage() {
   const session = await auth()
@@ -22,30 +23,12 @@ export default async function ParentPage() {
       </div>
 
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="p-4 sm:p-6 border rounded-lg hover:shadow-md transition-shadow">
-          <h2 className="text-lg sm:text-xl font-semibold mb-2">My Children</h2>
+        <Link href="/parent/report" className="p-4 sm:p-6 border rounded-lg hover:shadow-md transition-shadow block">
+          <h2 className="text-lg sm:text-xl font-semibold mb-2">Laporan Anak</h2>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            View your children&apos;s information
+            Lihat laporan perkembangan dan laporan mingguan anak
           </p>
-        </div>
-        <div className="p-4 sm:p-6 border rounded-lg hover:shadow-md transition-shadow">
-          <h2 className="text-lg sm:text-xl font-semibold mb-2">Daily Reports</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            View daily assessment reports
-          </p>
-        </div>
-        <div className="p-4 sm:p-6 border rounded-lg hover:shadow-md transition-shadow">
-          <h2 className="text-lg sm:text-xl font-semibold mb-2">Weekly Reports</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Review weekly progress summaries
-          </p>
-        </div>
-        <div className="p-4 sm:p-6 border rounded-lg hover:shadow-md transition-shadow">
-          <h2 className="text-lg sm:text-xl font-semibold mb-2">Monthly Reports</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Access monthly development reports
-          </p>
-        </div>
+        </Link>
         <div className="p-4 sm:p-6 border rounded-lg hover:shadow-md transition-shadow">
           <h2 className="text-lg sm:text-xl font-semibold mb-2">Activity Agenda</h2>
           <p className="text-xs sm:text-sm text-muted-foreground">

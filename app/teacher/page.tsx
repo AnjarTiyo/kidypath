@@ -52,9 +52,8 @@ export default function TeacherPage() {
     {
       icon: IconChartBar,
       title: "Laporan",
-      description: "Lihat laporan harian, mingguan, dan bulanan",
+      description: "Lihat laporan kehadiran, penilaian, dan laporan mingguan",
       href: "/teacher/report",
-      disabled: true,
     },
     {
       icon: IconBook,
