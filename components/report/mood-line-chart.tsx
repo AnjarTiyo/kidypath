@@ -1,6 +1,7 @@
 'use client'
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts'
+import type { TooltipContentProps } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   ChartContainer,
@@ -78,14 +79,21 @@ export function MoodLineChart({ moodTimeSeries }: MoodLineChartProps) {
               tick={{ fontSize: 11 }}
               width={68}
             />
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            { }
             <ChartTooltip
-              content={(props: any) => (
-                <ChartTooltipContent
-                  {...props}
-                  formatter={(value: number) => MOOD_NUM_LABELS[value] ?? value}
-                />
-              )}
+              content={(props: TooltipContentProps<number, string>) => {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { content: _content, ...rest } = props
+                return (
+                  <ChartTooltipContent
+                    {...rest}
+                    formatter={(value) => {
+                      const num = typeof value === 'number' ? value : undefined
+                      return num !== undefined ? (MOOD_NUM_LABELS[num] ?? String(num)) : String(value)
+                    }}
+                  />
+                )
+              }}
             />
             <ChartLegend content={<ChartLegendContent />} />
             <Line
