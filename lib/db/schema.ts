@@ -84,6 +84,7 @@ export const dailyAssessments = pgTable('daily_assessments', {
   studentId: uuid('student_id').references(() => students.id),
   classroomId: uuid('classroom_id').references(() => classrooms.id),
   summary: text('summary'), // Optional AI-generated summary
+  imageUrl: varchar('image_url'), // Optional activity photo stored in object storage
   createdBy: uuid('created_by').references(() => users.id),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });

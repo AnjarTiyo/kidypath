@@ -2,21 +2,36 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+### 1. Environment variables
+
+Copy the example env file and fill in the values:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+cp .env.example .env
+```
+
+### 2. Start services
+
+```bash
+docker compose up -d
+```
+
+This starts PostgreSQL, MinIO, and a one-shot `minio-init` container that automatically:
+- Creates the `$MINIO_BUCKET_NAME` bucket (if it doesn't exist)
+- Sets public `download` access so uploaded images are publicly readable
+
+### 3. Run the development server
+
+```bash
 bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### MinIO console
+
+The MinIO admin console is available at [http://localhost:9001](http://localhost:9001).  
+Login with `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` from your `.env`.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

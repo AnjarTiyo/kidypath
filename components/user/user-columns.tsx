@@ -10,7 +10,7 @@ export type User = {
   id: string
   name: string | null
   email: string | null
-  role: "admin" | "teacher" | "parent" | null
+  role: "admin" | "teacher" | "parent" | "curriculum" | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -19,12 +19,14 @@ const roleVariants = {
   admin: "destructive",
   teacher: "default",
   parent: "secondary",
+  curriculum: "chart-1",
 } as const
 
 const roleLabels = {
   admin: "Admin",
   teacher: "Guru",
   parent: "Orang Tua",
+  curriculum: "Kurikulum",
 }
 
 export const getUserColumns = (onRefresh?: () => void): ColumnDef<User>[] => [

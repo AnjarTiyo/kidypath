@@ -87,7 +87,7 @@ export default function AssessmentPageClient() {
         const studentsResponse = await fetch(`/api/students?classroom=${classroomId}&pageSize=100`)
         if (studentsResponse.ok) {
           const studentsData = await studentsResponse.json()
-          setTotalStudents(studentsData.total || 0)
+          setTotalStudents(studentsData.totalCount || studentsData.data?.length || 0)
           setStudents(studentsData.data || [])
         }
 

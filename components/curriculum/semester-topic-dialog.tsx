@@ -131,7 +131,7 @@ export function SemesterTopicDialog({ open, onOpenChange, topic, onSuccess }: Se
                 id="st-year"
                 value={form.academicYear}
                 onChange={(e) => setForm((f) => ({ ...f, academicYear: e.target.value }))}
-                placeholder="2024/2025"
+                placeholder="2025/2026"
               />
               {errors.academicYear && <p className="text-xs text-destructive">{errors.academicYear}</p>}
             </div>

@@ -41,6 +41,7 @@ export default function AdminPage() {
       title: "Dasbor",
       description: "Lihat ringkasan sistem dan statistik",
       href: "/admin/dashboard",
+      disabled: true
     },
     {
       icon: IconUsers,
@@ -71,12 +72,14 @@ export default function AdminPage() {
       title: "Manajemen Agenda",
       description: "Kelola agenda",
       href: "/admin/agenda",
+      disabled: true
     },
     {
       icon: IconSpeakerphone,
       title: "Pengumuman",
       description: "Lihat dan kelola pengumuman sekolah",
       href: "/admin/announcement",
+      disabled: true
     },
     {
       icon: IconBook,

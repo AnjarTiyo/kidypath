@@ -14,6 +14,7 @@ import {
 import { PageHeader } from "@/components/layout/page-header"
 import { LoadingState } from "@/components/layout/loading-state"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
+import { Button } from "@/components/ui/button"
 
 export default function TeacherPage() {
   const router = useRouter()
@@ -81,21 +82,21 @@ export default function TeacherPage() {
       <div className="flex flex-row justify-between items-center border-b">
         <PageHeader
           title="Aplikasi Teacher"
-          description={`Selamat Datang, ${user.name || user.email}!`}
+          description={`Selamat Datang, Teacher ${user.name || user.email}!`}
           subDesc={`Kelas: ${classroomNames}`}
           breadcrumbs={[
             { label: "Beranda", href: "/teacher", icon: IconHome },
           ]}
           border={false}
         />
-        <div className="text-md text-muted-foreground">
+        <Button variant="secondary" className="text-md text-primary font-bold">
           {new Date().toLocaleDateString("id-ID", {
             weekday: "long",
             day: "numeric",
             month: "long",
             year: "numeric",
           })}
-        </div>
+        </Button>
       </div>
 
       <MenuGrid>

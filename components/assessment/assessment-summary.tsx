@@ -12,13 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-import { IconLoader2, IconPencil, IconCheck, IconSearch, IconUser } from "@tabler/icons-react"
+import { IconLoader2, IconSearch, IconCircleCheck } from "@tabler/icons-react"
+import { StudentAssessmentList } from "./student-assessment-list"
 
 interface AssessmentSummaryProps {
   classroomName: string
@@ -44,45 +39,11 @@ interface AssessmentRecord {
   scopeName: string | null
   score: string | null
   note: string | null
+  summary?: string | null
+  imageUrl?: string | null
 }
 
 type FilterStatus = "all" | "assessed" | "not-assessed"
-
-const SCORE_LABELS: Record<string, string> = {
-  BB: "Belum Berkembang",
-  MB: "Mulai Berkembang",
-  BSH: "Berkembang Sesuai Harapan",
-  BSB: "Berkembang Sangat Baik",
-}
-
-const SCORE_COLORS: Record<string, string> = {
-  BB: "bg-red-100 text-red-700 border-red-200",
-  MB: "bg-yellow-100 text-yellow-700 border-yellow-200",
-  BSH: "bg-blue-100 text-blue-700 border-blue-200",
-  BSB: "bg-green-100 text-green-700 border-green-200",
-}
-
-// Map backend scope names to Indonesian frontend labels
-const SCOPE_NAME_MAP: Record<string, string> = {
-  "Nilai Agama dan Moral": "Nilai Agama dan Moral",
-  "Fisik Motorik": "Fisik Motorik",
-  "Kognitif": "Kognitif",
-  "Bahasa": "Bahasa",
-  "Sosial Emosional": "Sosial Emosional",
-  "Seni": "Seni",
-  // Add fallback for any English names that might come from backend
-  "religious_moral": "Nilai Agama dan Moral",
-  "physical_motor": "Fisik Motorik",
-  "cognitive": "Kognitif",
-  "language": "Bahasa",
-  "social_emotional": "Sosial Emosional",
-  "art": "Seni",
-}
-
-const getScopeDisplayName = (scopeName: string | null): string => {
-  if (!scopeName) return ""
-  return SCOPE_NAME_MAP[scopeName] || scopeName
-}
 
 export function AssessmentSummary({
   classroomName,
@@ -116,6 +77,8 @@ export function AssessmentSummary({
     id: student.id,
     name: student.fullName || student.name || '',
     isAssessed: studentAssessments.hasOwnProperty(student.id),
+    hasSummary: !!(studentAssessments[student.id]?.assessments[0]?.summary),
+    hasPhoto: !!(studentAssessments[student.id]?.assessments[0]?.imageUrl),
     assessments: studentAssessments[student.id]?.assessments || [],
   }))
 
@@ -195,7 +158,7 @@ export function AssessmentSummary({
             </Button>
           ) : (
             <div className="text-center py-2 text-xs text-green-600 font-medium w-full bg-green-50 rounded-md border border-green-200">
-              ✓ Penilaian untuk semua siswa telah selesai
+              <IconCircleCheck className="h-4 w-4 mr-2 inline-block" /> Penilaian untuk semua siswa telah selesai
             </div>
           )}
         </div>
@@ -235,115 +198,25 @@ export function AssessmentSummary({
               </Select>
             </div>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="max-h-[calc(100vh-350px)] overflow-y-auto">
-              <div className="space-y-1.5 p-3 pt-0">
-                {filteredStudents.length === 0 ? (
-                  <div className="text-center py-8 text-xs text-muted-foreground">
-                    {sortedStudents.length === 0 ? (
-                      <>
-                        <p className="mb-1">Tidak ada siswa di kelas ini</p>
-                        <p className="text-[10px]">Tambahkan siswa terlebih dahulu</p>
-                      </>
-                    ) : (
-                      <p>Tidak ada siswa yang sesuai dengan pencarian</p>
-                    )}
-                  </div>
+          <CardContent className="p-3 pt-0">
+            {filteredStudents.length === 0 ? (
+              <div className="text-center py-8 text-xs text-muted-foreground">
+                {sortedStudents.length === 0 ? (
+                  <>
+                    <p className="mb-1">Tidak ada siswa di kelas ini</p>
+                    <p className="text-[10px]">Tambahkan siswa terlebih dahulu</p>
+                  </>
                 ) : (
-                  filteredStudents.map((student) => (
-                    <Card key={student.id} className={`border ${!student.isAssessed ? 'bg-muted/20' : ''}`}>
-                      <CardContent className="p-2">
-                        <div className="flex items-start gap-2">
-                          {/* User Avatar Placeholder */}
-                          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
-                            <IconUser className="h-5 w-5 text-muted-foreground" />
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between mb-1">
-                              <div className="flex-1 min-w-0">
-                                <div className="font-medium text-xs flex items-center gap-1.5">
-                                  {student.isAssessed ? (
-                                    <IconCheck className="h-3.5 w-3.5 text-green-600 shrink-0" />
-                                  ) : (
-                                    <div className="h-3.5 w-3.5 rounded-full border-2 border-muted-foreground/30 shrink-0" />
-                                  )}
-                                  <span className="truncate">
-                                    {student.name}
-                                  </span>
-                                </div>
-                                <div className="text-[10px] text-muted-foreground">
-                                  {student.isAssessed 
-                                    ? `${student.assessments.length} aspek perkembangan` 
-                                    : 'Belum dinilai'}
-                                </div>
-                              </div>
-                              {student.isAssessed ? (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => onEdit(student.id)}
-                                  className="h-6 text-[11px] px-2 shrink-0 ml-2"
-                                >
-                                  <IconPencil className="h-3 w-3 mr-1" />
-                                  Ubah
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant="default"
-                                  size="sm"
-                                  onClick={() => onEdit(student.id)}
-                                  className="h-6 text-[11px] px-2 shrink-0 ml-2"
-                                >
-                                  Nilai
-                                </Button>
-                              )}
-                            </div>
-
-                            {student.isAssessed && (
-                              <Accordion type="single" collapsible className="w-full">
-                                <AccordionItem value="details" className="border-0">
-                                  <AccordionTrigger className="py-1 text-[10px] text-muted-foreground hover:no-underline">
-                                    Lihat Detail Penilaian
-                                  </AccordionTrigger>
-                                  <AccordionContent>
-                                    <div className="grid grid-cols-2 gap-1 pt-1">
-                                      {student.assessments.map((assessment) => (
-                                        <div
-                                          key={assessment.id}
-                                          className="flex items-center justify-between gap-1 p-1.5 bg-muted/50 rounded text-[10px]"
-                                        >
-                                          <span className="truncate flex-1 leading-tight">
-                                            {getScopeDisplayName(assessment.scopeName)}
-                                          </span>
-                                          <Badge
-                                            variant="outline"
-                                            className={`text-[9px] px-1 py-0 h-4 leading-none ${
-                                              SCORE_COLORS[assessment.score || ""] || ""
-                                            }`}
-                                          >
-                                            {assessment.score}
-                                          </Badge>
-                                        </div>
-                                      ))}
-                                    </div>
-                                    
-                                    {/* Future summary placeholder */}
-                                    <div className="mt-2 p-2 bg-muted/30 rounded text-[10px] text-muted-foreground italic">
-                                      Ringkasan penilaian akan ditampilkan di sini
-                                    </div>
-                                  </AccordionContent>
-                                </AccordionItem>
-                              </Accordion>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
+                  <p>Tidak ada siswa yang sesuai dengan pencarian</p>
                 )}
               </div>
-            </div>
+            ) : (
+              <StudentAssessmentList
+                key={`${searchQuery}-${filterStatus}`}
+                students={filteredStudents}
+                onEdit={onEdit}
+              />
+            )}
           </CardContent>
         </Card>
       </div>
