@@ -10,6 +10,7 @@ import {
   IconSchool,
   IconBook,
   IconChalkboardTeacher,
+  IconChecklist,
 } from "@tabler/icons-react"
 import { PageHeader } from "@/components/layout/page-header"
 import { LoadingState } from "@/components/layout/loading-state"
@@ -32,9 +33,9 @@ export default function TeacherPage() {
 
   const availableMenus: MenuCardProps[] = [
     {
-      icon: IconLayoutDashboard,
-      title: "Dasbor",
-      description: "Ringkasan data, aktivitas, dan statistik harian",
+      icon: IconChecklist,
+      title: "TODO List Hari ini",
+      description: "Lihat dan kelola tugas serta agenda harian Anda",
       href: "/teacher/dashboard",
       disabled: true
     },

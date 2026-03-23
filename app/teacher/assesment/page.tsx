@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/layout/page-header"
 import { format } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { LoadingState } from "@/components/layout/loading-state"
 
 interface LessonPlanData {
@@ -59,7 +59,15 @@ interface AttendanceRecord {
 
 export default function StudentAssessmentPage() {
   const { user, classrooms, loading } = useCurrentUser()
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const searchParams = useSearchParams()
+  const dateParam = searchParams.get("date")
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    if (dateParam) {
+      const parsed = new Date(dateParam)
+      if (!isNaN(parsed.getTime())) return parsed
+    }
+    return new Date()
+  })
   const [lessonPlans, setLessonPlans] = useState<LessonPlanData[]>([])
   const [attendanceData, setAttendanceData] = useState<Map<string, AttendanceData>>(new Map())
   const [assessmentData, setAssessmentData] = useState<Map<string, AssessmentData>>(new Map())
@@ -67,6 +75,13 @@ export default function StudentAssessmentPage() {
   const [loadingAttendance, setLoadingAttendance] = useState(false)
   const [loadingAssessments, setLoadingAssessments] = useState(false)
   const router = useRouter()
+
+  const handleDateChange = (date: Date) => {
+    setSelectedDate(date)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("date", format(date, "yyyy-MM-dd"))
+    router.replace(`?${params.toString()}`)
+  }
 
   // Fetch lesson plans for selected date
   useEffect(() => {
@@ -130,7 +145,7 @@ export default function StudentAssessmentPage() {
           classrooms.map(async (classroom) => {
             try {
               console.log(`📊 Fetching attendance for classroom: ${classroom.id} (${classroom.name})`)
-              
+
               const response = await fetch(
                 `/api/attendances?classroomId=${classroom.id}&date=${dateStr}`,
                 { signal: abortController.signal }
@@ -229,8 +244,8 @@ export default function StudentAssessmentPage() {
 
                 const totalStudents = studentsData.total || studentsData.data?.length || 0
                 const completedCount = assessmentsData.total || assessmentsData.data?.length || 0
-                const progressPercentage = totalStudents > 0 
-                  ? Math.round((completedCount / totalStudents) * 100) 
+                const progressPercentage = totalStudents > 0
+                  ? Math.round((completedCount / totalStudents) * 100)
                   : 0
 
                 assessmentMap.set(classroom.id, {
@@ -299,15 +314,15 @@ export default function StudentAssessmentPage() {
 
           <Card className="border-yellow-200 bg-yellow-50">
             <CardContent className="flex">
-                <IconAlertTriangle className="h-6 w-6 mr-2 text-yellow-900" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-yellow-900 mb-1">
-                    Belum Ada Rombongan Belajar
-                  </h3>
-                  <p className="text-sm text-yellow-800">
-                    Anda belum di-assign ke rombongan belajar manapun. Silakan hubungi admin untuk mendapatkan akses ke rombongan belajar.
-                  </p>
-                </div>
+              <IconAlertTriangle className="h-6 w-6 mr-2 text-yellow-900" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-yellow-900 mb-1">
+                  Belum Ada Rombongan Belajar
+                </h3>
+                <p className="text-sm text-yellow-800">
+                  Anda belum di-assign ke rombongan belajar manapun. Silakan hubungi admin untuk mendapatkan akses ke rombongan belajar.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -354,7 +369,7 @@ export default function StudentAssessmentPage() {
       <Card className="p-0">
         <CompactDateNavigation
           selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
+          onDateChange={handleDateChange}
         />
       </Card>
 
@@ -404,32 +419,55 @@ export default function StudentAssessmentPage() {
                     totalStudents: assessment?.totalStudents || 0,
                   }}
                   onEditLessonPlan={() => console.log("Edit lesson plan", plan.id)}
-                  onCheckIn={() => window.location.href = `/teacher/class/${plan.classroomId}/check-in`}
+                  onCheckIn={() => window.location.href = `/teacher/class/${plan.classroomId}/check-in?date=${format(selectedDate, "yyyy-MM-dd")}`}
                   onAssess={() => handleAssessLessonPlan(plan.classroomId)}
-                  onCheckOut={() => window.location.href = `/teacher/class/${plan.classroomId}/check-out`}
+                  onCheckOut={() => window.location.href = `/teacher/class/${plan.classroomId}/check-out?date=${format(selectedDate, "yyyy-MM-dd")}`}
                 />
               )
             })}
 
-            {/* Daily Journal CTA - Future Implementation */}
-            <Card className="border-dashed bg-muted/30">
-              <CardContent className="p-4">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  size="sm"
-                  onClick={handleGenerateDailyJournal}
-                  disabled
-                >
-                  <IconFileText className="h-4 w-4 mr-2" />
-                  Generate Jurnal Harian
-                  <span className="ml-2 text-[10px] text-muted-foreground">(Segera Hadir)</span>
-                </Button>
-                <p className="text-xs text-muted-foreground text-center mt-2">
-                  Fitur ini akan merangkum semua penilaian hari ini
-                </p>
-              </CardContent>
-            </Card>
+            {/* Daily Journal CTA */}
+            {(() => {
+              const allPlansCompleted = lessonPlans.every((plan) => {
+                const attendance = attendanceData.get(plan.classroomId)
+                const assessment = assessmentData.get(plan.classroomId)
+                const checkInDone = (attendance?.checkIn.total || 0) > 0
+                const checkOutDone = (attendance?.checkOut.total || 0) > 0
+                const assessmentDone = (assessment?.progressPercentage || 0) >= 100
+                return checkInDone && assessmentDone && checkOutDone
+              })
+
+              return (
+                <Card className={`border-dashed ${allPlansCompleted ? "bg-muted/30" : "bg-yellow-50 border-yellow-200"}`}>
+                  <CardContent className="p-4 space-y-2">
+                    {!allPlansCompleted && (
+                      <div className="flex items-start gap-2 text-yellow-800">
+                        <IconAlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0 text-yellow-600" />
+                        <p className="text-xs">
+                          Selesaikan semua proses (check-in, penilaian, dan check-out) pada setiap kelas sebelum melihat jurnal harian.
+                        </p>
+                      </div>
+                    )}
+                    <Link
+                      href={allPlansCompleted ? `/teacher/assesment/${classrooms[0]?.id}?date=${format(selectedDate, "yyyy-MM-dd")}` : "#"}
+                      onClick={(e) => !allPlansCompleted && e.preventDefault()}
+                      aria-disabled={!allPlansCompleted}
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        size="sm"
+                        disabled={!allPlansCompleted}
+                        onClick={allPlansCompleted ? handleGenerateDailyJournal : undefined}
+                      >
+                        <IconFileText className="h-4 w-4 mr-2" />
+                        Lihat Jurnal Harian
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              )
+            })()}
           </div>
         ) : (
           <Card>
