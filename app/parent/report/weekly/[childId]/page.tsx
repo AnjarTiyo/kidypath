@@ -25,7 +25,7 @@ export default function ParentWeeklyReportPage() {
   const params = useParams<{ childId: string }>()
   const { user, children, loading: userLoading } = useCurrentUser()
   const [reports, setReports] = useState<WeeklyReport[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -35,7 +35,6 @@ export default function ParentWeeklyReportPage() {
 
   useEffect(() => {
     if (!params.childId || userLoading) return
-    setLoading(true)
     fetch(`/api/reports/weekly?studentId=${params.childId}`)
       .then((r) => r.json())
       .then((data) => {

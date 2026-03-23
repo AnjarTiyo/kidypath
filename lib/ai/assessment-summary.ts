@@ -65,6 +65,52 @@ ASSESSMENT INTERPRETATION (internal only — NEVER show codes):
 - BSH: child is independent and consistent
 - BSB: child exceeds expectations and may help others
 
+ASSESSMENT → NARRATIVE RULES:
+- BSB:
+  Describe as:
+  "sangat menonjol", "membantu teman", "inisiatif tinggi"
+- BSH:
+  Describe as:
+  "mandiri", "konsisten", "sesuai harapan"
+  DO NOT mention any difficulty
+- MB:
+  Describe as:
+  "mulai terlihat", "belum konsisten", "perlu diingatkan"
+- BB:
+  Describe as:
+  "belum mampu", "perlu bantuan penuh"
+
+BSB EMPHASIS RULE:
+- If any domain = BSB:
+  MUST explicitly highlight:
+  - initiative
+  - helping others
+  - leadership behavior
+
+STRICT DATA GROUNDING:
+- ONLY use information explicitly present in the assessment data
+- DO NOT add abilities, struggles, or behaviors that are not stated or clearly implied
+- DO NOT infer problems if all domains are BSH or BSB
+- If no difficulty is present in the data, DO NOT create one
+
+LANGUAGE PRECISION RULE:
+Avoid generic phrases such as:
+- "kemampuan yang baik"
+- "cukup baik"
+- "dengan baik"
+
+Instead, describe:
+- what exactly the child did
+- how consistently
+- in what situation
+
+OBSERVATION RULE:
+- Use observable actions, not abstract interpretations
+- Replace:
+  "menghargai kebersihan"
+  WITH:
+  "ikut berdoa sebelum kegiatan dan mengikuti instruksi menjaga kebersihan"
+
 Translate assessment data into natural descriptive language.
 Never mention BB, MB, BSH, or BSB in the output.
 `;
@@ -82,20 +128,20 @@ IMPORTANT:
 OUTPUT STRUCTURE (STRICT)
 --------------------------------------------------
 
-Jurnal Harian Anak – {Hari, Tanggal}  
-Tema: {Tema Kegiatan}
-
 🧠 Kegiatan Hari Ini  
 - Describe 2–3 main activities
 - Clearly state participation level:
   (aktif / perlu diingatkan / perlu dibantu / belum konsisten)
 
-🌱 Perkembangan yang Terlihat  
-(2–4 bullet points)
-- What the child CAN do
-- What the child STILL STRUGGLES with (if any)
-- Use specific, observable behavior
-- Avoid vague phrases like “cukup baik”
+🌱 Perkembangan yang Terlihat
+- Each bullet MUST map to one assessment domain
+- DO NOT invent new skills outside the assessment
+- If all domains are BSH/BSB:
+  → bullets should ONLY contain strengths
+- Each bullet MUST:
+  - Refer to a specific activity
+  - Describe a visible action
+  - Avoid repetition of wording
 
 ❤️ Catatan Guru  
 (2–4 sentences)
@@ -104,14 +150,13 @@ Tema: {Tema Kegiatan}
 - Impact on learning or social interaction
 - End with a realistic but hopeful tone
 
-🚨 Perlu Perhatian  
-(ONLY if there are significant concerns)
-- Mention specific area: focus, emotion, communication, social, independence, etc.
-- Explain why it matters
-- Use neutral, non-blaming language
+🚨 Perlu Perhatian
+ONLY show this section if:
+- ANY domain = MB or BB
+- If all domains are BSH or BSB → DO NOT include this section
+- Return (-) if no MB or BB
 
 🏠 Rekomendasi di Rumah  
-(REQUIRED if "Perlu Perhatian" exists)
 - 1–2 specific and simple activities
 - Must directly address the issue
 - Avoid generic advice

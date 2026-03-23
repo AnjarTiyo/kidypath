@@ -6,7 +6,6 @@ import { MenuCard, MenuCardProps, MenuGrid } from "@/components/layout/menu-card
 import {
   IconChartBar,
   IconHome,
-  IconLayoutDashboard,
   IconSchool,
   IconBook,
   IconChalkboardTeacher,
@@ -14,12 +13,19 @@ import {
 import { PageHeader } from "@/components/layout/page-header"
 import { LoadingState } from "@/components/layout/loading-state"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
+import { useTomorrowLessonPlan } from "@/lib/hooks/use-tomorrow-lesson-plan"
+import { useTodayDailyStatus } from "@/lib/hooks/use-today-daily-status"
+import { OutstandingTasksBanner } from "@/components/common/tomorrow-lesson-plan-banner"
 import { Button } from "@/components/ui/button"
 
 export default function TeacherPage() {
   const router = useRouter()
   const { user, classrooms, loading: userLoading } = useCurrentUser()
   const isUserCurriculumCoordinator = user?.isCurriculumCoordinator || false
+  const activeClassrooms = !userLoading && user?.role === "teacher" ? classrooms : []
+  const { targetDate, missingClassrooms, isLoading: lessonPlanLoading } = useTomorrowLessonPlan(activeClassrooms)
+  const { checkIn, assessment, checkOut, isLoading: statusLoading } = useTodayDailyStatus(activeClassrooms)
+  const bannerLoading = lessonPlanLoading || statusLoading
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -31,13 +37,6 @@ export default function TeacherPage() {
   }, [user, userLoading, router])
 
   const availableMenus: MenuCardProps[] = [
-    {
-      icon: IconLayoutDashboard,
-      title: "Dasbor",
-      description: "Ringkasan data, aktivitas, dan statistik harian",
-      href: "/teacher/dashboard",
-      disabled: true
-    },
     {
       icon: IconChalkboardTeacher,
       title: "Rencana Pembelajaran",
@@ -98,6 +97,16 @@ export default function TeacherPage() {
           })}
         </Button>
       </div>
+
+      {!bannerLoading && (
+        <OutstandingTasksBanner
+          targetDate={targetDate}
+          missingClassrooms={missingClassrooms}
+          checkIn={checkIn}
+          assessment={assessment}
+          checkOut={checkOut}
+        />
+      )}
 
       <MenuGrid>
         {availableMenus.map((menu, index) => (
