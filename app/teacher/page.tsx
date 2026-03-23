@@ -14,6 +14,7 @@ import {
 import { PageHeader } from "@/components/layout/page-header"
 import { LoadingState } from "@/components/layout/loading-state"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
+import { Button } from "@/components/ui/button"
 
 export default function TeacherPage() {
   const router = useRouter()
@@ -52,9 +53,8 @@ export default function TeacherPage() {
     {
       icon: IconChartBar,
       title: "Laporan",
-      description: "Lihat laporan harian, mingguan, dan bulanan",
+      description: "Lihat laporan kehadiran, penilaian, dan laporan mingguan",
       href: "/teacher/report",
-      disabled: true,
     },
     {
       icon: IconBook,
@@ -73,20 +73,31 @@ export default function TeacherPage() {
     return null
   }
 
-  const classroomNames = classrooms.length > 0 
+  const classroomNames = classrooms.length > 0
     ? classrooms.map(c => c.name).join(", ")
     : "Belum ada kelas"
 
   return (
     <>
-      <PageHeader
-        title="Teacher Dashboard"
-        description={`Selamat Datang, ${user.name || user.email}!`}
-        subDesc={`Kelas: ${classroomNames}`}
-        breadcrumbs={[
-          { label: "Beranda", href: "/teacher", icon: IconHome },
-        ]}
-      />
+      <div className="flex flex-row justify-between items-center border-b">
+        <PageHeader
+          title="Aplikasi Teacher"
+          description={`Selamat Datang, Teacher ${user.name || user.email}!`}
+          subDesc={`Kelas: ${classroomNames}`}
+          breadcrumbs={[
+            { label: "Beranda", href: "/teacher", icon: IconHome },
+          ]}
+          border={false}
+        />
+        <Button variant="secondary" className="text-md text-primary font-bold">
+          {new Date().toLocaleDateString("id-ID", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </Button>
+      </div>
 
       <MenuGrid>
         {availableMenus.map((menu, index) => (

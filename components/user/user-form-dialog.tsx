@@ -177,7 +177,7 @@ export function UserFormDialog({ user, open, onOpenChange, onSuccess }: UserForm
               <Select
                 value={formData.role}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, role: value as "admin" | "teacher" | "parent" })
+                  setFormData({ ...formData, role: value as "admin" | "teacher" | "parent" | "curriculum" })
                 }
               >
                 <SelectTrigger id="role">
@@ -187,6 +187,7 @@ export function UserFormDialog({ user, open, onOpenChange, onSuccess }: UserForm
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="teacher">Guru</SelectItem>
                   <SelectItem value="parent">Orang Tua</SelectItem>
+                  <SelectItem value="curriculum">Kurikulum</SelectItem>
                 </SelectContent>
               </Select>
             </div>

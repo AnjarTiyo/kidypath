@@ -207,7 +207,7 @@ export function ClassroomFormDialog({
               </Label>
               <Input
                 id="academicYear"
-                placeholder="Contoh: 2024/2025"
+                placeholder="Contoh: 2025/2026"
                 value={formData.academicYear}
                 onChange={(e) =>
                   setFormData({ ...formData, academicYear: e.target.value })

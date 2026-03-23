@@ -32,6 +32,7 @@ interface AssessmentRequestBody {
   classroomId: string;
   date: string;
   summary?: string | null;
+  imageUrl?: string | null;
   items: AssessmentRequestItem[];
 }
 
@@ -68,6 +69,7 @@ export async function GET(request: NextRequest) {
         studentName: students.fullName,
         date: dailyAssessments.date,
         summary: dailyAssessments.summary,
+        imageUrl: dailyAssessments.imageUrl,
         classroomId: dailyAssessments.classroomId,
         createdBy: dailyAssessments.createdBy,
         createdAt: dailyAssessments.createdAt,
@@ -144,6 +146,7 @@ export async function POST(request: NextRequest) {
       classroomId,
       date,
       summary,
+      imageUrl,
       items, // Array of assessment items
     } = body;
 
@@ -175,6 +178,7 @@ export async function POST(request: NextRequest) {
         .update(dailyAssessments)
         .set({
           summary: summary || null,
+          imageUrl: imageUrl ?? null,
         })
         .where(eq(dailyAssessments.id, existing[0].id))
         .returning();
@@ -194,6 +198,7 @@ export async function POST(request: NextRequest) {
           classroomId,
           date,
           summary: summary || null,
+          imageUrl: imageUrl ?? null,
           createdBy: session.user.id,
         })
         .returning();
@@ -223,6 +228,7 @@ export async function POST(request: NextRequest) {
         classroomId: dailyAssessments.classroomId,
         date: dailyAssessments.date,
         summary: dailyAssessments.summary,
+        imageUrl: dailyAssessments.imageUrl,
         createdBy: dailyAssessments.createdBy,
         createdAt: dailyAssessments.createdAt,
       })

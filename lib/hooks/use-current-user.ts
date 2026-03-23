@@ -61,6 +61,7 @@ export function useCurrentUser() {
     const abortController = new AbortController()
 
     const fetchUserData = async () => {
+      let wasAborted = false
       try {
         const response = await fetch("/api/auth/me", {
           signal: abortController.signal,
@@ -75,14 +76,18 @@ export function useCurrentUser() {
           setError("Failed to fetch user data")
         }
       } catch (err) {
-        // Ignore abort errors
+        // Ignore abort errors — do NOT set loading=false so the second
+        // Strict Mode effect run can complete the fetch cleanly.
         if (err instanceof Error && err.name === 'AbortError') {
+          wasAborted = true
           return
         }
         setError("An error occurred while fetching user data")
         console.error("Error fetching user data:", err)
       } finally {
-        setLoading(false)
+        if (!wasAborted) {
+          setLoading(false)
+        }
       }
     }
 

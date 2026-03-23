@@ -9,6 +9,7 @@ import { IconChalkboardTeacher, IconHome, IconNoteOff } from "@tabler/icons-reac
 import { format } from "date-fns"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
 import { Card, CardContent } from "@/components/ui/card"
+import { LoadingState } from "@/components/layout/loading-state"
 
 type DevelopmentScope = 'religious_moral' | 'physical_motor' | 'cognitive' | 'language' | 'social_emotional' | 'art';
 
@@ -122,23 +123,7 @@ export default function TeacherLessonPlanPage() {
 
   // Show loading state
   if (userLoading) {
-    return (
-      <>
-        <PageHeader
-          title="Rencana Pembelajaran"
-          description="Kelola rencana pembelajaran untuk rombongan belajar"
-          breadcrumbs={[
-            { label: "Beranda", href: "/teacher", icon: IconHome },
-            { label: "Rencana Pembelajaran", href: "/teacher/lesson-plan", icon: IconChalkboardTeacher },
-          ]}
-        />
-        <Card>
-          <CardContent className="py-6">
-            <p className="text-center text-muted-foreground">Memuat data...</p>
-          </CardContent>
-        </Card>
-      </>
-    )
+    return <LoadingState message="Memuat data..." />
   }
 
   // Show warning if teacher has no assigned classrooms
