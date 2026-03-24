@@ -82,7 +82,7 @@ export function CurriculumExecutionSection() {
                     </Badge>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    <span>{cls.actualPlans}/{cls.expectedDays} hari</span>
+                    <span>{cls.actualPlans} dari {cls.expectedDays} hari</span>
                   </div>
                 </div>
                 <Progress value={cls.completionPct} className="h-2" />

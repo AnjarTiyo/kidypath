@@ -23,7 +23,7 @@ import {
   YAxis,
   CartesianGrid,
 } from 'recharts'
-import { IconChalkboard } from '@tabler/icons-react'
+import { IconChalkboard, IconUser } from '@tabler/icons-react'
 
 interface ClassroomData {
   classroomId: string
@@ -126,7 +126,12 @@ export function LessonPlanAnalyticsSection() {
                       <tr key={c.classroomId} className="border-b last:border-0 hover:bg-muted/30">
                         <td className="py-2 pr-3 font-medium">{c.name}</td>
                         <td className="py-2 px-2 text-xs text-muted-foreground">
-                          {c.teachers.length > 0 ? c.teachers.join(', ') : '—'}
+                          {c.teachers.map((t, index) => (
+                              <div key={index} className="flex items-center gap-1">
+                                <IconUser className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-xs text-muted-foreground">Teacher {t}</span>
+                              </div>
+                            ))}
                         </td>
                         <td className="text-center py-2 px-2 font-semibold">{c.totalPlans}</td>
                         <td className="text-center py-2 px-2">

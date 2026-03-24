@@ -13,7 +13,7 @@ import { sql, and, gte, lte, eq, count } from "drizzle-orm"
 import { subDays, format } from "date-fns"
 
 const SCOPE_LABELS: Record<string, string> = {
-  religious_moral: "Religius",
+  religious_moral: "Nilai Agama Moral",
   physical_motor: "Fisik",
   cognitive: "Kognitif",
   language: "Bahasa",
