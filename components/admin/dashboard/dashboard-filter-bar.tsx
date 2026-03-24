@@ -33,10 +33,10 @@ export function DashboardFilterBar() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 p-3 bg-muted/40 rounded-xl w-full border">
-      <IconFilter size={16} className="text-muted-foreground shrink-0" />
+    <div className="flex flex-wrap items-center gap-3 p-3 bg-primary text-primary-foreground rounded-xl w-full border">
+      <IconFilter size={16} className="text-primary-foreground/90 shrink-0" />
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground whitespace-nowrap">Dari</span>
+        <span className="text-sm text-primary-foreground/90 whitespace-nowrap">Dari</span>
         <Input
           type="date"
           className="h-8 w-36 text-sm"
@@ -45,7 +45,7 @@ export function DashboardFilterBar() {
         />
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground whitespace-nowrap">Sampai</span>
+        <span className="text-sm text-primary-foreground/90 whitespace-nowrap">Sampai</span>
         <Input
           type="date"
           className="h-8 w-36 text-sm"
@@ -69,7 +69,7 @@ export function DashboardFilterBar() {
           ))}
         </SelectContent>
       </Select>
-      <Button variant="ghost" size="sm" className="h-8 gap-1" onClick={handleReset}>
+      <Button variant="outline" size="sm" className="h-8 gap-1 text-primary" onClick={handleReset}>
         <IconRefresh size={14} />
         Reset
       </Button>
