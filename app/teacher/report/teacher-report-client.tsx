@@ -112,7 +112,7 @@ export default function TeacherReportClient() {
         actions={
           <Link href="/teacher/report/weekly">
             <Button variant="outline" size="sm">
-              Laporan Mingguan
+              Laporan Mingguan ke Orang Tua
             </Button>
           </Link>
         }

@@ -5,6 +5,7 @@ import {
   weeklyReports,
   students,
   classroomTeachers,
+  users,
   parentChild,
   attendances,
   dailyAssessments,
@@ -297,6 +298,20 @@ export async function GET(
             )
         : []
 
+    // ── Teachers for the classroom ───────────────────────────────────────────
+    const classroomId = student?.classroomId ?? null
+    const teachersData = classroomId
+      ? await db
+          .select({
+            id: users.id,
+            name: users.name,
+          })
+          .from(classroomTeachers)
+          .innerJoin(users, eq(classroomTeachers.teacherId, users.id))
+          .where(eq(classroomTeachers.classroomId, classroomId))
+      : []
+    const teachers = teachersData.map((t) => ({ id: t.id, name: t.name }))
+
     return NextResponse.json({
       data: {
         report,
@@ -307,6 +322,7 @@ export async function GET(
         moodTimeSeries,
         scopeBreakdown,
         activityImages,
+        teachers,
       },
     })
   } catch (error) {

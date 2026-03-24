@@ -65,6 +65,7 @@ export default function TeacherWeeklyReportClient() {
 
   const [reports, setReports] = useState<WeeklyReportRow[]>([])
   const [loadingReports, setLoadingReports] = useState(false)
+  const [sending, setSending] = useState<Set<string>>(new Set())
 
   // Batch generate state
   const [showConfirm, setShowConfirm] = useState(false)
@@ -116,6 +117,26 @@ export default function TeacherWeeklyReportClient() {
       setReports((prev) => prev.filter((r) => r.id !== id))
     } catch (err) {
       console.error(err)
+    }
+  }
+
+  const handleSend = async (id: string) => {
+    setSending((prev) => new Set(prev).add(id))
+    try {
+      const res = await fetch(`/api/reports/weekly/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sentAt: new Date().toISOString() }),
+      })
+      if (res.ok) {
+        setReports((prev) =>
+          prev.map((r) => (r.id === id ? { ...r, sentAt: new Date() } : r))
+        )
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setSending((prev) => { const s = new Set(prev); s.delete(id); return s })
     }
   }
 
@@ -273,7 +294,7 @@ export default function TeacherWeeklyReportClient() {
           {loadingReports ? (
             <LoadingState message="Memuat laporan..." />
           ) : (
-            <WeeklyReportTable data={reports} onDelete={handleDelete} />
+            <WeeklyReportTable data={reports} onDelete={handleDelete} onSend={handleSend} sending={sending} />
           )}
         </CardContent>
       </Card>
