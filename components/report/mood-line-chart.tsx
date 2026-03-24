@@ -68,7 +68,7 @@ export function MoodLineChart({ moodTimeSeries }: MoodLineChartProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[270px]">
+        <ChartContainer config={chartConfig} className="h-[270px] aspect-auto w-full">
           <LineChart data={chartData} margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="date" tick={{ fontSize: 11 }} />

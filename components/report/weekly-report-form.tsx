@@ -96,7 +96,7 @@ export function WeeklyReportForm({
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center justify-between text-base">
             <span>
-              📝 Laporan Mingguan — {studentName}
+              Laporan Mingguan — {studentName}
               <span className="ml-2 text-sm text-muted-foreground font-normal">({weekLabel})</span>
             </span>
             <Badge variant={report.isPublished ? 'default' : 'outline'}>

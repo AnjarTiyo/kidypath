@@ -174,3 +174,75 @@
     animation: accordion-up 0.2s ease-out;
   }
 }
+
+/* ── Print / PDF styles ──────────────────────────────────────────────────── */
+@media print {
+  /* Hide the app navbar and any action toolbar marked print:hidden */
+  nav,
+  aside,
+  [data-sidebar],
+  .print-hidden {
+    display: none !important;
+  }
+
+  /* Reset layout — undo the app-shell overflow:hidden/h-screen constraints so
+     all sections flow naturally across multiple pages */
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  main {
+    height: auto !important;
+    overflow: visible !important;
+    overflow-y: visible !important;
+    padding-bottom: 0 !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+    font-size: 11pt;
+  }
+
+  #weekly-report-print {
+    display: block;
+    width: 100%;
+  }
+
+  /* Page margins */
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+
+  /* Card borders look clean in print */
+  .border,
+  [class*="rounded-md"] {
+    border-color: #d1d5db !important;
+    box-shadow: none !important;
+  }
+
+  /* Allow cards to flow across pages — break-inside: avoid clips tall content */
+
+  /* Page break helpers */
+  .print-break-before {
+    break-before: page;
+  }
+
+  /* Table borders */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th, td {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 4px 8px;
+  }
+
+  /* Keep images */
+  img { max-width: 100%; }
+
+  /* Charts */
+  .recharts-responsive-container { height: 220px !important; }
+}
