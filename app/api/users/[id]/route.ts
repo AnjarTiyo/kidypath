@@ -29,6 +29,7 @@ export async function GET(
         id: users.id,
         name: users.name,
         email: users.email,
+        phoneNumber: users.phoneNumber,
         role: users.role,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
@@ -71,7 +72,7 @@ export async function PATCH(
     }
 
     const body = await request.json()
-    const { name, email, password, role } = body
+    const { name, email, password, role, phoneNumber } = body
 
     // Check if user exists
     const [existingUser] = await db
@@ -105,6 +106,7 @@ export async function PATCH(
       updatedAt: Date
       name?: string | null
       email?: string
+      phoneNumber?: string | null
       role?: "admin" | "teacher" | "parent"
       passwordHash?: string
     } = {
@@ -113,6 +115,7 @@ export async function PATCH(
 
     if (name !== undefined) updateData.name = name || null
     if (email) updateData.email = email
+    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber || null
     if (role) updateData.role = role as "admin" | "teacher" | "parent"
     if (password) updateData.passwordHash = await hashPassword(password)
 
@@ -125,6 +128,7 @@ export async function PATCH(
         id: users.id,
         name: users.name,
         email: users.email,
+        phoneNumber: users.phoneNumber,
         role: users.role,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,

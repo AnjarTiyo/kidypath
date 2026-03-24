@@ -32,18 +32,18 @@ export function LoginForm() {
       <CardHeader className="space-y-1 sm:space-y-2">
         <CardTitle className="text-xl sm:text-2xl">Login</CardTitle>
         <CardDescription className="text-xs sm:text-sm">
-          Gunakan email dan password akun Anda untuk masuk ke Kidy Path.
+          Gunakan email atau nomor HP dan password akun Anda untuk masuk ke Kidy Path.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div className="space-y-1.5 sm:space-y-2">
-            <Label htmlFor="email" className="text-sm">Email</Label>
+            <Label htmlFor="identifier" className="text-sm">Email / No. HP</Label>
             <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="your@email.com"
+              id="identifier"
+              name="identifier"
+              type="text"
+              placeholder="email@contoh.com atau 08123456789"
               required
               disabled={isPending}
               className="h-10 sm:h-11"

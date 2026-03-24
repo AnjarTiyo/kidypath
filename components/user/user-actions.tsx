@@ -10,10 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { IconDots, IconEdit, IconTrash } from "@tabler/icons-react"
+import { IconDots, IconEdit, IconKey, IconTrash } from "@tabler/icons-react"
 import { User } from "./user-columns"
 import { UserFormDialog } from "./user-form-dialog"
 import { DeleteUserDialog } from "./delete-user-dialog"
+import { ResetPasswordDialog } from "./reset-password-dialog"
 
 interface UserActionsProps {
   user: User
@@ -23,6 +24,7 @@ interface UserActionsProps {
 export function UserActions({ user, onRefresh }: UserActionsProps) {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showResetPasswordDialog, setShowResetPasswordDialog] = useState(false)
 
   return (
     <>
@@ -45,6 +47,11 @@ export function UserActions({ user, onRefresh }: UserActionsProps) {
             <IconEdit className="mr-2 h-4 w-4" />
             Edit
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setShowResetPasswordDialog(true)}>
+            <IconKey className="mr-2 h-4 w-4" />
+            Reset Password
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => setShowDeleteDialog(true)}
             className="text-destructive"
@@ -66,6 +73,11 @@ export function UserActions({ user, onRefresh }: UserActionsProps) {
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         onSuccess={onRefresh}
+      />
+      <ResetPasswordDialog
+        user={user}
+        open={showResetPasswordDialog}
+        onOpenChange={setShowResetPasswordDialog}
       />
     </>
   )

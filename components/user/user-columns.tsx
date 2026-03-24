@@ -10,6 +10,7 @@ export type User = {
   id: string
   name: string | null
   email: string | null
+  phoneNumber: string | null
   role: "admin" | "teacher" | "parent" | "curriculum" | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -70,6 +71,16 @@ export const getUserColumns = (onRefresh?: () => void): ColumnDef<User>[] => [
     cell: ({ row }) => {
       const email = row.getValue("email") as string | null
       return <div>{email || "-"}</div>
+    },
+  },
+  {
+    accessorKey: "phoneNumber",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="No. HP" />
+    ),
+    cell: ({ row }) => {
+      const phone = row.getValue("phoneNumber") as string | null
+      return <div className="text-sm">{phone || "-"}</div>
     },
   },
   {

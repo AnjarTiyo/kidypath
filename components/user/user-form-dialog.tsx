@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { User } from "./user-columns"
+import { normalizePhoneToLocal } from "@/lib/helpers/phone"
 
 interface UserFormDialogProps {
   user?: User
@@ -35,6 +36,7 @@ export function UserFormDialog({ user, open, onOpenChange, onSuccess }: UserForm
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
+    phoneNumber: user?.phoneNumber || "",
     password: "",
     role: user?.role || "parent",
   })
@@ -54,12 +56,17 @@ export function UserFormDialog({ user, open, onOpenChange, onSuccess }: UserForm
       const body: {
         name: string
         email: string
+        phoneNumber?: string
         role: string
         password?: string
       } = {
         name: formData.name,
         email: formData.email,
         role: formData.role,
+      }
+
+      if (formData.phoneNumber) {
+        body.phoneNumber = normalizePhoneToLocal(formData.phoneNumber)
       }
 
       // Only include password if it's provided
@@ -91,7 +98,7 @@ export function UserFormDialog({ user, open, onOpenChange, onSuccess }: UserForm
       }
 
       // Reset form and close dialog
-      setFormData({ name: "", email: "", password: "", role: "parent" })
+      setFormData({ name: "", email: "", phoneNumber: "", password: "", role: "parent" })
       onOpenChange(false)
       
       // Call success callback to refresh data
@@ -149,6 +156,19 @@ export function UserFormDialog({ user, open, onOpenChange, onSuccess }: UserForm
                 }
                 placeholder="john@example.com"
                 required
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="phoneNumber">No. HP</Label>
+              <Input
+                id="phoneNumber"
+                type="tel"
+                value={formData.phoneNumber}
+                onChange={(e) =>
+                  setFormData({ ...formData, phoneNumber: e.target.value })
+                }
+                placeholder="081234567890"
               />
             </div>
 
