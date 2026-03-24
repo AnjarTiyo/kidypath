@@ -7,9 +7,11 @@ import {
   assessmentItems,
   dailyAssessments,
   developmentScopes,
+  dayOffs,
 } from "@/lib/db/schema"
 import { sql, and, gte, lte, eq, count } from "drizzle-orm"
-import { subDays, format, eachDayOfInterval, isWeekend } from "date-fns"
+import { subDays, format } from "date-fns"
+import { countSchoolDays, getSchoolDays } from "@/lib/helpers/school-days"
 
 const SCOPE_LABELS: Record<string, string> = {
   religious_moral: "Nilai Agama Moral",
@@ -18,11 +20,6 @@ const SCOPE_LABELS: Record<string, string> = {
   language: "Bahasa",
   social_emotional: "Sosem",
   art: "Seni",
-}
-
-function countSchoolDays(start: string, end: string): number {
-  const days = eachDayOfInterval({ start: new Date(start), end: new Date(end) })
-  return days.filter((d) => !isWeekend(d)).length
 }
 
 export async function GET(request: NextRequest) {
@@ -35,7 +32,14 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get("endDate") || format(new Date(), "yyyy-MM-dd")
     const startDate = searchParams.get("startDate") || format(subDays(new Date(), 29), "yyyy-MM-dd")
 
-    const expectedDays = countSchoolDays(startDate, endDate)
+    // Fetch all configured day-offs that fall within the range
+    const dayOffRows = await db
+      .select({ date: dayOffs.date })
+      .from(dayOffs)
+      .where(and(gte(dayOffs.date, startDate), lte(dayOffs.date, endDate)))
+    const dayOffDates = dayOffRows.map((r) => r.date as string)
+
+    const expectedDays = countSchoolDays(startDate, endDate, dayOffDates)
 
     const classroomList = await db.select({ id: classrooms.id, name: classrooms.name }).from(classrooms)
 
@@ -70,12 +74,7 @@ export async function GET(request: NextRequest) {
           )
 
         const submittedDates = new Set(planDates.map((p) => p.date))
-        const allSchoolDays = eachDayOfInterval({
-          start: new Date(startDate),
-          end: new Date(endDate),
-        })
-          .filter((d) => !isWeekend(d))
-          .map((d) => format(d, "yyyy-MM-dd"))
+        const allSchoolDays = getSchoolDays(startDate, endDate, dayOffDates)
 
         const missingDates = allSchoolDays
           .filter((d) => !submittedDates.has(d))

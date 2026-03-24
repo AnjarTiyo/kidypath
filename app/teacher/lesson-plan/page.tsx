@@ -96,16 +96,12 @@ export default function TeacherLessonPlanPage() {
 
   const fetchDayOffDates = async () => {
     try {
-      // TODO: Replace with actual API call to fetch day-off dates from Agenda entity
-      // const response = await fetch("/api/agendas?type=day-off&pageSize=1000")
-      // if (response.ok) {
-      //   const data = await response.json()
-      //   const dates = data.data.map((agenda: any) => agenda.date)
-      //   setDayOffDates(dates)
-      // }
-      
-      // For now, set empty array. Will be implemented with Agenda entity
-      setDayOffDates([])
+      const response = await fetch("/api/day-offs")
+      if (response.ok) {
+        const data = await response.json()
+        const dates = (data.data || []).map((d: { date: string }) => d.date)
+        setDayOffDates(dates)
+      }
     } catch (error) {
       console.error("Error fetching day-off dates:", error)
     }

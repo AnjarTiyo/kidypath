@@ -108,6 +108,33 @@ async function seed() {
     },
   ]).onConflictDoNothing();
 
+  // Seed day-offs (Indonesian national holidays 2025)
+  console.log('📅 Seeding day-offs...');
+  const adminUser = await db
+    .select({ id: schema.users.id })
+    .from(schema.users)
+    .limit(1);
+  const adminId = adminUser[0]?.id ?? null;
+
+  await db.insert(schema.dayOffs).values([
+    { date: '2025-01-01', name: 'Tahun Baru Masehi', createdBy: adminId },
+    { date: '2025-01-27', name: 'Isra Miraj Nabi Muhammad SAW', createdBy: adminId },
+    { date: '2025-01-29', name: 'Tahun Baru Imlek', createdBy: adminId },
+    { date: '2025-03-29', name: 'Hari Suci Nyepi', createdBy: adminId },
+    { date: '2025-03-30', name: 'Hari Raya Idul Fitri', createdBy: adminId },
+    { date: '2025-03-31', name: 'Hari Raya Idul Fitri', createdBy: adminId },
+    { date: '2025-04-18', name: 'Wafat Isa Al Masih', createdBy: adminId },
+    { date: '2025-05-01', name: 'Hari Buruh Internasional', createdBy: adminId },
+    { date: '2025-05-12', name: 'Hari Raya Waisak', createdBy: adminId },
+    { date: '2025-05-29', name: 'Kenaikan Isa Al Masih', createdBy: adminId },
+    { date: '2025-06-01', name: 'Hari Lahir Pancasila', createdBy: adminId },
+    { date: '2025-06-06', name: 'Hari Raya Idul Adha', createdBy: adminId },
+    { date: '2025-06-27', name: 'Tahun Baru Islam 1447 H', createdBy: adminId },
+    { date: '2025-08-17', name: 'Hari Kemerdekaan RI', createdBy: adminId },
+    { date: '2025-09-05', name: 'Maulid Nabi Muhammad SAW', createdBy: adminId },
+    { date: '2025-12-25', name: 'Hari Raya Natal', createdBy: adminId },
+  ]).onConflictDoNothing();
+
   console.log('✅ Seeding completed!');
   console.log('📝 Default credentials:');
   console.log('   Admin:  admin@kidypath.id / password123');

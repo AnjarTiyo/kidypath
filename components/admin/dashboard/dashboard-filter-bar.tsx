@@ -39,7 +39,7 @@ export function DashboardFilterBar() {
         <span className="text-sm text-primary-foreground/90 whitespace-nowrap">Dari</span>
         <Input
           type="date"
-          className="h-8 w-36 text-sm"
+          className="h-8 w-36 text-sm text-primary-foreground"
           value={filters.startDate}
           onChange={(e) => setFilters((f) => ({ ...f, startDate: e.target.value }))}
         />
@@ -48,7 +48,7 @@ export function DashboardFilterBar() {
         <span className="text-sm text-primary-foreground/90 whitespace-nowrap">Sampai</span>
         <Input
           type="date"
-          className="h-8 w-36 text-sm"
+          className="h-8 w-36 text-sm text-primary-foreground"
           value={filters.endDate}
           onChange={(e) => setFilters((f) => ({ ...f, endDate: e.target.value }))}
         />
@@ -57,7 +57,7 @@ export function DashboardFilterBar() {
         value={filters.classroomId || 'all'}
         onValueChange={(v) => setFilters((f) => ({ ...f, classroomId: v === 'all' ? '' : v }))}
       >
-        <SelectTrigger className="h-8 w-44 text-sm">
+        <SelectTrigger className="h-8 w-44 text-sm text-primary-foreground">
           <SelectValue placeholder="Semua Kelas" />
         </SelectTrigger>
         <SelectContent>

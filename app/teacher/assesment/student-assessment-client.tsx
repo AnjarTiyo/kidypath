@@ -74,6 +74,7 @@ export default function StudentAssessmentClient() {
   const [loadingPlans, setLoadingPlans] = useState(false)
   const [loadingAttendance, setLoadingAttendance] = useState(false)
   const [loadingAssessments, setLoadingAssessments] = useState(false)
+  const [dayOffDates, setDayOffDates] = useState<string[]>([])
   const router = useRouter()
 
   const handleDateChange = (date: Date) => {
@@ -82,6 +83,13 @@ export default function StudentAssessmentClient() {
     params.set("date", format(date, "yyyy-MM-dd"))
     router.replace(`?${params.toString()}`)
   }
+
+  useEffect(() => {
+    fetch("/api/day-offs")
+      .then((r) => r.json())
+      .then((d) => setDayOffDates((d.data || []).map((x: { date: string }) => x.date)))
+      .catch(() => {})
+  }, [])
 
   // Fetch lesson plans for selected date
   useEffect(() => {
@@ -370,6 +378,7 @@ export default function StudentAssessmentClient() {
         <CompactDateNavigation
           selectedDate={selectedDate}
           onDateChange={handleDateChange}
+          dayOffDates={dayOffDates}
         />
       </Card>
 

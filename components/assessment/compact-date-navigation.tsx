@@ -5,13 +5,15 @@ import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
 import { format, addDays, subDays } from "date-fns"
 import { id as localeId } from "date-fns/locale"
 import { cn } from "@/lib/utils"
+import { isDayOff } from "@/lib/helpers/school-days"
 
 interface CompactDateNavigationProps {
     selectedDate: Date
     onDateChange: (date: Date) => void
+    dayOffDates?: string[]
 }
 
-export function CompactDateNavigation({ selectedDate, onDateChange }: CompactDateNavigationProps) {
+export function CompactDateNavigation({ selectedDate, onDateChange, dayOffDates = [] }: CompactDateNavigationProps) {
     const handlePreviousDay = () => {
         onDateChange(subDays(selectedDate, 1))
     }
@@ -48,7 +50,7 @@ export function CompactDateNavigation({ selectedDate, onDateChange }: CompactDat
                 {days.map((day, index) => {
                     const isSelected = format(day, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
                     const isToday = format(day, "yyyy-MM-dd") === format(today, "yyyy-MM-dd")
-                    const isSunday = day.getDay() === 0
+                    const isOff = isDayOff(day, dayOffDates)
 
                     return (
                         <button
@@ -56,13 +58,14 @@ export function CompactDateNavigation({ selectedDate, onDateChange }: CompactDat
                             onClick={() => handleSelectDate(day)}
                             className={cn(
                                 "flex flex-col items-center justify-center min-w-[52px] px-2 py-2 rounded-md transition-all rounded-sm",
-                                isSunday && "text-red-500",
+                                isOff && "text-red-500",
                                 isSelected
                                     ? "bg-primary text-primary-foreground shadow-sm"
                                     : "hover:bg-accent",
                                 isToday && !isSelected && "bg-secondary/50",
+                                isOff && "opacity-60 cursor-not-allowed",
                             )}
-                            disabled={isSunday}
+                            disabled={isOff}
                         >
                             <span>
                                 <span className="text-xs leading-tight">
@@ -71,19 +74,19 @@ export function CompactDateNavigation({ selectedDate, onDateChange }: CompactDat
                             </span>
                             <span className={cn(
                                 "text-lg font-semibold leading-none",
-                                isSunday ? "text-red-500" : isSelected ? "text-primary-foreground" : "text-foreground"
+                                isOff ? "text-red-500" : isSelected ? "text-primary-foreground" : "text-foreground"
                             )}>
                                 {format(day, "dd")}
                             </span>
                             <span className={cn(
                                 "text-[10px] leading-tight mt-0.5",
-                                isSunday ? "text-red-500" : isSelected ? "text-primary-foreground" : "text-foreground"
+                                isOff ? "text-red-500" : isSelected ? "text-primary-foreground" : "text-foreground"
                             )}>
                                 {format(day, "MMM", { locale: localeId }).toUpperCase()}
                             </span>
                             <span className={cn(
                                 "text-[9px] leading-tight",
-                                isSunday ? "text-red-500" : isSelected ? "text-primary-foreground/80" : "text-muted-foreground"
+                                isOff ? "text-red-500" : isSelected ? "text-primary-foreground/80" : "text-muted-foreground"
                             )}>
                                 {format(day, "yyyy")}
                             </span>
