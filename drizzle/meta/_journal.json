@@ -43,6 +43,13 @@
       "when": 1774324274755,
       "tag": "0005_flat_the_executioner",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1774354270020,
+      "tag": "0006_hard_ego",
+      "breakpoints": true
     }
   ]
 }

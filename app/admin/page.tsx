@@ -12,12 +12,11 @@ import {
   IconSchool,
   IconCalendarEvent,
   IconBook,
+  IconCalendarOff,
 } from "@tabler/icons-react"
 import { PageHeader } from "@/components/layout/page-header"
 import { useCurrentUser } from "@/lib/hooks/use-current-user";
 import { useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingState } from "@/components/layout/loading-state";
 
 export default function AdminPage() {
@@ -41,7 +40,6 @@ export default function AdminPage() {
       title: "Dasbor",
       description: "Lihat ringkasan sistem dan statistik",
       href: "/admin/dashboard",
-      disabled: true
     },
     {
       icon: IconUsers,
@@ -66,6 +64,12 @@ export default function AdminPage() {
       title: "Laporan",
       description: "Lihat laporan dan analitik sistem",
       href: "/admin/report",
+    },
+    {
+      icon: IconCalendarOff,
+      title: "Manajemen Hari Libur",
+      description: "Kelola hari libur sekolah untuk perhitungan hari efektif",
+      href: "/admin/day-off",
     },
     {
       icon: IconCalendarEvent,

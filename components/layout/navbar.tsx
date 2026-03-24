@@ -16,24 +16,18 @@ export async function Navbar() {
         <div className="flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center gap-2 sm:gap-4 min-w-0">
             <Image
-              src="/images/logo.png"
+              src="/images/logo2.png"
               alt="KidyPath Logo"
               width={32}
               height={32}
-              className="object-contain w-8 h-8 sm:w-9 sm:h-9 shrink-0"
+              className="object-contain w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-full"
             />
             <div className="flex flex-col leading-tight min-w-0">
               <div className="flex items-center gap-1">
-                <span className="text-sm sm:text-md font-bold text-primary truncate">KidyPath</span>
-                <Image
-                  src="/images/path.svg"
-                  alt="KidyPath Logo"
-                  width={16}
-                  height={16}
-                  className="object-contain w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0"
-                />
+                <span className="text-sm sm:text-md font-bold text-primary truncate">KB TK Putra 1</span>
+
                 </div>
-              <span className="text-[10px] sm:text-xs text-muted-foreground truncate">TK Putra 1 Mataram</span>
+              <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Mataram</span>
             </div>
           </Link>
 

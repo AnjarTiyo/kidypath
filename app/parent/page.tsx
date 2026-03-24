@@ -1,6 +1,9 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import { PageHeader } from "@/components/layout/page-header"
+import { IconHome, IconImageInPicture } from "@tabler/icons-react"
+import { MenuCard, MenuCardProps, MenuGrid } from "@/components/layout/menu-card"
 
 export default async function ParentPage() {
   const session = await auth()
@@ -13,29 +16,36 @@ export default async function ParentPage() {
     redirect("/unauthorized")
   }
 
+  const availableMenus: MenuCardProps[] = [
+    {
+      icon: IconHome,
+      title: "Laporan Mingguan",
+      description: "Lihat laporan perkembangan dan laporan mingguan anak",
+      href: "/parent/report",
+    },
+    {
+      icon: IconImageInPicture,
+      title: "Galeri Ananda",
+      description: "Lihat galeri foto dan video anak",
+      href: "/parent/gallery",
+      disabled: true,
+    }
+  ]
+
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Parent Dashboard</h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          Welcome, {session.user.name || session.user.email}
-        </p>
-      </div>
-
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        <Link href="/parent/report" className="p-4 sm:p-6 border rounded-lg hover:shadow-md transition-shadow block">
-          <h2 className="text-lg sm:text-xl font-semibold mb-2">Laporan Anak</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Lihat laporan perkembangan dan laporan mingguan anak
-          </p>
-        </Link>
-        <div className="p-4 sm:p-6 border rounded-lg hover:shadow-md transition-shadow">
-          <h2 className="text-lg sm:text-xl font-semibold mb-2">Activity Agenda</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            View upcoming activities
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Parent Dashboard"
+        description="Lihat laporan perkembangan dan laporan mingguan anak"
+        breadcrumbs={[
+          { label: "Dashboard", href: "/parent", icon: IconHome },
+        ]}
+      />
+      <MenuGrid>
+        {availableMenus.map((menu, index) => (
+          <MenuCard key={index} {...menu} />
+        ))}
+      </MenuGrid>
     </div>
   )
 }

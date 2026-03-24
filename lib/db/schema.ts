@@ -68,6 +68,14 @@ export const activityAgenda = pgTable('activity_agenda', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
 
+export const dayOffs = pgTable('day_offs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  date: date('date').notNull().unique(),
+  name: varchar('name').notNull(),
+  createdBy: uuid('created_by').references(() => users.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+});
+
 export const developmentScopes = pgTable('development_scopes', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: developmentScopeEnum('name'),
@@ -167,6 +175,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   classroomTeachers: many(classroomTeachers),
   parentChildren: many(parentChild),
   activityAgendas: many(activityAgenda),
+  dayOffs: many(dayOffs),
   lessonPlans: many(lessonPlans),
   dailyAssessments: many(dailyAssessments),
   semesterTopics: many(semesterTopics),
@@ -179,6 +188,13 @@ export const classroomsRelations = relations(classrooms, ({ many }) => ({
   students: many(students),
   activityAgendas: many(activityAgenda),
   lessonPlans: many(lessonPlans),
+}));
+
+export const dayOffsRelations = relations(dayOffs, ({ one }) => ({
+  creator: one(users, {
+    fields: [dayOffs.createdBy],
+    references: [users.id],
+  }),
 }));
 
 export const activityAgendaRelations = relations(activityAgenda, ({ one }) => ({

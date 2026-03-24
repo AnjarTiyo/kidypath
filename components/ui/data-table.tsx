@@ -7,6 +7,7 @@ import {
   VisibilityState,
   flexRender,
   getCoreRowModel,
+  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table"
 import {
@@ -87,6 +88,7 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: manualPagination ? undefined : getPaginationRowModel(),
     manualPagination,
     manualSorting,
     pageCount: manualPagination ? pageCount : undefined,
@@ -97,9 +99,7 @@ export function DataTable<TData, TValue>({
       sorting,
       columnVisibility,
       rowSelection,
-      pagination: manualPagination
-        ? { pageIndex, pageSize }
-        : undefined,
+      ...(manualPagination ? { pagination: { pageIndex, pageSize } } : {}),
     },
   })
 
