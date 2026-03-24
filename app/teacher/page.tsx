@@ -15,6 +15,7 @@ import { LoadingState } from "@/components/layout/loading-state"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
 import { useTomorrowLessonPlan } from "@/lib/hooks/use-tomorrow-lesson-plan"
 import { useTodayDailyStatus } from "@/lib/hooks/use-today-daily-status"
+import { useWeeklyReportStatus } from "@/lib/hooks/use-weekly-report-status"
 import { OutstandingTasksBanner } from "@/components/common/tomorrow-lesson-plan-banner"
 import { Button } from "@/components/ui/button"
 
@@ -24,7 +25,8 @@ export default function TeacherPage() {
   const isUserCurriculumCoordinator = user?.isCurriculumCoordinator || false
   const activeClassrooms = !userLoading && user?.role === "teacher" ? classrooms : []
   const { targetDate, missingClassrooms, isLoading: lessonPlanLoading } = useTomorrowLessonPlan(activeClassrooms)
-  const { checkIn, assessment, checkOut, isLoading: statusLoading } = useTodayDailyStatus(activeClassrooms)
+  const { checkIn, assessment, checkOut, todayLessonPlan, isLoading: statusLoading } = useTodayDailyStatus(activeClassrooms)
+  const weeklyReport = useWeeklyReportStatus(activeClassrooms)
   const bannerLoading = lessonPlanLoading || statusLoading
 
   useEffect(() => {
@@ -102,9 +104,11 @@ export default function TeacherPage() {
         <OutstandingTasksBanner
           targetDate={targetDate}
           missingClassrooms={missingClassrooms}
+          todayLessonPlan={todayLessonPlan}
           checkIn={checkIn}
           assessment={assessment}
           checkOut={checkOut}
+          weeklyReport={weeklyReport.isLoading ? null : weeklyReport}
         />
       )}
 

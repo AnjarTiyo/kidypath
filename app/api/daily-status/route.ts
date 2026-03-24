@@ -172,8 +172,6 @@ export async function GET(request: NextRequest) {
       assessment: assessmentStatus,
       checkOut: checkOutStatus,
     }
-
-    console.log('Returning daily status:', result)
     
     return NextResponse.json(result)
   } catch (error) {

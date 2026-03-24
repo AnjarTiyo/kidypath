@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
+import { Suspense } from "react"
 import { UserManagementPage } from "@/components/user/user-management-page"
 
 export default async function AdminUserPage() {
@@ -13,5 +14,9 @@ export default async function AdminUserPage() {
     redirect("/unauthorized")
   }
 
-  return <UserManagementPage />
+  return (
+    <Suspense>
+      <UserManagementPage />
+    </Suspense>
+  )
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,8 +22,21 @@ interface UserActionsProps {
 }
 
 export function UserActions({ user }: UserActionsProps) {
-  const [showEditDialog, setShowEditDialog] = useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+  const isEditOpen =
+    searchParams.get("modal") === "edit" && searchParams.get("userId") === user.id
+
+  const openEdit = () => {
+    router.replace(`${pathname}?modal=edit&userId=${user.id}`)
+  }
+
+  const closeEdit = () => {
+    router.replace(pathname)
+  }
 
   return (
     <>
@@ -41,7 +55,7 @@ export function UserActions({ user }: UserActionsProps) {
             Copy user ID
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+          <DropdownMenuItem onClick={openEdit}>
             <IconEdit className="mr-2 h-4 w-4" />
             Edit
           </DropdownMenuItem>
@@ -57,8 +71,8 @@ export function UserActions({ user }: UserActionsProps) {
 
       <UserFormDialog
         user={user}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
+        open={isEditOpen}
+        onOpenChange={(open) => !open && closeEdit()}
       />
       <DeleteUserDialog
         user={user}
