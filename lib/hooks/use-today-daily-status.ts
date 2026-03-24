@@ -45,10 +45,17 @@ export interface TodayStatusItem {
   firstIncompleteClassroomId: string | null
 }
 
+export interface TodayLessonPlanStatus {
+  /** true when all classrooms have a lesson plan created for today */
+  done: boolean
+  firstIncompleteClassroomId: string | null
+}
+
 export interface TodayDailyStatus {
   checkIn: TodayStatusItem
   assessment: TodayStatusItem
   checkOut: TodayStatusItem
+  todayLessonPlan: TodayLessonPlanStatus
   isLoading: boolean
 }
 
@@ -62,11 +69,17 @@ function emptyItem(): TodayStatusItem {
   }
 }
 
+function emptyLessonPlan(): TodayLessonPlanStatus {
+  return { done: true, firstIncompleteClassroomId: null }
+}
+
 export function useTodayDailyStatus(classrooms: Classroom[]): TodayDailyStatus {
-  const [status, setStatus] = useState<Omit<TodayDailyStatus, "isLoading">>({
+  const [status, setStatus] = useState<Omit<TodayDailyStatus, "isLoading">>(
+    {
     checkIn: emptyItem(),
     assessment: emptyItem(),
     checkOut: emptyItem(),
+    todayLessonPlan: emptyLessonPlan(),
   })
   const [isLoading, setIsLoading] = useState(true)
 
@@ -75,7 +88,7 @@ export function useTodayDailyStatus(classrooms: Classroom[]): TodayDailyStatus {
 
   useEffect(() => {
     if (classrooms.length === 0) {
-      setStatus({ checkIn: emptyItem(), assessment: emptyItem(), checkOut: emptyItem() })
+      setStatus({ checkIn: emptyItem(), assessment: emptyItem(), checkOut: emptyItem(), todayLessonPlan: emptyLessonPlan() })
       setIsLoading(false)
       return
     }
@@ -133,10 +146,16 @@ export function useTodayDailyStatus(classrooms: Classroom[]): TodayDailyStatus {
           ? (checkOut.completedCount / checkOut.totalStudents) * 100
           : 100
 
-        setStatus({ checkIn, assessment, checkOut })
+        const todayLessonPlan: TodayLessonPlanStatus = {
+          done: valid.every((r) => r.lessonPlan.isCreated),
+          firstIncompleteClassroomId:
+            valid.find((r) => !r.lessonPlan.isCreated)?.classroomId ?? null,
+        }
+
+        setStatus({ checkIn, assessment, checkOut, todayLessonPlan })
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") return
-        setStatus({ checkIn: emptyItem(), assessment: emptyItem(), checkOut: emptyItem() })
+        setStatus({ checkIn: emptyItem(), assessment: emptyItem(), checkOut: emptyItem(), todayLessonPlan: emptyLessonPlan() })
       } finally {
         setIsLoading(false)
       }

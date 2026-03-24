@@ -29,6 +29,13 @@
       "when": 1774246179511,
       "tag": "0003_great_kulan_gath",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1774320709828,
+      "tag": "0004_bouncy_wiccan",
+      "breakpoints": true
     }
   ]
 }
