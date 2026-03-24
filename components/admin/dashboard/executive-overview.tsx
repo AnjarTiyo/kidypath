@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { startTransition, useEffect, useState } from 'react'
 import { useDashboardFilters } from './dashboard-filters-context'
 import { KpiCard } from './kpi-card'
 import { Users, School, CalendarCheck, FileText, Smile } from 'lucide-react'
@@ -28,7 +28,7 @@ export function ExecutiveOverview() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setLoading(true)
+    startTransition(() => setLoading(true))
     fetch(`/api/admin/dashboard/summary?startDate=${filters.startDate}&endDate=${filters.endDate}`)
       .then((r) => r.json())
       .then((d) => { setData(d); setLoading(false) })

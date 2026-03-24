@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, startTransition, useEffect, useState } from 'react'
 import { useDashboardFilters } from './dashboard-filters-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -661,7 +661,7 @@ export function TopicAchievementSection() {
   const [selectedTopicRow, setSelectedTopicRow] = useState<AllTopicRow | null>(null)
 
   useEffect(() => {
-    setLoading(true)
+    startTransition(() => setLoading(true))
     const params = new URLSearchParams({ startDate: filters.startDate, endDate: filters.endDate })
     if (filters.classroomId) params.set('classroomId', filters.classroomId)
     fetch(`/api/admin/dashboard/topic-achievement?${params}`)
@@ -671,7 +671,7 @@ export function TopicAchievementSection() {
   }, [filters.startDate, filters.endDate, filters.classroomId])
 
   useEffect(() => {
-    setAllTopicsLoading(true)
+    startTransition(() => setAllTopicsLoading(true))
     const params = new URLSearchParams({ endDate: filters.endDate })
     if (filters.classroomId) params.set('classroomId', filters.classroomId)
     fetch(`/api/admin/dashboard/topic-achievement/all-topics?${params}`)

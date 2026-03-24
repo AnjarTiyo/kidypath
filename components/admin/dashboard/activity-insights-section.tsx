@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { startTransition, useEffect, useState } from 'react'
 import { useDashboardFilters } from './dashboard-filters-context'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -43,7 +43,7 @@ export function ActivityInsightsSection() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setLoading(true)
+    startTransition(() => setLoading(true))
     const params = new URLSearchParams({
       startDate: filters.startDate,
       endDate: filters.endDate,
