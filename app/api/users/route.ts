@@ -70,6 +70,7 @@ export async function GET(request: NextRequest) {
         id: users.id,
         name: users.name,
         email: users.email,
+        phoneNumber: users.phoneNumber,
         role: users.role,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, email, password, role } = body
+    const { name, email, password, role, phoneNumber } = body
 
     // Validation
     if (!email || !password || !role) {
@@ -147,6 +148,7 @@ export async function POST(request: NextRequest) {
       .values({
         name: name || null,
         email,
+        phoneNumber: phoneNumber ? phoneNumber : null,
         passwordHash,
         role: role as "admin" | "teacher" | "parent",
       })
@@ -154,6 +156,7 @@ export async function POST(request: NextRequest) {
         id: users.id,
         name: users.name,
         email: users.email,
+        phoneNumber: users.phoneNumber,
         role: users.role,
         createdAt: users.createdAt,
       })

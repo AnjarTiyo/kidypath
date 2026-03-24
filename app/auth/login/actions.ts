@@ -4,12 +4,12 @@ import { signIn } from "@/auth"
 import { AuthError } from "next-auth"
 
 export async function authenticate(formData: FormData) {
-  const email = formData.get("email") as string
+  const identifier = formData.get("identifier") as string
   const password = formData.get("password") as string
 
   try {
     await signIn("credentials", {
-      email,
+      identifier,
       password,
       redirectTo: "/",
     })

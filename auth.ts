@@ -5,26 +5,37 @@ import { db } from "@/lib/db"
 import { users } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { verifyPassword } from "@/lib/auth-utils"
+import { isPhoneNumber, normalizePhoneToLocal } from "@/lib/helpers/phone"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        email: { label: "Email", type: "email" },
+        identifier: { label: "Email / No. HP", type: "text" },
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.identifier || !credentials?.password) {
           return null;
         }
 
         try {
-          // Find user by email
-          const [user] = await db
-            .select()
-            .from(users)
-            .where(eq(users.email, credentials.email as string))
-            .limit(1);
+          // Find user by email or phone number
+          let user;
+          if (isPhoneNumber(credentials.identifier as string)) {
+            const normalized = normalizePhoneToLocal(credentials.identifier as string);
+            [user] = await db
+              .select()
+              .from(users)
+              .where(eq(users.phoneNumber, normalized))
+              .limit(1);
+          } else {
+            [user] = await db
+              .select()
+              .from(users)
+              .where(eq(users.email, credentials.identifier as string))
+              .limit(1);
+          }
 
           if (!user || !user.passwordHash) {
             return null;
