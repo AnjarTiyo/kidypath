@@ -28,7 +28,6 @@ export default async function ParentPage() {
       title: "Galeri Ananda",
       description: "Lihat galeri foto dan video anak",
       href: "/parent/gallery",
-      disabled: true,
     }
   ]
 
