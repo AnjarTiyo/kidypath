@@ -41,7 +41,6 @@ export default function AdminPage() {
       title: "Dasbor",
       description: "Lihat ringkasan sistem dan statistik",
       href: "/admin/dashboard",
-      disabled: true
     },
     {
       icon: IconUsers,
