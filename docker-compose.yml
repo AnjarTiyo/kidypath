@@ -5,24 +5,27 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+        MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+        MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
+        MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+        MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+        MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL}
     image: ansara-jurnal-app
     ports:
       - "3000:3000"
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: 3000
-    volumes:
-      - .:/app:cached
-      - /app/node_modules
     env_file:
       - .env
     depends_on:
       - db
-    command: bun run dev --hostname 0.0.0.0 --port 3000
     restart: unless-stopped
 
   db:
-    image: postgres:15
+    image: postgres:latest
     env_file:
       - .env
     volumes:
@@ -56,9 +59,11 @@ services:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-        mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} --api S3v4 &&
-        mc mb --ignore-existing local/${MINIO_BUCKET_NAME} &&
-        mc anonymous set download local/${MINIO_BUCKET_NAME} &&
+        until mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} --api S3v4; do
+          echo 'Waiting for MinIO...' && sleep 2;
+        done &&
+        mc mb --ignore-existing local/$${MINIO_BUCKET_NAME} &&
+        mc anonymous set download local/$${MINIO_BUCKET_NAME} &&
         echo 'MinIO bucket ready.'
       "
     environment:
