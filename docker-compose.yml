@@ -25,7 +25,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:latest
+    image: postgres:15
     env_file:
       - .env
     volumes:
