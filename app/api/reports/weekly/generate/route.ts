@@ -179,7 +179,7 @@ Tulis 2–3 kalimat tentang kondisi emosional dan sosial anak minggu ini. Jujur 
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
-      model: 'llama-3.3-70b-versatile',
+      model: process.env.GROQ_AI_MODEL!,
       temperature: 0.7,
       max_tokens: 700,
       stream: false,

@@ -15,6 +15,13 @@ export const assessmentScoreEnum = pgEnum('assessment_score', ['BB', 'MB', 'BSH'
 export const attendanceTypeEnum = pgEnum('attendance_type', ['check_in', 'check_out']);
 export const attendanceStatusEnum = pgEnum('attendance_status', ['present', 'sick', 'permission']);
 export const moodEnum = pgEnum('mood', ['bahagia', 'sedih', 'marah', 'takut', 'jijik']);
+export const lessonPlanActivityPhaseEnum = pgEnum('lesson_plan_activity_phase', [
+  'kegiatan_awal',
+  'kegiatan_inti',
+  'istirahat',
+  'kegiatan_penutup',
+  'refleksi'
+]);
 
 // Tables
 export const users = pgTable('users', {
@@ -116,6 +123,7 @@ export const lessonPlans = pgTable('lesson_plans', {
   topic: varchar('topic'), // Main topic/theme of the lesson plan
   subtopic: varchar('subtopic'), // Subtopic of the lesson plan
   code: varchar('code'), // Optional code/identifier for the lesson
+  materials: text('materials'), // Alat dan Bahan (tools and materials)
   generatedByAi: boolean('generated_by_ai').default(false),
   createdBy: uuid('created_by').references(() => users.id),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
@@ -129,6 +137,17 @@ export const lessonPlanItems = pgTable('lesson_plan_items', {
   developmentScope: developmentScopeEnum('development_scope'),
   learningGoal: text('learning_goal'), // The learning objective for this scope
   activityContext: text('activity_context'), // The activity/context to achieve the goal
+  generatedByAi: boolean('generated_by_ai').default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});
+
+// Lesson Plan Activities - Daily activity phases (Kegiatan Awal, Inti, Istirahat, Penutup, Refleksi)
+export const lessonPlanActivities = pgTable('lesson_plan_activities', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  lessonPlanId: uuid('lesson_plan_id').references(() => lessonPlans.id, { onDelete: 'cascade' }),
+  phase: lessonPlanActivityPhaseEnum('phase'),
+  description: text('description'),
   generatedByAi: boolean('generated_by_ai').default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
@@ -218,11 +237,19 @@ export const lessonPlansRelations = relations(lessonPlans, ({ one, many }) => ({
     references: [users.id],
   }),
   items: many(lessonPlanItems),
+  activities: many(lessonPlanActivities),
 }));
 
 export const lessonPlanItemsRelations = relations(lessonPlanItems, ({ one }) => ({
   lessonPlan: one(lessonPlans, {
     fields: [lessonPlanItems.lessonPlanId],
+    references: [lessonPlans.id],
+  }),
+}));
+
+export const lessonPlanActivitiesRelations = relations(lessonPlanActivities, ({ one }) => ({
+  lessonPlan: one(lessonPlans, {
+    fields: [lessonPlanActivities.lessonPlanId],
     references: [lessonPlans.id],
   }),
 }));
