@@ -5,6 +5,7 @@
  * and activities for all development scopes.
  */
 
+import Groq from "groq-sdk";
 import { buildTopicContextSection } from "@/lib/helpers/topic-helpers"
 import { CurrentTopicsPayload } from "@/lib/types/current-topics"
 import { DevelopmentScope, DEVELOPMENT_SCOPES } from "@/lib/types/development-scope"
@@ -35,16 +36,50 @@ export async function generateLessonPlan(
   classroomContext?: string,
   currentTopics?: CurrentTopicsPayload | null
 ): Promise<GeneratedLessonPlan> {
-  // TODO: Integrate with actual AI service (OpenAI, Anthropic, etc.)
-  // For now, return a template structure
-  
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error("Groq API key is not configured");
+  }
+
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
   const prompt = buildLessonPlanPrompt(theme, ageGroup, classroomContext, currentTopics);
-  
-  // Placeholder: In production, call your AI service here
-  // const aiResponse = await callAIService(prompt);
-  
-  // For now, return a structured template
-  return generateTemplateLessonPlan(theme);
+
+  try {
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an expert early childhood education curriculum designer for Indonesian kindergarten (PAUD/TK). Always respond with valid JSON only, no extra text.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      model: process.env.GROQ_AI_MODEL!,
+      temperature: 0.7,
+      max_tokens: 5000,
+      top_p: 1,
+      stream: false,
+    });
+
+    const content = chatCompletion.choices[0]?.message?.content;
+
+    if (!content) {
+      throw new Error("Failed to generate lesson plan from AI");
+    }
+
+    const parsed: GeneratedLessonPlan = JSON.parse(content.trim());
+
+    if (!validateLessonPlan(parsed)) {
+      throw new Error("AI response is missing required development scopes");
+    }
+
+    return parsed;
+  } catch (error) {
+    console.error("Error generating lesson plan with Groq, falling back to template:", error);
+    return generateTemplateLessonPlan(theme);
+  }
 }
 
 /**

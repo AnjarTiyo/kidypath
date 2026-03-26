@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { lessonPlans, classrooms, users, classroomTeachers } from "@/lib/db/schema"
+import { lessonPlans, lessonPlanActivities, classrooms, users, classroomTeachers } from "@/lib/db/schema"
 import { desc, asc, sql, or, ilike, eq, and, inArray } from "drizzle-orm"
 import { DEVELOPMENT_SCOPES, DevelopmentScope } from "@/lib/types/development-scope"
 
@@ -12,13 +12,21 @@ interface LessonPlanRequestItem {
   generatedByAi?: boolean
 }
 
+interface LessonPlanActivityRequest {
+  phase: string
+  description: string
+  generatedByAi?: boolean
+}
+
 interface LessonPlanCreateBody {
   classroomId: string
   date: string
   topic: string
   subtopic?: string | null
   code?: string | null
+  materials?: string | null
   items: LessonPlanRequestItem[]
+  activities?: LessonPlanActivityRequest[]
   generatedByAi?: boolean
 }
 
@@ -167,7 +175,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body: LessonPlanCreateBody = await request.json()
-    const { classroomId, date, topic, subtopic, code, items, generatedByAi = false } = body
+    const { classroomId, date, topic, subtopic, code, materials, items, activities, generatedByAi = false } = body
 
     // Validation
     if (!classroomId || !date || !topic || !items || !Array.isArray(items)) {
@@ -263,6 +271,7 @@ export async function POST(request: NextRequest) {
           topic,
           subtopic: subtopic || null,
           code: code || null,
+          materials: materials || null,
           generatedByAi,
           createdBy: session.user.id,
         })
@@ -285,9 +294,25 @@ export async function POST(request: NextRequest) {
         )
         .returning()
 
+      // Insert activity phases if provided
+      const newActivities = activities && activities.length > 0
+        ? await tx
+            .insert(lessonPlanActivities)
+            .values(
+              activities.map((activity) => ({
+                lessonPlanId: newLessonPlan.id,
+                phase: activity.phase as "kegiatan_awal" | "kegiatan_inti" | "istirahat" | "kegiatan_penutup" | "refleksi",
+                description: activity.description,
+                generatedByAi: activity.generatedByAi || generatedByAi,
+              }))
+            )
+            .returning()
+        : []
+
       return {
         ...newLessonPlan,
         items: newItems,
+        activities: newActivities,
       }
     })
 

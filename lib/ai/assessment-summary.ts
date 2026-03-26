@@ -194,7 +194,7 @@ The journal must be ready to send without edits.
           content: userPrompt,
         },
       ],
-      model: "llama-3.3-70b-versatile",
+      model: process.env.GROQ_AI_MODEL!,
       temperature: 0.7,
       max_tokens: 500,
       top_p: 1,

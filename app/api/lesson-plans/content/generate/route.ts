@@ -10,14 +10,22 @@ interface GeneratedLessonPlanItem {
     activityContext: string
 }
 
+interface GeneratedActivityPhase {
+    phase: string
+    description: string
+}
+
 interface GeneratedLessonPlanResponse {
     items?: GeneratedLessonPlanItem[]
+    activities?: GeneratedActivityPhase[]
+    materials?: string
 }
 
 interface GenerateLessonPlanPayload {
     topic: string
     subtopic?: string | null
     userPrompt?: string
+    ageGroup?: string
     currentTopics?: CurrentTopicsPayload | null
 }
 
@@ -45,7 +53,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = (await request.json()) as GenerateLessonPlanPayload
-        const { topic, subtopic, userPrompt: userPreferences, currentTopics } = body
+        const { topic, subtopic, userPrompt: userPreferences, ageGroup, currentTopics } = body
 
         if (!topic || typeof topic !== "string" || topic.trim().length === 0) {
             return NextResponse.json(
@@ -63,48 +71,60 @@ export async function POST(request: NextRequest) {
 
         const systemPrompt = `You are an expert early childhood education curriculum designer for Indonesian kindergarten (PAUD/TK). 
 
-You MUST create a comprehensive daily lesson plan that covers ALL 6 development scopes (aspek perkembangan) required by Indonesian curriculum.
+You MUST create a comprehensive daily lesson plan that covers ALL 6 development scopes, 5 daily activity phases, and a materials list.
 
-For each development scope, provide:
-1. A specific, measurable learning goal (tujuan pembelajaran)
-2. A practical, engaging activity description (konteks/aktivitas)
+CRITICAL: You MUST use EXACTLY these developmentScope values in the items array — never translate or change them:
+- "religious_moral"
+- "physical_motor"
+- "cognitive"
+- "language"
+- "social_emotional"
+- "art"
 
 IMPORTANT: 
 - Respond ONLY with valid JSON, no additional text
-- Use simple, clear Bahasa Indonesia
-- Make activities age-appropriate and fun
-- All activities should relate to the daily theme
+- Use simple, clear Bahasa Indonesia for all content descriptions
+- Make everything age-appropriate and fun
+- All content should relate to the daily theme
 - Keep descriptions concise but complete (2-3 sentences each)
 
-The 6 required development scopes are:
-1. Nilai Agama dan Moral (religious_moral) - Religious and moral values
-2. Fisik-Motorik (physical_motor) - Physical and motor development
-3. Kognitif (cognitive) - Cognitive development
-4. Bahasa (language) - Language development
-5. Sosial-Emosional (social_emotional) - Social and emotional development
-6. Seni (art) - Art and creativity
+The 5 required activity phases for the "activities" array are:
+1. "kegiatan_awal" - Opening (15 min): circle time, morning prayers, warm-up
+2. "kegiatan_inti" - Core (60 min): main learning activities tied to the theme
+3. "istirahat" - Break (30 min): snack, free play, toilet time
+4. "kegiatan_penutup" - Closing (15 min): recap, reflection, closing prayer
+5. "refleksi" - Teacher reflection: observations and notes for improvement
 
 Respond with this exact JSON structure:
 {
   "items": [
-    {
-      "developmentScope": "religious_moral",
-      "learningGoal": "Tujuan pembelajaran untuk aspek agama dan moral",
-      "activityContext": "Deskripsi aktivitas untuk mencapai tujuan"
-    },
-    ... (5 more items for other scopes)
-  ]
+    { "developmentScope": "religious_moral", "learningGoal": "...", "activityContext": "..." },
+    { "developmentScope": "physical_motor", "learningGoal": "...", "activityContext": "..." },
+    { "developmentScope": "cognitive", "learningGoal": "...", "activityContext": "..." },
+    { "developmentScope": "language", "learningGoal": "...", "activityContext": "..." },
+    { "developmentScope": "social_emotional", "learningGoal": "...", "activityContext": "..." },
+    { "developmentScope": "art", "learningGoal": "...", "activityContext": "..." }
+  ],
+  "activities": [
+    { "phase": "kegiatan_awal", "description": "..." },
+    { "phase": "kegiatan_inti", "description": "..." },
+    { "phase": "istirahat", "description": "..." },
+    { "phase": "kegiatan_penutup", "description": "..." },
+    { "phase": "refleksi", "description": "..." }
+  ],
+  "materials": "Daftar alat dan bahan yang dibutuhkan"
 }`
 
         const topicContext = buildTopicContextSection(currentTopics)
         const topicContextSection = topicContext ? `\nKonteks kurikulum saat ini:\n${topicContext}\n` : ''
-        const userPrompt = `Create a daily lesson plan for the theme: "${topic}"${subtopic ? ` with subtopic: "${subtopic}"` : ''}.
+        const resolvedAgeGroup = ageGroup?.trim() || '4-5 tahun'
+        const userPrompt = `Buat rencana pembelajaran harian untuk tema: "${topic}"${subtopic ? ` dengan sub-tema: "${subtopic}"` : ''}.
 
-Theme: ${topic}${subtopic ? `\nSubtopic: ${subtopic}` : ''}
-Age Group: 4-5 years (KB/TK A) or 5-6 years (TK B)
-${topicContextSection}${userPreferences && userPreferences.trim().length > 0 ? `\nAdditional preferences: ${userPreferences}` : ''}
+Tema: ${topic}${subtopic ? `\nSub-tema: ${subtopic}` : ''}
+Kelompok Usia: ${resolvedAgeGroup}
+${topicContextSection}${userPreferences && userPreferences.trim().length > 0 ? `\nPreferensi tambahan: ${userPreferences}` : ''}
 
-Generate learning goals and activities for ALL 6 development scopes. Make sure all activities are practical and can be done in a classroom setting.`
+Buat tujuan pembelajaran dan aktivitas untuk SEMUA 6 aspek perkembangan, SEMUA 5 fase kegiatan harian, dan daftar alat dan bahan. Pastikan semua aktivitas praktis dan bisa dilakukan di kelas.`
 
         const chatCompletion = await groq.chat.completions.create({
             messages: [
@@ -117,9 +137,9 @@ Generate learning goals and activities for ALL 6 development scopes. Make sure a
                     content: userPrompt,
                 },
             ],
-            model: "llama-3.3-70b-versatile",
+            model: process.env.GROQ_AI_MODEL!,
             temperature: 0.7,
-            max_tokens: 2000,
+            max_tokens: 3000,
             top_p: 1,
             stream: false,
             response_format: { type: "json_object" },
@@ -155,12 +175,35 @@ Generate learning goals and activities for ALL 6 development scopes. Make sure a
         }
 
         const requiredScopes = ['religious_moral', 'physical_motor', 'cognitive', 'language', 'social_emotional', 'art']
-        const items = parsedData.items || []
-        
-        if (!Array.isArray(items) || items.length !== 6) {
-            console.error("AI response missing required items:", items)
+
+        // Normalize scope names in case the model returns variations
+        const scopeAliases: Record<string, string> = {
+            'nilai_agama_dan_moral': 'religious_moral',
+            'nilai_agama': 'religious_moral',
+            'agama_moral': 'religious_moral',
+            'moral': 'religious_moral',
+            'fisik_motorik': 'physical_motor',
+            'fisik': 'physical_motor',
+            'motorik': 'physical_motor',
+            'physical': 'physical_motor',
+            'kognitif': 'cognitive',
+            'bahasa': 'language',
+            'sosial_emosional': 'social_emotional',
+            'sosial': 'social_emotional',
+            'emosional': 'social_emotional',
+            'seni': 'art',
+        }
+
+        const rawItems = parsedData.items || []
+        const items = rawItems.map((item) => ({
+            ...item,
+            developmentScope: scopeAliases[item.developmentScope] ?? item.developmentScope,
+        }))
+
+        if (!Array.isArray(items) || items.length === 0) {
+            console.error("AI response has no items:", parsedData)
             return NextResponse.json(
-                { error: "AI did not generate all required development scopes" },
+                { error: "AI did not generate any development scope items" },
                 { status: 500 }
             )
         }
@@ -169,15 +212,17 @@ Generate learning goals and activities for ALL 6 development scopes. Make sure a
         const missingScopes = requiredScopes.filter(scope => !presentScopes.has(scope))
         
         if (missingScopes.length > 0) {
-            console.error("AI response missing scopes:", missingScopes)
+            console.error("AI response missing scopes:", missingScopes, "raw response:", generatedContent)
             return NextResponse.json(
-                { error: `Missing development scopes: ${missingScopes.join(', ')}` },
+                { error: `AI did not generate all required development scopes: ${missingScopes.join(', ')}` },
                 { status: 500 }
             )
         }
 
         return NextResponse.json({
             items: items,
+            activities: parsedData.activities || [],
+            materials: parsedData.materials || "",
             success: true,
         })
     } catch (error) {

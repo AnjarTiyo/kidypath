@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
 import { LessonPlanBasicInfoCard } from "@/components/lesson-plan/lesson-plan-basic-info-card"
 import { LessonPlanAgendaCard } from "@/components/lesson-plan/lesson-plan-agenda-card"
+import { LessonPlanActivitiesCard } from "@/components/lesson-plan/lesson-plan-activities-card"
 import { format, parse } from "date-fns"
 import {
   IconHome,
@@ -16,6 +17,21 @@ import {
   IconArrowLeft
 } from "@tabler/icons-react"
 import { CurrentTopicsPayload, CurrentTopicsResponse } from "@/lib/types/current-topics"
+
+type ActivityPhase =
+  | "kegiatan_awal"
+  | "kegiatan_inti"
+  | "istirahat"
+  | "kegiatan_penutup"
+  | "refleksi"
+
+const ACTIVITY_PHASES: ActivityPhase[] = [
+  "kegiatan_awal",
+  "kegiatan_inti",
+  "istirahat",
+  "kegiatan_penutup",
+  "refleksi",
+]
 
 type DevelopmentScope =
   | "religious_moral"
@@ -32,8 +48,16 @@ interface LessonPlanItem {
   generatedByAi?: boolean
 }
 
+interface ActivityPhaseItem {
+  phase: ActivityPhase
+  description: string
+  generatedByAi?: boolean
+}
+
 interface GeneratedLessonPlanResponse {
   items: Array<Pick<LessonPlanItem, "developmentScope" | "learningGoal" | "activityContext">>
+  activities?: Array<{ phase: string; description: string }>
+  materials?: string
 }
 
 interface Classroom {
@@ -78,12 +102,19 @@ export default function LessonPlanNewPageClient() {
     topic: "",
     subtopic: "",
     code: "",
+    ageGroup: "",
+    materials: "",
     items: developmentScopes.map((scope) => ({
       developmentScope: scope,
       learningGoal: "",
       activityContext: "",
       generatedByAi: false,
     })),
+    activities: ACTIVITY_PHASES.map((phase) => ({
+      phase,
+      description: "",
+      generatedByAi: false,
+    })) as ActivityPhaseItem[],
   })
 
   useEffect(() => {
@@ -219,7 +250,9 @@ export default function LessonPlanNewPageClient() {
           topic: formData.topic,
           subtopic: formData.subtopic || null,
           code: formData.code || null,
+          materials: formData.materials || null,
           items: formData.items,
+          activities: formData.activities.filter((a) => a.description.trim()),
           generatedByAi: generatedByAi,
         }),
       })
@@ -261,6 +294,7 @@ export default function LessonPlanNewPageClient() {
           topic: formData.topic,
           subtopic: formData.subtopic,
           userPrompt: prompt || "",
+          ageGroup: formData.ageGroup,
           currentTopics,
         }),
       })
@@ -282,9 +316,20 @@ export default function LessonPlanNewPageClient() {
         }
       })
 
+      const updatedActivities = ACTIVITY_PHASES.map((phase) => {
+        const generatedActivity = data.activities?.find((a) => a.phase === phase)
+        return {
+          phase,
+          description: generatedActivity?.description || "",
+          generatedByAi: true,
+        }
+      })
+
       setFormData({
         ...formData,
         items: updatedItems,
+        activities: updatedActivities,
+        materials: data.materials || formData.materials,
       })
       setGeneratedByAi(true)
     } catch (error) {
@@ -306,6 +351,19 @@ export default function LessonPlanNewPageClient() {
         item.developmentScope === scope ? { ...item, [field]: value } : item
       ),
     })
+  }
+
+  const updateActivity = (phase: ActivityPhase, value: string) => {
+    setFormData({
+      ...formData,
+      activities: formData.activities.map((a) =>
+        a.phase === phase ? { ...a, description: value } : a
+      ),
+    })
+  }
+
+  const updateMaterials = (value: string) => {
+    setFormData({ ...formData, materials: value })
   }
 
   if (loadingUser) {
@@ -377,6 +435,7 @@ export default function LessonPlanNewPageClient() {
               topic: formData.topic,
               subtopic: formData.subtopic,
               code: formData.code,
+              ageGroup: formData.ageGroup,
             }}
             classrooms={classrooms}
             loadingClassrooms={loadingClassrooms}
@@ -400,6 +459,14 @@ export default function LessonPlanNewPageClient() {
             onItemChange={updateItem}
           />
         </div>
+
+        <LessonPlanActivitiesCard
+          activities={formData.activities}
+          materials={formData.materials}
+          isGenerating={isGenerating}
+          onActivityChange={updateActivity}
+          onMaterialsChange={updateMaterials}
+        />
 
         {errors.submit && (
           <Card className="border-destructive">

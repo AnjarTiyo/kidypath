@@ -33,6 +33,7 @@ interface BasicInfoFormData {
     topic: string
     subtopic: string
     code: string
+    ageGroup: string
 }
 
 interface LessonPlanBasicInfoCardProps {
@@ -394,6 +395,19 @@ export function LessonPlanBasicInfoCard({
                         onChange={(e) => onFormChange({ subtopic: e.target.value })}
                         rows={2}
                         className="resize-none text-xs"
+                    />
+                </div>
+
+                {/* Age Group */}
+                <div className="space-y-1.5">
+                    <Label htmlFor="ageGroup" className="text-xs">Kelompok Usia (Opsional)</Label>
+                    <Input
+                        id="ageGroup"
+                        type="text"
+                        placeholder="Contoh: 4-5 tahun, TK B"
+                        value={formData.ageGroup}
+                        onChange={(e) => onFormChange({ ageGroup: e.target.value })}
+                        className="h-9 text-xs"
                     />
                 </div>
 
