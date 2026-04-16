@@ -32,9 +32,9 @@ export function LoginForm() {
   return (
     <Card className="w-full">
       <CardHeader className="space-y-1 sm:space-y-2">
-        <CardTitle className="text-xl sm:text-2xl">Login</CardTitle>
+        <CardTitle className="text-xl sm:text-2xl">Login KidyPath</CardTitle>
         <CardDescription className="text-xs sm:text-sm">
-          Halo, Guru Hebat! Masukkan email/nomor HP dan password Anda untuk lanjut berbagi keceriaan di Kidy Path.
+          Halo, Guru Hebat! Masukkan username/nomor HP dan password Anda untuk lanjut berbagi keceriaan di Kidy Path.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col w-full">
