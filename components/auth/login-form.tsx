@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { authenticate } from "@/app/auth/login/actions"
-import { IconEye, IconEyeOff } from "@tabler/icons-react"
+import { IconEye, IconEyeOff, IconLoader, IconLogin } from "@tabler/icons-react"
+import { Badge } from "../ui/badge"
+import { version } from "@/package.json"
 
 export function LoginForm() {
   const [error, setError] = useState<string | undefined>()
@@ -16,9 +18,9 @@ export function LoginForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(undefined)
-    
+
     const formData = new FormData(e.currentTarget)
-    
+
     startTransition(async () => {
       const result = await authenticate(formData)
       if (result) {
@@ -32,13 +34,13 @@ export function LoginForm() {
       <CardHeader className="space-y-1 sm:space-y-2">
         <CardTitle className="text-xl sm:text-2xl">Login</CardTitle>
         <CardDescription className="text-xs sm:text-sm">
-          Gunakan email atau nomor HP dan password akun Anda untuk masuk ke Kidy Path.
+          Halo, Guru Hebat! Masukkan email/nomor HP dan password Anda untuk lanjut berbagi keceriaan di Kidy Path.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col w-full">
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div className="space-y-1.5 sm:space-y-2">
-            <Label htmlFor="identifier" className="text-sm">Email / No. HP</Label>
+            <Label htmlFor="identifier" className="text-sm">Username / No. HP</Label>
             <Input
               id="identifier"
               name="identifier"
@@ -82,9 +84,11 @@ export function LoginForm() {
             </div>
           )}
           <Button type="submit" className="w-full h-10 sm:h-11 text-sm sm:text-base" disabled={isPending}>
+            {isPending ? <IconLoader className="animate-spin h-4 w-4 sm:h-5 sm:w-5" /> : <IconLogin className="h-4 w-4 sm:h-5 sm:w-5" />}
             {isPending ? "Loading..." : "Masuk"}
           </Button>
         </form>
+        <span className="pt-4 text-[10px] text-muted-foreground italic text-center w-full">Versi v{version}</span>
       </CardContent>
     </Card>
   )
