@@ -49,7 +49,7 @@ export async function GET(
         },
         creator: {
           columns: {
-            name: true,
+            fullName: true,
           },
         },
       },
@@ -91,7 +91,7 @@ export async function GET(
       code: lessonPlan.code,
       generatedByAi: lessonPlan.generatedByAi,
       createdBy: lessonPlan.createdBy,
-      createdByName: lessonPlan.creator?.name,
+      createdByName: lessonPlan.creator?.fullName,
       createdAt: lessonPlan.createdAt,
       updatedAt: lessonPlan.updatedAt,
       items: lessonPlan.items,

@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
         },
         creator: {
           columns: {
-            name: true,
+            fullName: true,
           },
         },
       },
@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
       code: lp.code,
       generatedByAi: lp.generatedByAi,
       createdBy: lp.createdBy,
-      createdByName: lp.creator?.name,
+      createdByName: lp.creator?.fullName,
       createdAt: lp.createdAt,
       updatedAt: lp.updatedAt,
       items: lp.items,

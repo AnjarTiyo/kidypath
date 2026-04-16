@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
     const [newUser] = await db
       .insert(users)
       .values({
-        name: name || null,
+        fullName: name || null,
         email,
         phoneNumber: phoneNumber ? phoneNumber : null,
         passwordHash,
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
       })
       .returning({
         id: users.id,
-        name: users.fullName,
+        fullName: users.fullName,
         email: users.email,
         phoneNumber: users.phoneNumber,
         role: users.role,
