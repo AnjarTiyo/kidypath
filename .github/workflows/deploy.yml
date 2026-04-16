@@ -105,7 +105,7 @@ jobs:
             # Restart app with new image (no rebuild on server)
             cd ~/kidypath
             GHCR_IMAGE="ghcr.io/$IMAGE_OWNER/kidypath:latest" \
-              podman-compose --env-file .env up -d --no-build app
+              podman-compose --env-file .env up -d --no-build --force-recreate app
 
             # Clean up old images (remove stopped containers first to release references)
             podman container prune -f || true
