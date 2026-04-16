@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "next build",
+    "build": "eslint --quiet && next build",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
@@ -12,8 +12,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "bun run lib/db/seed.ts",
-    "db:check": "bun run lib/db/check.ts",
-    "db:verify": "bun run lib/db/verify.ts"
+    "db:check": "bun run lib/db/check.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1014.0",
@@ -65,7 +64,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "baseline-browser-mapping": "^2.10.9",
+    "baseline-browser-mapping": "^2.10.19",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.0.8",
