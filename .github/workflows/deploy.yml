@@ -85,7 +85,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: GHCR_PAT,GITHUB_ACTOR,GITHUB_REPOSITORY_OWNER
+          envs: GHCR_PAT,GITHUB_ACTOR,IMAGE_OWNER
           script: |
             set -e
 
@@ -93,22 +93,22 @@ jobs:
             echo "$GHCR_PAT" | podman login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
             # Pull the new image
-            podman pull "ghcr.io/$GITHUB_REPOSITORY_OWNER/kidypath:latest"
+            podman pull "ghcr.io/$IMAGE_OWNER/kidypath:latest"
 
             # Run database migrations before restarting the app
             podman run --rm \
               --env-file ~/kidypath/.env \
               --network=kidypath_default \
-              "ghcr.io/$GITHUB_REPOSITORY_OWNER/kidypath:latest" \
+              "ghcr.io/$IMAGE_OWNER/kidypath:latest" \
               bun run db:migrate
 
             # Restart app with new image (no rebuild on server)
             cd ~/kidypath
-            GHCR_IMAGE="ghcr.io/$GITHUB_REPOSITORY_OWNER/kidypath:latest" \
+            GHCR_IMAGE="ghcr.io/$IMAGE_OWNER/kidypath:latest" \
               podman-compose --env-file .env up -d --no-build app
 
             # Clean up old images
             podman image prune -f
         env:
           GHCR_PAT: ${{ secrets.GHCR_PAT }}
-          GITHUB_REPOSITORY_OWNER: ${{ needs.build-and-push.outputs.owner }}
+          IMAGE_OWNER: ${{ needs.build-and-push.outputs.owner }}
