@@ -114,19 +114,26 @@ jobs:
               "$IMAGE" \
               bun run db:migrate
 
-            # Stop and remove old container explicitly, then recreate
+            # Stop and remove old app container (try both naming conventions)
             echo "==> Stopping old container..."
-            podman stop kidypath_app_1 || true
-            podman rm kidypath_app_1 || true
+            podman stop kidypath_app_1 2>/dev/null || podman stop kidypath-app-1 2>/dev/null || true
+            podman rm   kidypath_app_1 2>/dev/null || podman rm   kidypath-app-1 2>/dev/null || true
 
-            # Restart app with the exact new image
-            cd ~/kidypath
-            GHCR_IMAGE="$IMAGE" \
-              podman-compose --env-file .env up -d --no-build app
+            # Start new container directly — no compose variable substitution involved
+            echo "==> Starting new container with $IMAGE..."
+            podman run -d \
+              --name kidypath-app-1 \
+              --network=kidypath_default \
+              --env-file ~/kidypath/.env \
+              -e NODE_ENV=production \
+              -e PORT=3000 \
+              -p 3000:3000 \
+              --restart unless-stopped \
+              "$IMAGE"
 
             # Confirm what is now running
             echo "==> Container now running:"
-            podman inspect --format='{{.Image}} / {{.ImageName}}' kidypath_app_1 2>/dev/null || echo "(container not found)"
+            podman inspect --format='{{.Image}} / {{.ImageName}}' kidypath-app-1 2>/dev/null || echo "(container not found)"
 
             # Clean up old images (remove stopped containers first to release references)
             podman container prune -f || true
