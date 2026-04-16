@@ -13,7 +13,7 @@ services:
         MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
         MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL}
         GROQ_API_KEY: ${GROQ_API_KEY}
-    image: ansara-jurnal-app
+    image: ${GHCR_IMAGE:-ansara-jurnal-app}
     ports:
       - "3000:3000"
     environment:
