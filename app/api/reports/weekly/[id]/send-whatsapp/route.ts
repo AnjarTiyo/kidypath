@@ -91,7 +91,7 @@ export async function POST(
     // Fetch all parents with phone numbers mapped to this student
     const parents = await db
       .select({
-        parentName: users.name,
+        parentName: users.fullName,
         phoneNumber: users.phoneNumber,
       })
       .from(parentChild)

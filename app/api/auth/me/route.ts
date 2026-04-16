@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     const [user] = await db
       .select({
         id: users.id,
-        name: users.name,
+        name: users.fullName,
         email: users.email,
         role: users.role,
         isCurriculumCoordinator: users.isCurriculumCoordinator,

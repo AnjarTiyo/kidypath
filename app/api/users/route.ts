@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     if (search) {
       conditions.push(
         or(
-          ilike(users.name, `%${search}%`),
+          ilike(users.fullName, `%${search}%`),
           ilike(users.email, `%${search}%`)
         )
       )
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       .where(whereClause)
 
     // Get users
-    const orderColumn = sortBy === "name" ? users.name :
+    const orderColumn = sortBy === "name" ? users.fullName :
                         sortBy === "email" ? users.email :
                         sortBy === "role" ? users.role :
                         users.createdAt
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     const userList = await db
       .select({
         id: users.id,
-        name: users.name,
+        name: users.fullName,
         email: users.email,
         phoneNumber: users.phoneNumber,
         role: users.role,
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
       })
       .returning({
         id: users.id,
-        name: users.name,
+        name: users.fullName,
         email: users.email,
         phoneNumber: users.phoneNumber,
         role: users.role,

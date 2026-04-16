@@ -57,6 +57,13 @@
       "when": 1774455334942,
       "tag": "0007_tidy_cargill",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1776340107321,
+      "tag": "0008_first_northstar",
+      "breakpoints": true
     }
   ]
 }

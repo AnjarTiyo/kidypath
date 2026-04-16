@@ -304,7 +304,7 @@ export async function GET(
       ? await db
           .select({
             id: users.id,
-            name: users.name,
+            name: users.fullName,
           })
           .from(classroomTeachers)
           .innerJoin(users, eq(classroomTeachers.teacherId, users.id))

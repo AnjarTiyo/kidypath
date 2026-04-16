@@ -27,7 +27,7 @@ export async function GET(
     const [user] = await db
       .select({
         id: users.id,
-        name: users.name,
+        name: users.fullName,
         email: users.email,
         phoneNumber: users.phoneNumber,
         role: users.role,
@@ -126,7 +126,7 @@ export async function PATCH(
       .where(eq(users.id, id))
       .returning({
         id: users.id,
-        name: users.name,
+        name: users.fullName,
         email: users.email,
         phoneNumber: users.phoneNumber,
         role: users.role,

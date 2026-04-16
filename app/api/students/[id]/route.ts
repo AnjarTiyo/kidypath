@@ -42,7 +42,7 @@ export async function GET(
     const parentsData = await db
       .select({
         parentId: users.id,
-        parentName: users.name,
+        parentName: users.fullName,
         parentEmail: users.email,
       })
       .from(parentChild)

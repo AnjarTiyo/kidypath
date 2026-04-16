@@ -1,68 +1,71 @@
-import type { Metadata } from 'next'
-import { CheckCircle2, XCircle, Shield } from 'lucide-react'
-import { verifyToken } from '@/lib/utils/signature'
-import { db } from '@/lib/db'
-import { weeklyReports, students, users } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Verifikasi Dokumen – KidyPath',
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { CheckCircle2, XCircle, Shield, Loader2 } from 'lucide-react'
+
+interface VerifyResult {
+  valid: boolean
+  reason?: string
+  teacherName?: string | null
+  studentName?: string | null
+  weekStart?: string | null
+  weekEnd?: string | null
+  issuedAt?: number
+  reportId?: string
+  teacherId?: string
 }
 
-interface PageProps {
-  searchParams: Promise<{ t?: string }>
-}
+function VerifyContent() {
+  const searchParams = useSearchParams()
+  const t = searchParams.get('t')
+  const [result, setResult] = useState<VerifyResult | null>(null)
+  const [loading, setLoading] = useState(true)
 
-export default async function VerifyPage({ searchParams }: PageProps) {
-  const { t } = await searchParams
+  useEffect(() => {
+    if (!t) {
+      setResult({ valid: false, reason: 'Token verifikasi tidak ditemukan dalam URL.' })
+      setLoading(false)
+      return
+    }
 
-  if (!t) {
-    return <InvalidView reason="Token verifikasi tidak ditemukan dalam URL." />
-  }
+    fetch(`/api/verify?t=${encodeURIComponent(t)}`)
+      .then((res) => res.json())
+      .then((data: VerifyResult) => setResult(data))
+      .catch(() =>
+        setResult({ valid: false, reason: 'Terjadi kesalahan saat memverifikasi dokumen.' }),
+      )
+      .finally(() => setLoading(false))
+  }, [t])
 
-  const payload = verifyToken(decodeURIComponent(t))
-  if (!payload) {
+  if (loading) {
     return (
-      <InvalidView reason="Tanda tangan digital tidak valid atau telah dimanipulasi. Dokumen tidak dapat diverifikasi." />
+      <main className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
+        <div className="flex items-center gap-3 text-gray-500">
+          <Loader2 className="animate-spin" size={22} />
+          <span className="text-sm">Memverifikasi dokumen...</span>
+        </div>
+      </main>
     )
   }
 
-  // Fetch supporting data for display (best-effort)
-  const [report] = await db
-    .select({ weekStart: weeklyReports.weekStart, weekEnd: weeklyReports.weekEnd, studentId: weeklyReports.studentId })
-    .from(weeklyReports)
-    .where(eq(weeklyReports.id, payload.rid))
-    .limit(1)
+  if (!result?.valid) {
+    return <InvalidView reason={result?.reason ?? 'Verifikasi gagal.'} />
+  }
 
-  const [student] = report?.studentId
-    ? await db
-        .select({ fullName: students.fullName })
-        .from(students)
-        .where(eq(students.id, report.studentId!))
-        .limit(1)
-    : []
-
-  const [teacher] = await db
-    .select({ name: users.name })
-    .from(users)
-    .where(eq(users.id, payload.sub))
-    .limit(1)
-
-  const studentName = student?.fullName ?? null
+  const studentName = result.studentName ?? null
   const weekRange =
-    report?.weekStart && report?.weekEnd
-      ? `${report.weekStart} – ${report.weekEnd}`
-      : null
-  const documentTitle = ['Laporan Mingguan', studentName, weekRange]
-    .filter(Boolean)
-    .join(' ')
+    result.weekStart && result.weekEnd ? `${result.weekStart} – ${result.weekEnd}` : null
+  const documentTitle = ['Laporan Mingguan', studentName, weekRange].filter(Boolean).join(' ')
 
-  const issuedDate = new Date(payload.iat * 1000).toLocaleDateString('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
+  const issuedDate = result.issuedAt
+    ? new Date(result.issuedAt * 1000).toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    : '-'
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
@@ -80,11 +83,11 @@ export default async function VerifyPage({ searchParams }: PageProps) {
 
         {/* Detail rows */}
         <div className="px-6 py-5 space-y-4">
-          <InfoRow label="Diterbitkan oleh" value={teacher?.name ?? `ID: ${payload.sub}`} bold />
+          <InfoRow label="Diterbitkan oleh" value={result.teacherName ?? `ID: ${result.teacherId}`} bold />
           <InfoRow label="Tanggal Tanda Tangan" value={issuedDate} />
           <InfoRow
             label="Judul Dokumen"
-            value={documentTitle || `Laporan ID: ${payload.rid}`}
+            value={documentTitle || `Laporan ID: ${result.reportId}`}
             bold
           />
         </div>
@@ -96,6 +99,21 @@ export default async function VerifyPage({ searchParams }: PageProps) {
         </div>
       </div>
     </main>
+  )
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
+        <div className="flex items-center gap-3 text-gray-500">
+          <Loader2 className="animate-spin" size={22} />
+          <span className="text-sm">Memverifikasi dokumen...</span>
+        </div>
+      </main>
+    }>
+      <VerifyContent />
+    </Suspense>
   )
 }
 

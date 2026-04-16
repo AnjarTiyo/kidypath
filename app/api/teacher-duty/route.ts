@@ -34,7 +34,7 @@ export async function GET() {
     const dutyTeachers = await db
       .select({
         id: users.id,
-        name: users.name,
+        name: users.fullName,
         email: users.email,
         isCurriculumCoordinator: users.isCurriculumCoordinator,
       })
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       .where(eq(users.id, teacherId))
       .returning({
         id: users.id,
-        name: users.name,
+        name: users.fullName,
         email: users.email,
         isCurriculumCoordinator: users.isCurriculumCoordinator,
       })
