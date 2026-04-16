@@ -160,7 +160,7 @@ export function UserButton() {
                         <AlertDialogAction
                             onClick={handleLogout}
                             disabled={isLoggingOut}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className="bg-destructive text-primary-foreground hover:bg-destructive/90"
                         >
                             {isLoggingOut ? "Logging out..." : "Ya, Logout"}
                         </AlertDialogAction>
