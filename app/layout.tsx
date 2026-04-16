@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 // @ts-ignore
 import "./globals.css";
+import { IconCopyright } from "@tabler/icons-react";
 
 const jakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -31,9 +32,9 @@ export default function RootLayout({
       >
         <main className="h-full w-full overflow-y-auto pb-12">{children}</main>
 
-        <footer className="fixed inset-x-0 bottom-0 z-50 h-14 border-t border-gray-200 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-          <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-center px-4 text-center text-sm text-gray-600 sm:px-6">
-            © {currentYear} KidyPath by Ansara. All rights reserved.
+        <footer className="fixed inset-x-0 bottom-0 z-50 h-14 border-t border-gray-200 bg-primary/95">
+          <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-center px-4 text-center text-sm text-primary-foreground/80 sm:px-6">
+            <IconCopyright className="mr-2 h-4 w-4" /> {currentYear} KidyPath by Ansara. Hak cipta dilindungi.
           </div>
         </footer>
       </body>
