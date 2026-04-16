@@ -92,11 +92,20 @@ jobs:
 
             IMAGE="ghcr.io/$IMAGE_OWNER/kidypath:$IMAGE_SHA"
 
+            echo "==> Deploying image: $IMAGE"
+
             # Authenticate with GHCR
             echo "$GHCR_PAT" | podman login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
             # Pull the exact versioned image
+            echo "==> Pulling image..."
             podman pull "$IMAGE"
+            echo "==> Pull complete. Digest:"
+            podman inspect --format='{{.Digest}}' "$IMAGE"
+
+            # Show what is currently running
+            echo "==> Currently running container image:"
+            podman inspect --format='{{.Image}} / {{.ImageName}}' kidypath_app_1 2>/dev/null || echo "(container not found)"
 
             # Run database migrations before restarting the app
             podman run --rm \
@@ -105,10 +114,19 @@ jobs:
               "$IMAGE" \
               bun run db:migrate
 
+            # Stop and remove old container explicitly, then recreate
+            echo "==> Stopping old container..."
+            podman stop kidypath_app_1 || true
+            podman rm kidypath_app_1 || true
+
             # Restart app with the exact new image
             cd ~/kidypath
             GHCR_IMAGE="$IMAGE" \
-              podman-compose --env-file .env up -d --no-build --force-recreate app
+              podman-compose --env-file .env up -d --no-build app
+
+            # Confirm what is now running
+            echo "==> Container now running:"
+            podman inspect --format='{{.Image}} / {{.ImageName}}' kidypath_app_1 2>/dev/null || echo "(container not found)"
 
             # Clean up old images (remove stopped containers first to release references)
             podman container prune -f || true
