@@ -89,19 +89,19 @@ async function seed() {
   
   await db.insert(schema.users).values([
     {
-      name: 'Admin User',
+      fullName: 'Admin User',
       email: 'admin@kidypath.id',
       passwordHash: hashedPassword,
       role: 'admin',
     },
     {
-      name: 'Teacher User',
+      fullName: 'Teacher User',
       email: 'teacher@kidypath.id',
       passwordHash: hashedPassword,
       role: 'teacher',
     },
     {
-      name: 'Parent User',
+      fullName: 'Parent User',
       email: 'parent@kidypath.id',
       passwordHash: hashedPassword,
       role: 'parent',
