@@ -107,8 +107,9 @@ jobs:
             GHCR_IMAGE="ghcr.io/$IMAGE_OWNER/kidypath:latest" \
               podman-compose --env-file .env up -d --no-build app
 
-            # Clean up old images
-            podman image prune -f
+            # Clean up old images (remove stopped containers first to release references)
+            podman container prune -f || true
+            podman image prune -f || true
         env:
           GHCR_PAT: ${{ secrets.GHCR_PAT }}
           IMAGE_OWNER: ${{ needs.build-and-push.outputs.owner }}
