@@ -1,7 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useState, Suspense } from 'react'
+import { use, useMemo, Suspense } from 'react'
 import { CheckCircle2, XCircle, Shield, Loader2 } from 'lucide-react'
 
 interface VerifyResult {
@@ -19,35 +19,17 @@ interface VerifyResult {
 function VerifyContent() {
   const searchParams = useSearchParams()
   const t = searchParams.get('t')
-  const [result, setResult] = useState<VerifyResult | null>(null)
-  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const resultPromise = useMemo<Promise<VerifyResult>>(() => {
     if (!t) {
-      setResult({ valid: false, reason: 'Token verifikasi tidak ditemukan dalam URL.' })
-      setLoading(false)
-      return
+      return Promise.resolve({ valid: false, reason: 'Token verifikasi tidak ditemukan dalam URL.' })
     }
-
-    fetch(`/api/verify?t=${encodeURIComponent(t)}`)
-      .then((res) => res.json())
-      .then((data: VerifyResult) => setResult(data))
-      .catch(() =>
-        setResult({ valid: false, reason: 'Terjadi kesalahan saat memverifikasi dokumen.' }),
-      )
-      .finally(() => setLoading(false))
+    return fetch(`/api/verify?t=${encodeURIComponent(t)}`)
+      .then((res) => res.json() as Promise<VerifyResult>)
+      .catch((): VerifyResult => ({ valid: false, reason: 'Terjadi kesalahan saat memverifikasi dokumen.' }))
   }, [t])
 
-  if (loading) {
-    return (
-      <main className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
-        <div className="flex items-center gap-3 text-gray-500">
-          <Loader2 className="animate-spin" size={22} />
-          <span className="text-sm">Memverifikasi dokumen...</span>
-        </div>
-      </main>
-    )
-  }
+  const result = use(resultPromise)
 
   if (!result?.valid) {
     return <InvalidView reason={result?.reason ?? 'Verifikasi gagal.'} />
