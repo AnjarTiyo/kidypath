@@ -121,7 +121,7 @@ export function AssessmentSummaries({ summaries }: AssessmentSummariesProps) {
 
   return (
     <>
-      <Card className="h-full">
+      <Card className="min-h-full">
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2 text-base">
             <IconNotes size={18} />

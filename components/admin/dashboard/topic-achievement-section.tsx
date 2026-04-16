@@ -307,7 +307,7 @@ function InsightPanel({ scopes }: { scopes: ScopeData[] }) {
   const insightText = getOverallInsight(scopes)
 
   return (
-    <Card className="h-full">
+    <Card className="min-h-full">
       <CardHeader className="border-b pb-3">
         <CardTitle className="text-sm font-semibold">Insight Pembelajaran</CardTitle>
       </CardHeader>

@@ -33,46 +33,56 @@ export function DashboardFilterBar() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 p-3 bg-primary text-primary-foreground rounded-xl w-full border">
-      <IconFilter size={16} className="text-primary-foreground/90 shrink-0" />
+    <div className="flex flex-col gap-3 p-3 bg-muted text-primary rounded-xl w-full border sm:flex-row sm:flex-wrap sm:items-center">
       <div className="flex items-center gap-2">
-        <span className="text-sm text-primary-foreground/90 whitespace-nowrap">Dari</span>
-        <Input
-          type="date"
-          className="h-8 w-36 text-sm text-primary-foreground"
-          value={filters.startDate}
-          onChange={(e) => setFilters((f) => ({ ...f, startDate: e.target.value }))}
-        />
+        <IconFilter size={16} className="text-primary shrink-0" />
+        <span className="text-sm font-medium text-primary">Filter</span>
       </div>
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-primary-foreground/90 whitespace-nowrap">Sampai</span>
-        <Input
-          type="date"
-          className="h-8 w-36 text-sm text-primary-foreground"
-          value={filters.endDate}
-          onChange={(e) => setFilters((f) => ({ ...f, endDate: e.target.value }))}
-        />
+
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:items-center sm:gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-primary whitespace-nowrap">Dari</span>
+          <Input
+            type="date"
+            className="h-8 w-full sm:w-36 text-sm text-primary border border-primary"
+            value={filters.startDate}
+            onChange={(e) => setFilters((f) => ({ ...f, startDate: e.target.value }))}
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-primary whitespace-nowrap">Sampai</span>
+          <Input
+            type="date"
+            className="h-8 w-full sm:w-36 text-sm text-primary border border-primary"
+            value={filters.endDate}
+            onChange={(e) => setFilters((f) => ({ ...f, endDate: e.target.value }))}
+          />
+        </div>
       </div>
-      <Select
-        value={filters.classroomId || 'all'}
-        onValueChange={(v) => setFilters((f) => ({ ...f, classroomId: v === 'all' ? '' : v }))}
-      >
-        <SelectTrigger className="h-8 w-44 text-sm text-primary-foreground">
-          <SelectValue placeholder="Semua Kelas" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Semua Kelas</SelectItem>
-          {classrooms.map((c) => (
-            <SelectItem key={c.id} value={c.id}>
-              {c.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Button variant="outline" size="sm" className="h-8 gap-1 text-primary" onClick={handleReset}>
-        <IconRefresh size={14} />
-        Reset
-      </Button>
+
+      <div className="flex items-center gap-2 sm:flex-1">
+        <Select
+          value={filters.classroomId || 'all'}
+          onValueChange={(v) => setFilters((f) => ({ ...f, classroomId: v === 'all' ? '' : v }))}
+        >
+          <SelectTrigger className="h-8 w-full sm:w-44 text-sm text-primary border border-primary">
+            <SelectValue placeholder="Semua Kelas" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Kelas</SelectItem>
+            {classrooms.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Button variant="outline" size="sm" className="h-8 gap-1 ml-auto text-destructive shrink-0" onClick={handleReset}>
+          <IconRefresh size={14} />
+          <span className="hidden xs:inline">Reset</span>
+        </Button>
+      </div>
     </div>
   )
 }

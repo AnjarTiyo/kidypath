@@ -2,6 +2,7 @@ import Image from "next/image"
 import { Suspense } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { LoginForm } from "@/components/auth/login-form"
+import Link from "next/link"
 
 function LoginSkeleton() {
   return (
@@ -18,17 +19,28 @@ function LoginSkeleton() {
 
 export default function LoginPage() {
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-4 sm:gap-6 p-4 sm:p-6 md:p-10">
+    <div className="bg-[url('/images/bg-animated.svg')] flex h-full flex-col items-center justify-center gap-4 sm:gap-6 p-4 sm:p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-4 sm:gap-6">
-        <a href="#" className="flex items-center gap-2 self-center font-medium">
-          <Image
-            src="/images/logo.png"
-            alt="Logo"
-            width={50}
-            height={50}
-            className="w-10 h-10 sm:w-12 sm:h-12 md:w-[50px] md:h-[50px]"
-          />
-        </a>
+        <div className="flex flex-row gap-4 w-full items-center justify-center">
+          <Link href="/" className="flex items-center gap-2 self-center font-medium">
+            <Image
+              src="/images/logo.png"
+              alt="Logo TK Putra Mataram"
+              width={50}
+              height={50}
+              className="w-10 h-10 sm:w-12 sm:h-12 md:w-[50px] md:h-[50px]"
+            />
+          </Link>
+          <Link href="/" className="flex items-center gap-2 self-center font-medium">
+            <Image
+              src="/images/logo2.png"
+              alt="Logo Kidypath"
+              width={50}
+              height={50}
+              className="w-10 h-10 sm:w-12 sm:h-12 md:w-[50px] md:h-[50px] rounded-full border-2 border-primary"
+            />
+          </Link>
+        </div>
         <Suspense fallback={<LoginSkeleton />}>
           <LoginForm />
         </Suspense>

@@ -8,7 +8,7 @@ export default function ParentLayout({
 }) {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-full bg-background">
         <Navbar />
         <div className="p-3 sm:p-4 md:p-6 mx-auto space-y-4 sm:space-y-6 container max-w-7xl">
           {children}
