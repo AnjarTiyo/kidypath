@@ -30,7 +30,6 @@ export async function Navbar() {
               <span className="text-[10px] sm:text-xs text-muted-foreground truncate">Mataram</span>
             </div>
           </Link>
-
           <UserButton />
         </div>
       </div>
