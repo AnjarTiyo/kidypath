@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         name: dayOffs.name,
         createdBy: dayOffs.createdBy,
         createdAt: dayOffs.createdAt,
-        createdByName: users.name,
+        createdByName: users.fullName,
       })
       .from(dayOffs)
       .leftJoin(users, eq(dayOffs.createdBy, users.id))

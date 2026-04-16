@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
           .select({
             classroomId: classroomTeachers.classroomId,
             teacherId: users.id,
-            teacherName: users.name,
+            teacherName: users.fullName,
           })
           .from(classroomTeachers)
           .innerJoin(users, eq(classroomTeachers.teacherId, users.id))

@@ -22,13 +22,13 @@ export async function GET() {
     const teacherList = await db
       .select({
         id: users.id,
-        name: users.name,
+        name: users.fullName,
         email: users.email,
         isCurriculumCoordinator: users.isCurriculumCoordinator,
       })
       .from(users)
       .where(eq(users.role, "teacher"))
-      .orderBy(asc(users.name))
+      .orderBy(asc(users.fullName))
 
     return NextResponse.json({ data: teacherList })
   } catch (error) {

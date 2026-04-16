@@ -43,7 +43,7 @@ export default async function VerifyPage({ searchParams }: PageProps) {
     : []
 
   const [teacher] = await db
-    .select({ name: users.name })
+    .select({ name: users.fullName })
     .from(users)
     .where(eq(users.id, payload.sub))
     .limit(1)

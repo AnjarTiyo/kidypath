@@ -37,7 +37,7 @@ export async function GET(
     const teachersData = await db
       .select({
         teacherId: users.id,
-        teacherName: users.name,
+        teacherName: users.fullName,
       })
       .from(classroomTeachers)
       .innerJoin(users, eq(classroomTeachers.teacherId, users.id))

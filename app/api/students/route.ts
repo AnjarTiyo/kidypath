@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
       .select({
         childId: parentChild.childId,
         parentId: users.id,
-        parentName: users.name,
+        parentName: users.fullName,
         parentEmail: users.email,
       })
       .from(parentChild)
