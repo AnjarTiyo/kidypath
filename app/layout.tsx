@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
+// @ts-ignore
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const jakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-jakarta-sans",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -30,7 +27,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased w-full h-screen overflow-hidden`}
+        className={`${jakartaSans.variable} antialiased w-full h-screen overflow-hidden`}
       >
         <main className="h-full w-full overflow-y-auto pb-12">{children}</main>
 
