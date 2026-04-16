@@ -54,8 +54,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/ansara-jurnal:latest
-            ghcr.io/${{ github.repository_owner }}/ansara-jurnal:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/kidypath:latest
+            ghcr.io/${{ github.repository_owner }}/kidypath:${{ github.sha }}
           build-args: |
             DATABASE_URL=${{ secrets.DATABASE_URL }}
             MINIO_ENDPOINT=${{ secrets.MINIO_ENDPOINT }}
@@ -64,8 +64,8 @@ jobs:
             MINIO_ROOT_PASSWORD=${{ secrets.MINIO_ROOT_PASSWORD }}
             MINIO_PUBLIC_URL=${{ secrets.MINIO_PUBLIC_URL }}
             GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/ansara-jurnal:buildcache
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/ansara-jurnal:buildcache,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/kidypath:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/kidypath:buildcache,mode=max
 
   deploy:
     name: Deploy to VPS
@@ -87,18 +87,18 @@ jobs:
             echo "$GHCR_PAT" | podman login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
             # Pull the new image
-            podman pull "ghcr.io/$GITHUB_REPOSITORY_OWNER/ansara-jurnal:latest"
+            podman pull "ghcr.io/$GITHUB_REPOSITORY_OWNER/kidypath:latest"
 
             # Run database migrations before restarting the app
             podman run --rm \
               --env-file ~/kidypath/.env \
               --network=kidypath_default \
-              "ghcr.io/$GITHUB_REPOSITORY_OWNER/ansara-jurnal:latest" \
+              "ghcr.io/$GITHUB_REPOSITORY_OWNER/kidypath:latest" \
               bun run db:migrate
 
             # Restart app with new image (no rebuild on server)
             cd ~/kidypath
-            GHCR_IMAGE="ghcr.io/$GITHUB_REPOSITORY_OWNER/ansara-jurnal:latest" \
+            GHCR_IMAGE="ghcr.io/$GITHUB_REPOSITORY_OWNER/kidypath:latest" \
               podman-compose --env-file .env up -d --no-build app
 
             # Clean up old images
