@@ -61,12 +61,12 @@ export function UserButton() {
                 <PopoverTrigger asChild>
                     <Button
                         variant="ghost"
-                        className="relative h-10 gap-3 rounded-md px-2 md:w-auto md:px-3"
+                        className="relative h-10 gap-3 rounded-md px-2 md:w-auto md:px-3 group"
                         disabled={isLoggingOut}
                     >
                         <div className="hidden md:flex md:flex-col md:items-end md:text-right">
-                            <span className="text-sm font-medium">{userName}</span>
-                            <span className="text-xs text-muted-foreground capitalize">
+                            <span className="text-sm font-medium text-foreground group-hover:!text-foreground">{userName}</span>
+                            <span className="text-xs text-muted-foreground capitalize group-hover:!text-muted-foreground">
                                 {session.user?.role}
                             </span>
                         </div>
