@@ -6,12 +6,14 @@ declare module "next-auth" {
       id: string
       role: string
       isCurriculumCoordinator: boolean
+      avatarUrl?: string | null
     } & DefaultSession["user"]
   }
 
   interface User {
     role: string
     isCurriculumCoordinator?: boolean
+    avatarUrl?: string | null
   }
 }
 
@@ -20,5 +22,6 @@ declare module "next-auth/jwt" {
     role: string
     id: string
     isCurriculumCoordinator?: boolean
+    avatarUrl?: string | null
   }
 }

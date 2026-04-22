@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { signOut, useSession } from "next-auth/react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
     Popover,
@@ -18,10 +19,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
-import { User, LogOut, Settings } from "lucide-react"
+import { User, LogOut } from "lucide-react"
 
 export function UserButton() {
     const { data: session, status } = useSession()
@@ -79,6 +80,9 @@ export function UserButton() {
                             </span>
                         </div>
                         <Avatar className="h-8 w-8">
+                            {session.user?.avatarUrl && (
+                                <AvatarImage src={session.user.avatarUrl} alt={userName} />
+                            )}
                             <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                                 {userInitials}
                             </AvatarFallback>
@@ -91,6 +95,9 @@ export function UserButton() {
                         {/* User Info Section */}
                         <div className="flex items-center gap-3 p-4">
                             <Avatar className="h-12 w-12">
+                                {session.user?.avatarUrl && (
+                                    <AvatarImage src={session.user.avatarUrl} alt={userName} />
+                                )}
                                 <AvatarFallback className="bg-primary text-primary-foreground">
                                     {userInitials}
                                 </AvatarFallback>
@@ -112,27 +119,17 @@ export function UserButton() {
 
                         {/* Menu Items */}
                         <div className="p-1">
-                            {/* Profile Edit - Future Work */}
-                            <Button
-                                variant="ghost"
-                                className="w-full justify-start gap-2 text-muted-foreground cursor-not-allowed opacity-50"
-                                disabled
-                            >
-                                <User className="h-4 w-4" />
-                                <span className="text-sm">Edit Profile</span>
-                                <span className="ml-auto text-xs">(Soon)</span>
-                            </Button>
-
-                            {/* Settings - Future Work */}
-                            <Button
-                                variant="ghost"
-                                className="w-full justify-start gap-2 text-muted-foreground cursor-not-allowed opacity-50"
-                                disabled
-                            >
-                                <Settings className="h-4 w-4" />
-                                <span className="text-sm">Settings</span>
-                                <span className="ml-auto text-xs">(Soon)</span>
-                            </Button>
+                            {/* Profile */}
+                            <Link href="/profile" onClick={() => setIsPopoverOpen(false)}>
+                                <Button
+                                    variant="ghost"
+                                    className="w-full justify-start gap-2"
+                                    asChild={false}
+                                >
+                                    <User className="h-4 w-4" />
+                                    <span className="text-sm">Edit Profil</span>
+                                </Button>
+                            </Link>
 
                             <Separator className="my-1" />
 
