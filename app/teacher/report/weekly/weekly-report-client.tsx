@@ -78,7 +78,7 @@ export default function TeacherWeeklyReportClient() {
 
   useEffect(() => {
     if (!userLoading && !user) router.push('/auth/login')
-    if (!userLoading && user && user.role !== 'teacher') router.push('/unauthorized')
+    if (!userLoading && user && user.role === 'parent') router.push('/unauthorized')
   }, [user, userLoading, router])
 
   const fetchReports = useCallback(async () => {

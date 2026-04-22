@@ -315,7 +315,7 @@ export default function StudentAssessmentClient() {
               </div>
               <div className="flex items-center gap-2">
                 <IconChalkboard className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Tidak ada kelas</span>
+                <span className="text-xs text-muted-foreground text-destructive">Tidak ada kelas</span>
               </div>
             </CardContent>
           </Card>
@@ -367,7 +367,7 @@ export default function StudentAssessmentClient() {
           <span className="text-xs text-muted-foreground">
             {classrooms.length > 0
               ? classrooms.map(c => c.name).join(", ")
-              : "Tidak ada kelas"}
+              : <span className="text-destructive font-semibold">Tidak ada kelas</span>}
           </span>
         </div>
       </div>

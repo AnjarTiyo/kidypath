@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react";
+import { useCurrentUser } from "@/lib/hooks/use-current-user";
 import { PageHeader } from "@/components/layout/page-header";
 import { IconChartTreemap, IconHome, IconSchool } from "@tabler/icons-react";
 import {
@@ -19,6 +20,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function TopicsManagementPage() {
+    const { user } = useCurrentUser();
+    const homeHref = user?.role === "teacher" ? "/teacher" : "/";
     const { topics, loading, error, refetch } = useSemesterTopics();
     const [expandedMainTopics, setExpandedMainTopics] = useState<Set<string>>(new Set());
     const [expandedMonthlyTopics, setExpandedMonthlyTopics] = useState<Set<string>>(new Set());
@@ -78,7 +81,7 @@ export default function TopicsManagementPage() {
                 title="Topik"
                 description="Kelola topik utama, bulanan, dan mingguan"
                 breadcrumbs={[
-                    { label: "Beranda", href: "/", icon: IconHome },
+                    { label: "Beranda", href: homeHref, icon: IconHome },
                     { label: "Manajemen Kurikulum", href: "/curriculum", icon: IconSchool },
                     { label: "Manajemen Topik", href: "/curriculum/topics", icon: IconChartTreemap },
                 ]}

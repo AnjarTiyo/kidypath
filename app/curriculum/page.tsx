@@ -46,6 +46,8 @@ export default function CurriculumManagementPage() {
     return user?.isCurriculumCoordinator || user?.role === "admin"
   }, [user])
 
+  const homeHref = user?.role === "teacher" ? "/teacher" : "/"
+
   useEffect(() => {
     if (!userLoading && !isCurriculumCoordinator) {
       router.replace("/unauthorized")
@@ -63,8 +65,8 @@ export default function CurriculumManagementPage() {
         title="Manajemen Kurikulum"
         description={`Selamat Datang, ${user!.name || user!.email}!`}
         breadcrumbs={[
-          { label: "Beranda", href: "/", icon: IconHome },
-          { label: "Manajemen Kurikulum", href: "/curriculum", icon: IconSchool },
+          { label: "Beranda", href: homeHref, icon: IconHome },
+          { label: "Manajemen Kurikulum", href: "/", icon: IconSchool },
         ]}
       />
 

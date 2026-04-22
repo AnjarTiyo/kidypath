@@ -18,7 +18,7 @@ interface PageHeaderProps {
   title: string
   breadcrumbs?: BreadcrumbItem[]
   description?: string
-  subDesc?: string
+  subDesc?: React.ReactNode
   actions?: React.ReactNode
   border?: boolean
 }

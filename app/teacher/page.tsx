@@ -23,7 +23,7 @@ export default function TeacherPage() {
   const router = useRouter()
   const { user, classrooms, loading: userLoading } = useCurrentUser()
   const isUserCurriculumCoordinator = user?.isCurriculumCoordinator || false
-  const activeClassrooms = !userLoading && user?.role === "teacher" ? classrooms : []
+  const activeClassrooms = !userLoading && user?.role !== "parent" ? classrooms : []
   const { targetDate, missingClassrooms, isLoading: lessonPlanLoading } = useTomorrowLessonPlan(activeClassrooms)
   const { checkIn, assessment, checkOut, todayLessonPlan, isLoading: statusLoading } = useTodayDailyStatus(activeClassrooms)
   const weeklyReport = useWeeklyReportStatus(activeClassrooms)
@@ -33,7 +33,7 @@ export default function TeacherPage() {
     if (!userLoading && !user) {
       router.push("/auth/login")
     }
-    if (!userLoading && user && user.role !== "teacher") {
+    if (!userLoading && user && user.role === "parent") {
       router.push("/unauthorized")
     }
   }, [user, userLoading, router])
@@ -62,7 +62,9 @@ export default function TeacherPage() {
       title: "Manajemen Kurikulum",
       description: "Kelola topik pembelajaran dan kalender pendidikan",
       href: "/curriculum",
-      hidden: !!!isUserCurriculumCoordinator, // Hidden for now, can be enabled later
+      hidden: !!!isUserCurriculumCoordinator,
+      className: "border-amber-400 border-2 bg-amber-300 hover:border-amber-400 dark:border-amber-800 dark:bg-amber-950",
+      iconClassName: "bg-amber-100 text-primary group-hover:bg-amber-200 dark:bg-amber-900 dark:text-amber-300",
     }
   ]
 
@@ -76,7 +78,7 @@ export default function TeacherPage() {
 
   const classroomNames = classrooms.length > 0
     ? classrooms.map(c => c.name).join(", ")
-    : "Belum ada kelas"
+    : <span className="text-destructive font-semibold">Tidak ada kelas</span>
 
   return (
     <>
@@ -84,7 +86,7 @@ export default function TeacherPage() {
         <PageHeader
           title="Aplikasi Teacher"
           description={`Selamat Datang, Teacher ${user.name || user.email}!`}
-          subDesc={`Kelas: ${classroomNames}`}
+          subDesc={<>Kelas: {classroomNames}</>}
           breadcrumbs={[
             { label: "Beranda", href: "/teacher", icon: IconHome },
           ]}
