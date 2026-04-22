@@ -5,23 +5,17 @@ WORKDIR /app
 COPY bun.lockb package.json .
 RUN bun install
 
-# Copy the rest of the repository and run the production build
+# Copy the rest of the repository and run the production build.
+# Secrets are mounted only for this step and do not persist in the image.
 COPY . .
-ARG DATABASE_URL
-ARG MINIO_ENDPOINT
-ARG MINIO_BUCKET_NAME
-ARG MINIO_ROOT_USER
-ARG MINIO_ROOT_PASSWORD
-ARG MINIO_PUBLIC_URL
-ARG GROQ_API_KEY
-ENV DATABASE_URL=${DATABASE_URL}
-ENV MINIO_ENDPOINT=${MINIO_ENDPOINT}
-ENV MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME}
-ENV MINIO_ROOT_USER=${MINIO_ROOT_USER}
-ENV MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-ENV MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL}
-ENV GROQ_API_KEY=${GROQ_API_KEY}
-RUN bun run build
+RUN --mount=type=secret,id=database_url,env=DATABASE_URL \
+    --mount=type=secret,id=minio_endpoint,env=MINIO_ENDPOINT \
+    --mount=type=secret,id=minio_bucket_name,env=MINIO_BUCKET_NAME \
+    --mount=type=secret,id=minio_root_user,env=MINIO_ROOT_USER \
+    --mount=type=secret,id=minio_root_password,env=MINIO_ROOT_PASSWORD \
+    --mount=type=secret,id=minio_public_url,env=MINIO_PUBLIC_URL \
+    --mount=type=secret,id=groq_api_key,env=GROQ_API_KEY \
+    bun run build
 
 FROM oven/bun:latest
 WORKDIR /app
