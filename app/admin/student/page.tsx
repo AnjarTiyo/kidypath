@@ -9,7 +9,7 @@ export default async function AdminStudentPage() {
     redirect("/auth/login")
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "teacher") {
+  if (session.user.role !== "admin" && session.user.role !== "teacher" && !session.user.isCurriculumCoordinator) {
     redirect("/unauthorized")
   }
 
