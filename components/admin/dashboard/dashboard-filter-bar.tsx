@@ -33,7 +33,7 @@ export function DashboardFilterBar() {
   }
 
   return (
-    <div className="flex flex-col gap-3 p-3 bg-muted text-primary rounded-xl w-full border sm:flex-row sm:flex-wrap sm:items-center">
+    <div className="flex flex-col gap-3 p-3 bg-muted text-primary rounded-sm w-full border sm:flex-row sm:flex-wrap sm:items-center">
       <div className="flex items-center gap-2">
         <IconFilter size={16} className="text-primary shrink-0" />
         <span className="text-sm font-medium text-primary">Filter</span>

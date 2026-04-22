@@ -574,7 +574,7 @@ export default function EditLessonPlanPage() {
         )}
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between gap-4 sticky bottom-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 border rounded-lg shadow-lg">
+        <div className="flex items-center justify-between gap-4 sticky bottom-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 border rounded-sm shadow-lg">
           <Button
             type="button"
             variant="outline"

@@ -224,7 +224,7 @@ export function ClassroomFormDialog({
               
               {/* Selected teachers badges */}
               {formData.teacherIds.length > 0 && (
-                <div className="flex flex-wrap gap-1 p-2 border rounded-md">
+                <div className="flex flex-wrap gap-1 p-2 border rounded-sm">
                   {formData.teacherIds.map((teacherId) => {
                     const teacher = teachers.find(t => t.id === teacherId) || 
                       // Keep selected teachers even if they're not in current search results
@@ -335,7 +335,7 @@ export function ClassroomFormDialog({
             </div>
 
             {errors.submit && (
-              <div className="rounded-md bg-destructive/15 p-3">
+              <div className="rounded-sm bg-destructive/15 p-3">
                 <p className="text-sm text-destructive">{errors.submit}</p>
               </div>
             )}

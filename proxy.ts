@@ -28,7 +28,7 @@ export default auth((req) => {
     }
 
     // Teacher routes
-    if (pathname.startsWith('/teacher') && userRole !== 'teacher') {
+    if (pathname.startsWith('/teacher') && userRole === 'parent') {
       return NextResponse.redirect(new URL('/unauthorized', req.url))
     }
 

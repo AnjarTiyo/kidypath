@@ -327,7 +327,7 @@ export function LessonPlanBasicInfoCard({
                                         selected: formData.date ? [formData.date] : [],
                                     }}
                                     modifiersClassNames={{
-                                        selected: "bg-secondary text-white font-semibold hover:bg-secondary/80 hover:text-primary-foreground rounded-md",
+                                        selected: "bg-secondary text-white font-semibold hover:bg-secondary/80 hover:text-primary-foreground rounded-sm",
                                     }}
                                 />
                             </PopoverContent>

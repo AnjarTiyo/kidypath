@@ -31,7 +31,7 @@ const scopeLabels: Record<string, string> = {
 
 export function SimpleAssessmentTable({ items, className }: SimpleAssessmentTableProps) {
   return (
-    <div className={`rounded-md border ${className || ""}`}>
+    <div className={`rounded-sm border ${className || ""}`}>
       <Table>
         <TableHeader>
           <TableRow>

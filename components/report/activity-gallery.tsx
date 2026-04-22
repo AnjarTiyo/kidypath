@@ -43,7 +43,7 @@ export function ActivityGallery({ images }: ActivityGalleryProps) {
               {filtered.map((img, i) => (
                 <button
                   key={i}
-                  className="group relative rounded-md overflow-hidden border bg-muted aspect-square focus:outline-none focus-visible:ring-2 focus-visible:ring-ring print:cursor-default"
+                  className="group relative rounded-sm overflow-hidden border bg-muted aspect-square focus:outline-none focus-visible:ring-2 focus-visible:ring-ring print:cursor-default"
                   onClick={() => setLightbox(img)}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -87,7 +87,7 @@ export function ActivityGallery({ images }: ActivityGalleryProps) {
             <img
               src={lightbox.imageUrl}
               alt="Foto aktivitas"
-              className="w-full rounded-md object-contain max-h-[70vh]"
+              className="w-full rounded-sm object-contain max-h-[70vh]"
             />
           )}
         </DialogContent>

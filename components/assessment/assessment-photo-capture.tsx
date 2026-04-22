@@ -109,7 +109,7 @@ export function AssessmentPhotoCapture({
                 setShowSourceDialog(false)
                 setShowCameraDialog(true)
               }}
-              className="flex flex-col items-center gap-2 rounded-lg border p-4 text-sm font-medium hover:bg-accent transition-colors"
+              className="flex flex-col items-center gap-2 rounded-sm border p-4 text-sm font-medium hover:bg-accent transition-colors"
             >
               <IconCamera className="h-7 w-7 text-primary" />
               <span className="text-xs">Kamera</span>
@@ -120,7 +120,7 @@ export function AssessmentPhotoCapture({
                 setShowSourceDialog(false)
                 setTimeout(() => galleryInputRef.current?.click(), 100)
               }}
-              className="flex flex-col items-center gap-2 rounded-lg border p-4 text-sm font-medium hover:bg-accent transition-colors"
+              className="flex flex-col items-center gap-2 rounded-sm border p-4 text-sm font-medium hover:bg-accent transition-colors"
             >
               <IconPhoto className="h-7 w-7 text-primary" />
               <span className="text-xs">Galeri</span>
@@ -141,7 +141,7 @@ export function AssessmentPhotoCapture({
               audio={false}
               screenshotFormat="image/jpeg"
               videoConstraints={{ facingMode: "environment" }}
-              className="w-full rounded-md border object-cover"
+              className="w-full rounded-sm border object-cover"
             />
             <div className="flex gap-2">
               <Button
@@ -203,10 +203,10 @@ export function AssessmentPhotoCapture({
               <img
                 src={displayImage}
                 alt="Foto aktivitas"
-                className="h-28 sm:h-36 w-auto max-w-[180px] sm:max-w-[220px] rounded-md border object-cover"
+                className="h-28 sm:h-36 w-auto max-w-[180px] sm:max-w-[220px] rounded-sm border object-cover"
               />
               {uploading && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/40">
+                <div className="absolute inset-0 flex items-center justify-center rounded-sm bg-black/40">
                   <IconLoader2 className="h-5 w-5 animate-spin text-white" />
                 </div>
               )}

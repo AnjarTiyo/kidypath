@@ -259,7 +259,7 @@ function AchievementBarChart({
         <ChartTooltip
           content={({ active, payload }) =>
             active && payload?.[0] ? (
-              <div className="rounded-lg border bg-background px-3 py-2.5 shadow-md text-sm space-y-1 min-w-[180px]">
+              <div className="rounded-sm border bg-background px-3 py-2.5 shadow-md text-sm space-y-1 min-w-[180px]">
                 <div className="flex items-center gap-1.5 font-medium">
                   <StatusIcon achievement={payload[0].payload.achievement} />
                   {payload[0].payload.label}
@@ -585,17 +585,17 @@ function AllTopicDetailDialog({ row, onClose }: { row: AllTopicRow; onClose: () 
           </DialogTitle>
         </DialogHeader>
         <div className="mt-2 space-y-4">
-          <div className="text-xs text-muted-foreground bg-muted/30 rounded-lg px-3 py-2 space-y-0.5">
+          <div className="text-xs text-muted-foreground bg-muted/30 rounded-sm px-3 py-2 space-y-0.5">
             <p><span className="font-medium">Topik Bulan:</span> {row.monthlyTitle}</p>
             <p><span className="font-medium">Semester:</span> {row.semesterTitle}</p>
             <p><span className="font-medium">Periode:</span> {row.startDate} — {row.endDate}</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-muted/40 rounded-lg p-3">
+            <div className="bg-muted/40 rounded-sm p-3">
               <p className="text-xs text-muted-foreground">Total Item Penilaian</p>
               <p className="text-2xl font-bold tabular-nums">{row.sampleSize}</p>
             </div>
-            <div className="bg-muted/40 rounded-lg p-3">
+            <div className="bg-muted/40 rounded-sm p-3">
               <p className="text-xs text-muted-foreground">Capaian Rata-rata</p>
               {row.overallAchievement != null ? (
                 <p className={`text-2xl font-bold tabular-nums ${
@@ -691,7 +691,7 @@ export function TopicAchievementSection() {
             </CardTitle>
             <div className="group relative">
               <IconInfoCircle size={16} className="text-muted-foreground cursor-help" />
-              <div className="absolute right-0 top-6 w-64 bg-popover border rounded-lg px-3 py-2 text-xs text-muted-foreground shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 leading-relaxed">
+              <div className="absolute right-0 top-6 w-64 bg-popover border rounded-sm px-3 py-2 text-xs text-muted-foreground shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 leading-relaxed">
                 Capaian dihitung dengan formula: (Total Skor / (Jumlah Item x 3)) x 100%.
                 Target BSH = nilai 3. Capaian 100% berarti seluruh anak mencapai level BSH.
               </div>
@@ -727,7 +727,7 @@ export function TopicAchievementSection() {
 
               {/* Low sample warning */}
               {data.sampleSize < 10 && (
-                <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-700">
+                <div className="flex items-center gap-2 rounded-sm border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-700">
                   <IconAlertTriangle size={14} className="shrink-0" />
                   <span>Data terbatas ({data.sampleSize} item penilaian). Hasil analisa mungkin belum representatif.</span>
                 </div>
@@ -800,19 +800,19 @@ export function TopicAchievementSection() {
             </DialogHeader>
             <div className="mt-4 space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-muted/40 rounded-lg p-3">
+                <div className="bg-muted/40 rounded-sm p-3">
                   <p className="text-xs text-muted-foreground">Total Item</p>
                   <p className="text-2xl font-bold tabular-nums">{selectedScope.totalItems}</p>
                 </div>
-                <div className="bg-muted/40 rounded-lg p-3">
+                <div className="bg-muted/40 rounded-sm p-3">
                   <p className="text-xs text-muted-foreground">Total Skor</p>
                   <p className="text-2xl font-bold tabular-nums">{selectedScope.totalScore}</p>
                 </div>
-                <div className="bg-muted/40 rounded-lg p-3">
+                <div className="bg-muted/40 rounded-sm p-3">
                   <p className="text-xs text-muted-foreground">Rata-rata Skor</p>
                   <p className="text-2xl font-bold tabular-nums">{selectedScope.avgScore.toFixed(2)}</p>
                 </div>
-                <div className="bg-muted/40 rounded-lg p-3">
+                <div className="bg-muted/40 rounded-sm p-3">
                   <p className="text-xs text-muted-foreground">Capaian BSH</p>
                   <p className={`text-2xl font-bold tabular-nums ${
                     getStatus(selectedScope.achievement) === 'exceed'  ? 'text-indigo-600' :
@@ -837,7 +837,7 @@ export function TopicAchievementSection() {
                       { key: 'BSB', label: 'BSB', count: selectedScope.distribution.BSB, cls: 'bg-indigo-50 text-indigo-700' },
                     ] as const
                   ).map(({ key, label, count, cls }) => (
-                    <div key={key} className={`rounded-lg p-3 text-center ${cls}`}>
+                    <div key={key} className={`rounded-sm p-3 text-center ${cls}`}>
                       <p className="text-xs font-semibold">{label}</p>
                       <p className="text-2xl font-bold tabular-nums">{count}</p>
                       <p className="text-[10px] opacity-70 tabular-nums">
@@ -851,7 +851,7 @@ export function TopicAchievementSection() {
               </div>
 
               {/* Scope insight */}
-              <div className="bg-muted/30 rounded-lg p-3 flex items-start gap-2">
+              <div className="bg-muted/30 rounded-sm p-3 flex items-start gap-2">
                 <IconBulb size={14} className="text-amber-500 mt-0.5 shrink-0" />
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {getScopeInsight(selectedScope)}

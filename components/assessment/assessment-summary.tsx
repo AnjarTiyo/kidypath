@@ -157,7 +157,7 @@ export function AssessmentSummary({
               {completedCount === 0 ? "Mulai Penilaian" : "Lanjutkan Penilaian"}
             </Button>
           ) : (
-            <div className="text-center py-2 text-xs text-green-600 font-medium w-full bg-green-50 rounded-md border border-green-200">
+            <div className="text-center py-2 text-xs text-green-600 font-medium w-full bg-green-50 rounded-sm border border-green-200">
               <IconCircleCheck className="h-4 w-4 mr-2 inline-block" /> Penilaian untuk semua siswa telah selesai
             </div>
           )}

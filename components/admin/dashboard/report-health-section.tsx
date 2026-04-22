@@ -76,7 +76,7 @@ export function ReportHealthSection() {
                 <ChartTooltip
                   content={({ active, payload }) =>
                     active && payload?.[0] ? (
-                      <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-sm">
+                      <div className="rounded-sm border bg-background px-3 py-2 shadow-md text-sm">
                         <p>Pekan: {payload[0].payload.week}</p>
                         <p className="font-medium">Selesai: {payload[0].value}%</p>
                       </div>

@@ -51,7 +51,7 @@ export default function ParentReportPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {(children ?? []).map((child) => (
           <div key={child.id} className="space-y-2">
-            <div className="p-4 rounded-lg border bg-card space-y-3 min-w-sm">
+            <div className="p-4 rounded-sm border bg-card space-y-3 min-w-sm">
               <div className="flex items-center gap-2">
                 <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
                   <IconUser size={20} className="text-secondary-foreground" />
@@ -66,13 +66,13 @@ export default function ParentReportPage() {
               <div className="grid grid-cols-2 gap-2">
                 <Link
                   href={`/parent/report/${child.id}`}
-                  className="flex items-center justify-center gap-1 p-2.5 rounded-md border text-xs font-medium hover:bg-muted transition-colors text-center"
+                  className="flex items-center justify-center gap-1 p-2.5 rounded-sm border text-xs font-medium hover:bg-muted transition-colors text-center"
                 >
                   <IconGrowth className="h-4 w-4" /> Laporan Perkembangan
                 </Link>
                 <Link
                   href={`/parent/report/weekly/${child.id}`}
-                  className="flex items-center justify-center gap-1 p-2.5 rounded-md border text-xs font-medium hover:bg-muted transition-colors text-center"
+                  className="flex items-center justify-center gap-1 p-2.5 rounded-sm border text-xs font-medium hover:bg-muted transition-colors text-center"
                 >
                   <IconReport className="h-4 w-4" /> Laporan Mingguan
                 </Link>

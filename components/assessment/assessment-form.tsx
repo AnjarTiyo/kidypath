@@ -523,7 +523,7 @@ export function AssessmentForm({
                 />
 
                 {error && (
-                  <div className="flex items-center gap-1.5 sm:gap-2 rounded-md bg-destructive/10 p-1.5 sm:p-2 text-[10px] sm:text-[11px] text-destructive mb-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2 rounded-sm bg-destructive/10 p-1.5 sm:p-2 text-[10px] sm:text-[11px] text-destructive mb-2">
                     <IconAlertCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
                     <span className="flex-1">{error}</span>
                   </div>

@@ -245,7 +245,7 @@ export function StudentFormDialog({
           {/* Parents */}
           <div className="space-y-2">
             <Label>Orang Tua</Label>
-            <div className="rounded-md border p-3 space-y-2">
+            <div className="rounded-sm border p-3 space-y-2">
               {selectedParents.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
                   {selectedParents.map(parent => (
@@ -292,7 +292,7 @@ export function StudentFormDialog({
 
           {/* Error Message */}
           {errors.general && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="rounded-sm bg-destructive/10 p-3 text-sm text-destructive">
               {errors.general}
             </div>
           )}

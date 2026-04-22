@@ -811,7 +811,7 @@ export function YourEntityTableSkeleton() {
       </div>
 
       {/* Table Skeleton */}
-      <div className="rounded-md border">
+      <div className="rounded-sm border">
         {/* Table Header */}
         <div className="border-b bg-muted/50">
           <div className="flex items-center h-12 px-4 gap-4">
@@ -881,7 +881,7 @@ export function YourEntityTableError({
 }: YourEntityTableErrorProps) {
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-8">
+      <div className="rounded-sm border border-destructive/50 bg-destructive/10 p-8">
         <div className="flex flex-col items-center justify-center text-center space-y-4">
           <div className="rounded-full bg-destructive/20 p-3">
             <IconAlertCircle className="h-6 w-6 text-destructive" />

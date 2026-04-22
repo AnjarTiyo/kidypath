@@ -57,7 +57,7 @@ export function CompactDateNavigation({ selectedDate, onDateChange, dayOffDates 
                             key={index}
                             onClick={() => handleSelectDate(day)}
                             className={cn(
-                                "flex flex-col items-center justify-center min-w-[52px] px-2 py-2 rounded-md transition-all rounded-sm",
+                                "flex flex-col items-center justify-center min-w-[52px] px-2 py-2 rounded-sm transition-all rounded-sm",
                                 isOff && "text-red-500",
                                 isSelected
                                     ? "bg-primary text-primary-foreground shadow-sm"

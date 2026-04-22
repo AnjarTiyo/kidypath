@@ -38,7 +38,7 @@ export default function LessonPlanCalendar({
   return (
     <Card className="overflow-hidden">
       <CardHeader className="flex flex-row items-center gap-2 border-b h-18">
-        <div className="p-2 bg-muted flex items-center justify-center aspect-square rounded-md">
+        <div className="p-2 bg-muted flex items-center justify-center aspect-square rounded-sm">
           <IconCalendar className="text-muted-foreground" size={20} />
         </div>
         <div className="flex-1 min-w-0">
@@ -55,7 +55,7 @@ export default function LessonPlanCalendar({
             selected={selectedDate}
             onSelect={onDateSelect}
             onMonthChange={setCurrentMonth}
-            className="rounded-lg w-full"
+            className="rounded-sm w-full"
             locale={id}
             modifiers={{
               hasLessonPlan: lessonPlanDates.map((date) => new Date(date)),

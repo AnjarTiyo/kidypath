@@ -22,6 +22,8 @@ export default function TeacherDutyManagementPage() {
         return session?.user?.isCurriculumCoordinator || session?.user?.role === "admin"
     }, [session])
 
+    const homeHref = session?.user?.role === "teacher" ? "/teacher" : "/"
+
     useEffect(() => {
         if (status !== "loading" && !isCurriculumCoordinator) {
             router.replace("/unauthorized")
@@ -54,7 +56,7 @@ export default function TeacherDutyManagementPage() {
                 title="Guru Piket"
                 description="Kelola guru yang bertugas piket hari ini"
                 breadcrumbs={[
-                    { label: "Beranda", href: "/", icon: IconHome },
+                    { label: "Beranda", href: homeHref, icon: IconHome },
                     { label: "Manajemen Kurikulum", href: "/curriculum", icon: IconSchool },
                     { label: "Manajemen Guru Piket", href: "/curriculum/teacher-duty", icon: IconUser },
                 ]}

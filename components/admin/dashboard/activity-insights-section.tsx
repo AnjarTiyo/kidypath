@@ -106,7 +106,7 @@ export function ActivityInsightsSection() {
                   <ChartTooltip
                     content={({ active, payload }) =>
                       active && payload?.[0] ? (
-                        <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-sm max-w-xs">
+                        <div className="rounded-sm border bg-background px-3 py-2 shadow-md text-sm max-w-xs">
                           <p className="font-medium">{payload[0].payload.full}</p>
                           <p className="text-muted-foreground">Frekuensi: <strong>{payload[0].value}</strong></p>
                         </div>
@@ -141,7 +141,7 @@ export function ActivityInsightsSection() {
                     <ChartTooltip
                       content={({ active, payload }) =>
                         active && payload?.[0] ? (
-                          <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-sm max-w-xs">
+                          <div className="rounded-sm border bg-background px-3 py-2 shadow-md text-sm max-w-xs">
                             <p className="font-medium">{payload[0].payload.full}</p>
                             <p className="text-muted-foreground">Rata-rata Skor: <strong>{Number(payload[0].value).toFixed(2)}</strong></p>
                           </div>

@@ -78,7 +78,7 @@ export default function TeacherWeeklyReportClient() {
 
   useEffect(() => {
     if (!userLoading && !user) router.push('/auth/login')
-    if (!userLoading && user && user.role !== 'teacher') router.push('/unauthorized')
+    if (!userLoading && user && user.role === 'parent') router.push('/unauthorized')
   }, [user, userLoading, router])
 
   const fetchReports = useCallback(async () => {
@@ -350,7 +350,7 @@ export default function TeacherWeeklyReportClient() {
               {progress.map((p) => (
                 <div
                   key={p.studentId}
-                  className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm"
+                  className="flex items-center justify-between gap-2 rounded-sm border px-3 py-2 text-sm"
                 >
                   <span className="truncate">{p.studentName ?? 'Siswa'}</span>
                   <StatusBadge status={p.status} error={p.error} />

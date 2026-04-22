@@ -29,7 +29,7 @@ export function UserTableSkeleton() {
       </div>
 
       {/* Table Skeleton */}
-      <div className="rounded-md border">
+      <div className="rounded-sm border">
         {/* Table Header */}
         <div className="border-b bg-muted/50">
           <div className="flex items-center h-10 px-4 gap-2">

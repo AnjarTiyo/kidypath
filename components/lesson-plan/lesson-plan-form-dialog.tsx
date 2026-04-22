@@ -364,7 +364,7 @@ export function LessonPlanFormDialog({
           <div className="space-y-4 py-4">
             {/* Warning for teachers with no classrooms */}
             {user?.role === "teacher" && !loadingUser && classrooms.length === 0 && (
-              <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+              <div className="rounded-sm border border-yellow-200 bg-yellow-50 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
                     <svg
@@ -523,7 +523,7 @@ export function LessonPlanFormDialog({
             </div>
 
             {/* AI Generate Button */}
-            <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+            <div className="flex items-center justify-between p-4 border rounded-sm bg-muted/50">
               <div>
                 <p className="text-sm font-medium">Generate dengan AI</p>
                 <p className="text-xs text-muted-foreground">

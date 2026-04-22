@@ -121,22 +121,22 @@ export function AttendanceSummary({
       <CardContent className="space-y-4">
         {/* Statistics */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="text-center p-3 rounded-lg border">
+          <div className="text-center p-3 rounded-sm border">
             <div className="text-2xl font-bold text-green-700">{presentCount}</div>
             <div className="text-xs text-green-600">Hadir</div>
           </div>
-          <div className="text-center p-3 rounded-lg border">
+          <div className="text-center p-3 rounded-sm border">
             <div className="text-2xl font-bold text-orange-700">{sickCount}</div>
             <div className="text-xs text-orange-600">Sakit</div>
           </div>
-          <div className="text-center p-3 rounded-lg border">
+          <div className="text-center p-3 rounded-sm border">
             <div className="text-2xl font-bold text-blue-700">{permissionCount}</div>
             <div className="text-xs text-blue-600">Izin</div>
           </div>
         </div>
 
         {/* Attendance Table */}
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-sm overflow-hidden">
           <div className="max-h-[400px] overflow-y-auto">
             <Table>
               <TableHeader className="sticky top-0 bg-background">

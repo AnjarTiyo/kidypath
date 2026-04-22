@@ -70,7 +70,7 @@ export function DeleteClassroomDialog({
         </AlertDialogHeader>
 
         {error && (
-          <div className="rounded-md bg-destructive/15 p-3">
+          <div className="rounded-sm bg-destructive/15 p-3">
             <p className="text-sm text-destructive">{error}</p>
           </div>
         )}

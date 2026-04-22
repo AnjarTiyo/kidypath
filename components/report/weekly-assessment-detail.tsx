@@ -73,7 +73,7 @@ export function WeeklyAssessmentDetail({ scopeBreakdown }: WeeklyAssessmentDetai
           const isOpen = openScopes[group.scope] ?? true
           const label = SCOPE_LABELS[group.scope] ?? group.scope
           return (
-            <div key={group.scope} className="rounded-md border overflow-hidden">
+            <div key={group.scope} className="rounded-sm border overflow-hidden">
               {/* Scope header */}
               <button
                 onClick={() => toggle(group.scope)}

@@ -17,7 +17,7 @@ export default async function Home() {
     case "parent":
       redirect("/parent")
     case "curriculum":
-      redirect("/curriculum")
+      redirect("/teacher")
     default:
       redirect("/auth/login")
   }

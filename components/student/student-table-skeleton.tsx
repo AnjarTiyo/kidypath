@@ -19,7 +19,7 @@ export function StudentTableSkeleton() {
       </div>
 
       {/* Table skeleton */}
-      <div className="rounded-md border">
+      <div className="rounded-sm border">
         <Table>
           <TableHeader>
             <TableRow>

@@ -28,7 +28,7 @@ export function GalleryLightbox({ imageUrl, date, onClose }: GalleryLightboxProp
               alt={formattedDate ?? 'Foto aktivitas'}
               fill
               unoptimized
-              className="object-contain rounded-md"
+              className="object-contain rounded-sm"
               sizes="(max-width: 768px) 100vw, 672px"
             />
           </div>

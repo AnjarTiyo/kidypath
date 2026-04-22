@@ -388,7 +388,7 @@ export function AttendanceForm({
 
               {/* Messages */}
               {error && (
-                <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-2 text-xs text-destructive mb-3">
+                <div className="flex items-center gap-2 rounded-sm bg-destructive/10 p-2 text-xs text-destructive mb-3">
                   <IconAlertCircle className="h-4 w-4 shrink-0" />
                   {error}
                 </div>

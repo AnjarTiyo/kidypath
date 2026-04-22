@@ -34,7 +34,7 @@ export function KpiCard({ label, value, icon: Icon, delta, deltaLabel, colorVari
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-4 flex items-start gap-3">
-        <div className={cn('p-2 rounded-lg shrink-0', iconBg[colorVariant])}>
+        <div className={cn('p-2 rounded-sm shrink-0', iconBg[colorVariant])}>
           <Icon size={20} className={variantClasses[colorVariant]} />
         </div>
         <div className="flex-1 min-w-0">

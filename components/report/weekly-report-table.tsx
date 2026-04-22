@@ -214,7 +214,7 @@ export function WeeklyReportTable({ data, onDelete, onSend, sending = new Set() 
 
   if (data.length === 0) {
     return (
-      <div className="rounded-md border">
+      <div className="rounded-sm border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -241,7 +241,7 @@ export function WeeklyReportTable({ data, onDelete, onSend, sending = new Set() 
     <div className="space-y-2">
       {/* Bulk send bar */}
       {bulkable.length > 0 && (
-        <div className="flex items-center justify-between rounded-md border bg-muted/40 px-3 py-2">
+        <div className="flex items-center justify-between rounded-sm border bg-muted/40 px-3 py-2">
           <span className="text-sm text-muted-foreground">
             <strong>{bulkable.length}</strong> laporan terbit belum dikirim
           </span>
@@ -275,7 +275,7 @@ export function WeeklyReportTable({ data, onDelete, onSend, sending = new Set() 
         </div>
       )}
 
-      <div className="rounded-md border">
+      <div className="rounded-sm border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (

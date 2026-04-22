@@ -134,7 +134,7 @@ export function OutstandingTasksBanner({
   const todayParam = format(new Date(), "yyyy-MM-dd")
 
   return (
-    <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+    <div className="mt-4 rounded-sm border border-amber-200 bg-amber-50 px-4 py-3">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <IconAlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-500" />
