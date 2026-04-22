@@ -47,6 +47,14 @@ export function UserButton() {
         return null
     }
 
+    const ROLE_LABELS: Record<string, string> = {
+        admin: "Administrator",
+        teacher: "Teacher",
+        curriculum: "Koor. Kurikulum",
+        parent: "Orang Tua",
+    }
+    const roleLabel = ROLE_LABELS[session.user?.role ?? ""] ?? session.user?.role
+
     const userName = session.user?.name || session.user?.email || "User"
     const userInitials = userName
         .split(" ")
@@ -67,7 +75,7 @@ export function UserButton() {
                         <div className="hidden md:flex md:flex-col md:items-end md:text-right">
                             <span className="text-sm font-medium text-foreground group-hover:!text-foreground">{userName}</span>
                             <span className="text-xs text-muted-foreground capitalize group-hover:!text-muted-foreground">
-                                {session.user?.role}
+                                {roleLabel}
                             </span>
                         </div>
                         <Avatar className="h-8 w-8">
@@ -94,8 +102,8 @@ export function UserButton() {
                                 <p className="text-xs text-muted-foreground truncate">
                                     {session.user?.email}
                                 </p>
-                                <p className="text-xs text-muted-foreground capitalize">
-                                    {session.user?.role}
+                                <p className="text-xs text-muted-foreground">
+                                    {roleLabel}
                                 </p>
                             </div>
                         </div>
