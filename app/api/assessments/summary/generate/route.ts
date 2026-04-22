@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is admin or teacher
-    if (session.user.role !== "admin" && session.user.role !== "teacher") {
+    if (session.user.role !== "admin" && session.user.role !== "teacher" && !session.user.isCurriculumCoordinator) {
       return NextResponse.json(
         { error: "Forbidden: Only admin and teacher can generate summaries" },
         { status: 403 }

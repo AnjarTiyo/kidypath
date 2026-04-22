@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check authorization (admin or teacher)
-    if (session.user.role !== "admin" && session.user.role !== "teacher") {
+    if (session.user.role !== "admin" && session.user.role !== "teacher" && !session.user.isCurriculumCoordinator) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
