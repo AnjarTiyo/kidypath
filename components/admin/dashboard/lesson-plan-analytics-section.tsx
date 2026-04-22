@@ -97,7 +97,7 @@ export function LessonPlanAnalyticsSection() {
                     <ChartTooltip
                       content={({ active, payload }) =>
                         active && payload?.[0] ? (
-                          <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-sm">
+                          <div className="rounded-sm border bg-background px-3 py-2 shadow-md text-sm">
                             <p className="font-medium">{payload[0].payload.name}</p>
                             <p className="text-muted-foreground">Jumlah RP: <strong>{payload[0].value}</strong></p>
                           </div>
@@ -166,11 +166,11 @@ export function LessonPlanAnalyticsSection() {
             </DialogHeader>
             <div className="mt-4 space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-muted/40 rounded-lg p-3">
+                <div className="bg-muted/40 rounded-sm p-3">
                   <p className="text-xs text-muted-foreground">Total RP</p>
                   <p className="text-xl font-bold">{selectedClassroom.totalPlans}</p>
                 </div>
-                <div className="bg-muted/40 rounded-lg p-3">
+                <div className="bg-muted/40 rounded-sm p-3">
                   <p className="text-xs text-muted-foreground">Cakupan Aspek</p>
                   <p className="text-xl font-bold">{selectedClassroom.scopeDiversity} dari 6</p>
                 </div>
@@ -187,7 +187,7 @@ export function LessonPlanAnalyticsSection() {
                 </div>
               )}
 
-              <div className="bg-muted/30 rounded-lg p-3 text-xs text-muted-foreground space-y-1">
+              <div className="bg-muted/30 rounded-sm p-3 text-xs text-muted-foreground space-y-1">
                 {selectedClassroom.scopeDiversity < 4 && (
                   <p>📚 Cakupan aspek perkembangan masih terbatas ({selectedClassroom.scopeDiversity}/6). Perlu diversifikasi aktivitas.</p>
                 )}

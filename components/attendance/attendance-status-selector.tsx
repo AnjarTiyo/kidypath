@@ -46,7 +46,7 @@ export function AttendanceStatusSelector({
           type="button"
           data-selected={selectedStatus === status.value}
           className={cn(
-            "flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all",
+            "flex flex-col items-center justify-center p-3 rounded-sm border-2 transition-all",
             "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary",
             status.color,
             disabled && "opacity-50 cursor-not-allowed",

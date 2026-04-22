@@ -94,7 +94,7 @@ export function ClassroomPerformanceSection() {
                   <ChartTooltip
                     content={({ active, payload, label }) =>
                       active && payload?.length ? (
-                        <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-sm space-y-1">
+                        <div className="rounded-sm border bg-background px-3 py-2 shadow-md text-sm space-y-1">
                           <p className="font-medium">{label}</p>
                           {payload.map((p) => (
                             <p key={String(p.dataKey)} style={{ color: p.color }}>

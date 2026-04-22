@@ -209,7 +209,7 @@ export function StudentDetailPage({ studentId }: StudentDetailPageProps) {
                 {student.parents.map((parent) => (
                   <div
                     key={parent.id}
-                    className="flex items-start gap-3 rounded-lg border p-4"
+                    className="flex items-start gap-3 rounded-sm border p-4"
                   >
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
                       <IconUser className="h-5 w-5" />

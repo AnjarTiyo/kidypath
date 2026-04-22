@@ -48,7 +48,7 @@ export function AssessmentTable({ items, title = "Rencana Penilaian" }: Assessme
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
+        <div className="rounded-sm border">
           <Table>
             <TableHeader>
               <TableRow>

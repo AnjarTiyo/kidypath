@@ -11,7 +11,7 @@ function LoginSkeleton() {
         <Skeleton className="h-[50px] w-[50px] rounded-full" />
       </div>
       <div className="flex flex-col gap-4">
-        <Skeleton className="h-[400px] w-full rounded-lg" />
+        <Skeleton className="h-[400px] w-full rounded-sm" />
       </div>
     </div>
   )

@@ -218,7 +218,7 @@
 
   /* Card borders look clean in print */
   .border,
-  [class*="rounded-md"] {
+  [class*="rounded-sm"] {
     border-color: #d1d5db !important;
     box-shadow: none !important;
   }

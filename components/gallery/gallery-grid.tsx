@@ -27,7 +27,7 @@ export function GalleryGrid({ images, onImageClick }: GalleryGridProps) {
         <button
           key={idx}
           onClick={() => onImageClick(img.imageUrl, img.date)}
-          className="group relative aspect-square overflow-hidden rounded-md bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="group relative aspect-square overflow-hidden rounded-sm bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Image
             src={img.imageUrl}

@@ -161,7 +161,7 @@ export function AssessmentSummaries({ summaries }: AssessmentSummariesProps) {
             <div className="space-y-4">
               {/* Assessment items table */}
               {selected.items.length > 0 && (
-                <div className="rounded-md border overflow-hidden">
+                <div className="rounded-sm border overflow-hidden">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/50">

@@ -117,7 +117,7 @@ export function DevelopmentProgressSection() {
                 <ChartTooltip
                   content={({ active, payload }) =>
                     active && payload?.[0] ? (
-                      <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-sm">
+                      <div className="rounded-sm border bg-background px-3 py-2 shadow-md text-sm">
                         <p className="font-medium">{payload[0].payload.label}</p>
                         <p className="text-muted-foreground">Rata-rata: <strong>{Number(payload[0].value).toFixed(2)}</strong></p>
                       </div>

@@ -20,7 +20,7 @@ const SCORES = ["BB", "MB", "BSH", "BSB"] as const
 export function AssessmentScoreTable({ rows, onUpdate, loading }: AssessmentScoreTableProps) {
   return (
     <div className="mb-2 sm:mb-3 -mx-2 sm:-mx-3">
-      <div className="border-y sm:border sm:rounded-md overflow-hidden">
+      <div className="border-y sm:border sm:rounded-sm overflow-hidden">
         <div className="overflow-x-auto">
           <div className="min-w-[700px] sm:min-w-[800px]">
             <div className="max-h-[calc(100vh-320px)] sm:max-h-[calc(100vh-380px)] overflow-y-auto">

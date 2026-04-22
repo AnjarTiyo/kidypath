@@ -158,7 +158,7 @@ export function StudentReportCard({
           <CardContent>
             <div className="space-y-3">
               {scopeGroup.objectives.map((obj, i) => (
-                <div key={obj.objectiveId ?? i} className="border rounded-md p-3 space-y-2">
+                <div key={obj.objectiveId ?? i} className="border rounded-sm p-3 space-y-2">
                   {obj.objectiveDescription && (
                     <p className="text-sm font-medium">{obj.objectiveDescription}</p>
                   )}

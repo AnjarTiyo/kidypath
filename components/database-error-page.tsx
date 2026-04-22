@@ -14,7 +14,7 @@ export default function DatabaseErrorPage({
 }: DatabaseErrorPageProps) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8 text-center">
+      <div className="max-w-md w-full bg-white rounded-sm shadow-xl p-8 text-center">
         <div className="flex justify-center mb-6">
           <div className="relative">
             <Database className="w-20 h-20 text-red-500" />
@@ -33,7 +33,7 @@ export default function DatabaseErrorPage({
         </p>
         
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="bg-red-50 border border-red-200 rounded-sm p-4 mb-6">
             <p className="text-sm text-red-800 font-mono break-all">
               {error}
             </p>
@@ -44,7 +44,7 @@ export default function DatabaseErrorPage({
           {showRefresh && (
             <button
               onClick={() => window.location.reload()}
-              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-sm transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
               Coba Lagi
@@ -53,7 +53,7 @@ export default function DatabaseErrorPage({
           
           <Link
             href="/"
-            className="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors"
+            className="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-sm transition-colors"
           >
             Kembali ke Beranda
           </Link>

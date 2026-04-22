@@ -58,7 +58,7 @@ export function LessonPlanAssessmentTable({
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border overflow-hidden">
+        <div className="rounded-sm border overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">

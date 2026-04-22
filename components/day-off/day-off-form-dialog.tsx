@@ -113,7 +113,7 @@ export function DayOffFormDialog({ dayOff, open, onOpenChange, onSuccess }: DayO
           </div>
 
           {serverError && (
-            <p className="text-sm text-destructive rounded-md bg-destructive/10 px-3 py-2">
+            <p className="text-sm text-destructive rounded-sm bg-destructive/10 px-3 py-2">
               {serverError}
             </p>
           )}

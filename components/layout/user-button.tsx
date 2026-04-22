@@ -61,7 +61,7 @@ export function UserButton() {
                 <PopoverTrigger asChild>
                     <Button
                         variant="ghost"
-                        className="relative h-10 gap-3 rounded-md px-2 md:w-auto md:px-3 group"
+                        className="relative h-10 gap-3 rounded-sm px-2 md:w-auto md:px-3 group"
                         disabled={isLoggingOut}
                     >
                         <div className="hidden md:flex md:flex-col md:items-end md:text-right">

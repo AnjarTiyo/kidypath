@@ -82,7 +82,7 @@ export function StudentSelector({
                   key={student.id}
                   onClick={() => handleSelect(student)}
                   className={cn(
-                    "w-full flex items-center justify-between px-3 py-2 text-sm rounded-md hover:bg-accent",
+                    "w-full flex items-center justify-between px-3 py-2 text-sm rounded-sm hover:bg-accent",
                     selectedStudent?.id === student.id && "bg-accent"
                   )}
                 >

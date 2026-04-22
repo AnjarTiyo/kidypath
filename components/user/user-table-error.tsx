@@ -12,7 +12,7 @@ export function UserTableError({
 }: UserTableErrorProps) {
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-8">
+      <div className="rounded-sm border border-destructive/50 bg-destructive/10 p-8">
         <div className="flex flex-col items-center justify-center text-center space-y-4">
           <div className="rounded-full bg-destructive/20 p-3">
             <IconAlertCircle className="h-6 w-6 text-destructive" />
