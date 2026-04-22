@@ -44,10 +44,10 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Check if user is admin or teacher
-        if (session.user.role !== "admin" && session.user.role !== "teacher") {
+        // Check if user is admin, teacher, or curriculum coordinator
+        if (session.user.role !== "admin" && session.user.role !== "teacher" && !session.user.isCurriculumCoordinator) {
             return NextResponse.json(
-                { error: "Forbidden: Only admin and teacher can generate lesson plans" },
+                { error: "Forbidden: Not Allowed" },
                 { status: 403 }
             )
         }
