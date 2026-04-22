@@ -57,7 +57,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             email: user.email ?? "",
             name: user.fullName ?? "",
             role: user.role ?? "parent",
-            isCurriculumCoordinator: user.isCurriculumCoordinator || false, // Include curriculum coordinator flag
+            isCurriculumCoordinator: user.isCurriculumCoordinator || false,
+            avatarUrl: user.avatarUrl ?? null,
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -67,11 +68,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.role = user.role;
         token.id = user.id;
         token.isCurriculumCoordinator = user.isCurriculumCoordinator ?? false;
+        token.avatarUrl = user.avatarUrl ?? null;
+      }
+      // Allow client-side session.update() to refresh avatarUrl in the token
+      if (trigger === "update" && session?.avatarUrl !== undefined) {
+        token.avatarUrl = session.avatarUrl;
       }
       return token;
     },
@@ -80,6 +86,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.role = token.role as string;
         session.user.id = token.id as string;
         session.user.isCurriculumCoordinator = Boolean(token.isCurriculumCoordinator);
+        session.user.avatarUrl = (token.avatarUrl as string | null | undefined) ?? null;
       }
       return session;
     },
