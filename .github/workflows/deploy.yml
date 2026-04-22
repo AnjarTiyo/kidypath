@@ -63,14 +63,14 @@ jobs:
           tags: |
             ghcr.io/${{ steps.owner.outputs.name }}/kidypath:latest
             ghcr.io/${{ steps.owner.outputs.name }}/kidypath:${{ github.sha }}
-          build-args: |
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
-            MINIO_ENDPOINT=${{ secrets.MINIO_ENDPOINT }}
-            MINIO_BUCKET_NAME=${{ secrets.MINIO_BUCKET_NAME }}
-            MINIO_ROOT_USER=${{ secrets.MINIO_ROOT_USER }}
-            MINIO_ROOT_PASSWORD=${{ secrets.MINIO_ROOT_PASSWORD }}
-            MINIO_PUBLIC_URL=${{ secrets.MINIO_PUBLIC_URL }}
-            GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
+          secrets: |
+            database_url=${{ secrets.DATABASE_URL }}
+            minio_endpoint=${{ secrets.MINIO_ENDPOINT }}
+            minio_bucket_name=${{ secrets.MINIO_BUCKET_NAME }}
+            minio_root_user=${{ secrets.MINIO_ROOT_USER }}
+            minio_root_password=${{ secrets.MINIO_ROOT_PASSWORD }}
+            minio_public_url=${{ secrets.MINIO_PUBLIC_URL }}
+            groq_api_key=${{ secrets.GROQ_API_KEY }}
           cache-from: type=registry,ref=ghcr.io/${{ steps.owner.outputs.name }}/kidypath:buildcache
           cache-to: type=registry,ref=ghcr.io/${{ steps.owner.outputs.name }}/kidypath:buildcache,mode=max
 
