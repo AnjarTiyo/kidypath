@@ -86,7 +86,7 @@ export function ClassroomFormDialog({
   const fetchTeachers = async (search = "") => {
     try {
       setLoadingTeachers(true)
-      const params = new URLSearchParams({ role: "teacher" })
+      const params = new URLSearchParams({ roles: "teacher,curriculum" })
       if (search) {
         params.append("search", search)
       }

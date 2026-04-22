@@ -39,8 +39,8 @@ export async function GET(request: Request) {
 
     let relatedData = {}
 
-    // If teacher, get their classrooms
-    if (user.role === "teacher") {
+    // If teacher or curriculum coordinator, get their classrooms
+    if (user.role === "teacher" || user.role === "curriculum") {
       const teacherClassrooms = await db
         .select({
           id: classrooms.id,

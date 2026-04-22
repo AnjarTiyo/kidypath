@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { users } from "@/lib/db/schema"
-import { eq, ilike, or, and, desc, asc, count } from "drizzle-orm"
+import { eq, ilike, or, and, desc, asc, count, inArray } from "drizzle-orm"
 import { hashPassword } from "@/lib/auth-utils"
 
 // GET - List users with pagination and filtering
@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
     const pageSize = parseInt(searchParams.get("pageSize") || "10")
     const search = searchParams.get("search") || ""
     const role = searchParams.get("role") || ""
+    const roles = searchParams.get("roles") || ""
     const sortBy = searchParams.get("sortBy") || "createdAt"
     const sortOrder = searchParams.get("sortOrder") || "desc"
 
@@ -43,8 +44,15 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    if (role && role !== "all") {
-      conditions.push(eq(users.role, role as "admin" | "teacher" | "parent"))
+    if (roles) {
+      const roleList = roles.split(",").map(r => r.trim()).filter(Boolean) as Array<"admin" | "teacher" | "parent" | "curriculum">
+      if (roleList.length === 1) {
+        conditions.push(eq(users.role, roleList[0]))
+      } else if (roleList.length > 1) {
+        conditions.push(inArray(users.role, roleList))
+      }
+    } else if (role && role !== "all") {
+      conditions.push(eq(users.role, role as "admin" | "teacher" | "parent" | "curriculum"))
     }
     
     if (conditions.length === 1) {
