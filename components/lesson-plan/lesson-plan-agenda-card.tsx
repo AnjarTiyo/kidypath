@@ -46,7 +46,7 @@ export function LessonPlanAgendaCard({
   }
 
   return (
-    <Card className="h-fit">
+    <Card className="h-full">
       <CardHeader>
         <div className="flex flex-col gap-1">
           <CardTitle className="text-md">Rincian Agenda</CardTitle>

@@ -8,22 +8,31 @@ import { Button } from "@/components/ui/button"
 import { useCurrentUser } from "@/lib/hooks/use-current-user"
 import { LessonPlanBasicInfoCard } from "@/components/lesson-plan/lesson-plan-basic-info-card"
 import { LessonPlanAgendaCard } from "@/components/lesson-plan/lesson-plan-agenda-card"
-import { LessonPlanActivitiesCard } from "@/components/lesson-plan/lesson-plan-activities-card"
+import {
+  LessonPlanActivitiesCard,
+  ActivityPhase,
+  ActivityPhaseItem,
+  DEFAULT_ACTIVITY_DURATIONS,
+} from "@/components/lesson-plan/lesson-plan-activities-card"
+import { WizardProgress, WizardStep } from "@/components/lesson-plan/lesson-plan-wizard-progress"
+import {
+  LessonPlanPreview,
+  SavedLessonPlan,
+  DevelopmentScope,
+  LessonPlanItem,
+} from "@/components/lesson-plan/lesson-plan-preview"
 import { format, parse } from "date-fns"
 import {
   IconHome,
   IconChalkboardTeacher,
   IconAlertCircle,
-  IconArrowLeft
+  IconArrowLeft,
+  IconArrowRight,
+  IconDeviceFloppy,
+  IconEye,
 } from "@tabler/icons-react"
 import { CurrentTopicsPayload, CurrentTopicsResponse } from "@/lib/types/current-topics"
-
-type ActivityPhase =
-  | "kegiatan_awal"
-  | "kegiatan_inti"
-  | "istirahat"
-  | "kegiatan_penutup"
-  | "refleksi"
+import { FEATURE_FLAGS } from "@/lib/feature-flag"
 
 const ACTIVITY_PHASES: ActivityPhase[] = [
   "kegiatan_awal",
@@ -32,33 +41,6 @@ const ACTIVITY_PHASES: ActivityPhase[] = [
   "kegiatan_penutup",
   "refleksi",
 ]
-
-type DevelopmentScope =
-  | "religious_moral"
-  | "physical_motor"
-  | "cognitive"
-  | "language"
-  | "social_emotional"
-  | "art"
-
-interface LessonPlanItem {
-  developmentScope: DevelopmentScope
-  learningGoal: string
-  activityContext: string
-  generatedByAi?: boolean
-}
-
-interface ActivityPhaseItem {
-  phase: ActivityPhase
-  description: string
-  generatedByAi?: boolean
-}
-
-interface GeneratedLessonPlanResponse {
-  items: Array<Pick<LessonPlanItem, "developmentScope" | "learningGoal" | "activityContext">>
-  activities?: Array<{ phase: string; description: string }>
-  materials?: string
-}
 
 interface Classroom {
   id: string
@@ -77,15 +59,18 @@ export default function LessonPlanNewPageClient() {
   const searchParams = useSearchParams()
   const { user, classrooms: userClassrooms, loading: loadingUser } = useCurrentUser()
 
+  const [currentStep, setCurrentStep] = useState<WizardStep>(1)
   const [classrooms, setClassrooms] = useState<Classroom[]>([])
   const [loadingClassrooms, setLoadingClassrooms] = useState(false)
   const [saving, setSaving] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [generatedByAi, setGeneratedByAi] = useState(false)
+  const [agendaGeneratedByAi, setAgendaGeneratedByAi] = useState(false)
+  const [activitiesGeneratedByAi, setActivitiesGeneratedByAi] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [currentTopics, setCurrentTopics] = useState<CurrentTopicsPayload | null>(null)
   const [topicsLoading, setTopicsLoading] = useState(false)
   const [topicsError, setTopicsError] = useState<string | null>(null)
+  const [savedLessonPlan, setSavedLessonPlan] = useState<SavedLessonPlan | null>(null)
 
   const developmentScopes: DevelopmentScope[] = [
     "religious_moral",
@@ -113,6 +98,7 @@ export default function LessonPlanNewPageClient() {
     activities: ACTIVITY_PHASES.map((phase) => ({
       phase,
       description: "",
+      durationMinutes: DEFAULT_ACTIVITY_DURATIONS[phase],
       generatedByAi: false,
     })) as ActivityPhaseItem[],
   })
@@ -136,7 +122,11 @@ export default function LessonPlanNewPageClient() {
   }, [user])
 
   useEffect(() => {
-    if (user?.role === "teacher" && userClassrooms.length > 0) {
+    const hasAssignedClassrooms = userClassrooms.length > 0
+    const isTeacher = user?.role === "teacher"
+    const isCoordinator = user?.isCurriculumCoordinator
+
+    if ((isTeacher || isCoordinator) && hasAssignedClassrooms) {
       setClassrooms(userClassrooms)
       setLoadingClassrooms(false)
 
@@ -187,7 +177,10 @@ export default function LessonPlanNewPageClient() {
   }, [formData.date])
 
   const fetchClassrooms = async () => {
-    if (user?.role === "teacher") {
+    const isTeacher = user?.role === "teacher"
+    const isCoordinator = user?.isCurriculumCoordinator
+
+    if ((isTeacher || isCoordinator) && userClassrooms.length > 0) {
       setClassrooms(userClassrooms)
       setLoadingClassrooms(loadingUser)
       return
@@ -207,18 +200,13 @@ export default function LessonPlanNewPageClient() {
     }
   }
 
-  const validate = () => {
+  // ── Step 1: Validate and go to step 2 ──────────────────────────────
+  const handleStep1Next = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.classroomId) {
-      newErrors.classroomId = "Rombongan belajar harus dipilih"
-    }
-    if (!formData.date) {
-      newErrors.date = "Tanggal harus dipilih"
-    }
-    if (!formData.topic.trim()) {
-      newErrors.topic = "Tema pembelajaran harus diisi"
-    }
+    if (!formData.classroomId) newErrors.classroomId = "Rombongan belajar harus dipilih"
+    if (!formData.date) newErrors.date = "Tanggal harus dipilih"
+    if (!formData.topic.trim()) newErrors.topic = "Tema pembelajaran harus diisi"
 
     formData.items.forEach((item) => {
       if (!item.learningGoal.trim()) {
@@ -230,14 +218,123 @@ export default function LessonPlanNewPageClient() {
     })
 
     setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+    if (Object.keys(newErrors).length === 0) {
+      setCurrentStep(2)
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
   }
 
-  const submitLessonPlan = async () => {
-    if (!validate()) {
+  // ── Step 1 AI: generate only agenda items ──────────────────────────
+  const handleGenerateAgenda = async (prompt?: string) => {
+    if (!formData.topic.trim()) {
+      setErrors({ topic: "Tema harus diisi terlebih dahulu untuk generate dengan AI" })
       return
     }
 
+    setIsGenerating(true)
+    setErrors({})
+
+    try {
+      const response = await fetch("/api/lesson-plans/content/generate-agenda", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic: formData.topic,
+          subtopic: formData.subtopic,
+          userPrompt: prompt || "",
+          ageGroup: formData.ageGroup,
+          currentTopics,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Gagal generate rincian agenda")
+      }
+
+      const data = await response.json()
+
+      const updatedItems = developmentScopes.map((scope) => {
+        const generated = data.items?.find(
+          (item: { developmentScope: string }) => item.developmentScope === scope
+        )
+        return {
+          developmentScope: scope,
+          learningGoal: generated?.learningGoal || "",
+          activityContext: generated?.activityContext || "",
+          generatedByAi: true,
+        }
+      })
+
+      setFormData({ ...formData, items: updatedItems })
+      setAgendaGeneratedByAi(true)
+    } catch (error) {
+      console.error("Error generating agenda:", error)
+      setErrors({
+        submit: error instanceof Error ? error.message : "Terjadi kesalahan saat generate dengan AI",
+      })
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  // ── Step 2 AI: generate only activities + materials ────────────────
+  const handleGenerateActivities = async (prompt?: string) => {
+    setIsGenerating(true)
+    setErrors({})
+
+    try {
+      const response = await fetch("/api/lesson-plans/content/generate-activities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic: formData.topic,
+          subtopic: formData.subtopic,
+          ageGroup: formData.ageGroup,
+          items: formData.items,
+          currentTopics,
+          userPrompt: prompt || "",
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Gagal generate rangkaian kegiatan")
+      }
+
+      const data = await response.json()
+
+      const updatedActivities = ACTIVITY_PHASES.map((phase) => {
+        const generated = data.activities?.find(
+          (a: { phase: string }) => a.phase === phase
+        )
+        return {
+          phase,
+          description: generated?.description || "",
+          durationMinutes: formData.activities.find((a) => a.phase === phase)?.durationMinutes
+            ?? DEFAULT_ACTIVITY_DURATIONS[phase],
+          generatedByAi: true,
+        }
+      })
+
+      setFormData({
+        ...formData,
+        activities: updatedActivities,
+        materials: data.materials || formData.materials,
+      })
+      setActivitiesGeneratedByAi(true)
+    } catch (error) {
+      console.error("Error generating activities:", error)
+      setErrors({
+        submit: error instanceof Error ? error.message : "Terjadi kesalahan saat generate dengan AI",
+      })
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  // ── Submit lesson plan ─────────────────────────────────────────────
+  const submitLessonPlan = async () => {
     setSaving(true)
 
     try {
@@ -253,13 +350,20 @@ export default function LessonPlanNewPageClient() {
           materials: formData.materials || null,
           items: formData.items,
           activities: formData.activities.filter((a) => a.description.trim()),
-          generatedByAi: generatedByAi,
+          generatedByAi: agendaGeneratedByAi || activitiesGeneratedByAi,
         }),
       })
 
       if (response.ok) {
-        router.push("/teacher/lesson-plan")
-        router.refresh()
+        const saved: SavedLessonPlan = await response.json()
+        if (FEATURE_FLAGS.SHOW_LESSON_PLAN_PREVIEW) {
+          setSavedLessonPlan(saved)
+          setCurrentStep(3)
+          window.scrollTo({ top: 0, behavior: "smooth" })
+        } else {
+          router.push("/teacher/lesson-plan")
+          router.refresh()
+        }
       } else {
         const error = await response.json()
         setErrors({ submit: error.error || "Terjadi kesalahan" })
@@ -272,74 +376,7 @@ export default function LessonPlanNewPageClient() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    await submitLessonPlan()
-  }
-
-  const handleGenerateWithAI = async (prompt?: string) => {
-    if (!formData.topic.trim()) {
-      setErrors({ topic: "Tema harus diisi terlebih dahulu untuk generate dengan AI" })
-      return
-    }
-
-    setIsGenerating(true)
-    setErrors({})
-
-    try {
-      const response = await fetch("/api/lesson-plans/content/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          topic: formData.topic,
-          subtopic: formData.subtopic,
-          userPrompt: prompt || "",
-          ageGroup: formData.ageGroup,
-          currentTopics,
-        }),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || "Failed to generate lesson plan")
-      }
-
-      const data: GeneratedLessonPlanResponse = await response.json()
-
-      const updatedItems = developmentScopes.map((scope) => {
-        const generatedItem = data.items.find((item) => item.developmentScope === scope)
-        return {
-          developmentScope: scope,
-          learningGoal: generatedItem?.learningGoal || "",
-          activityContext: generatedItem?.activityContext || "",
-          generatedByAi: true,
-        }
-      })
-
-      const updatedActivities = ACTIVITY_PHASES.map((phase) => {
-        const generatedActivity = data.activities?.find((a) => a.phase === phase)
-        return {
-          phase,
-          description: generatedActivity?.description || "",
-          generatedByAi: true,
-        }
-      })
-
-      setFormData({
-        ...formData,
-        items: updatedItems,
-        activities: updatedActivities,
-        materials: data.materials || formData.materials,
-      })
-      setGeneratedByAi(true)
-    } catch (error) {
-      console.error("Error generating content:", error)
-      setErrors({ submit: error instanceof Error ? error.message : "Terjadi kesalahan saat generate dengan AI" })
-    } finally {
-      setIsGenerating(false)
-    }
-  }
-
+  // ── Field updaters ─────────────────────────────────────────────────
   const updateItem = (
     scope: DevelopmentScope,
     field: "learningGoal" | "activityContext",
@@ -362,10 +399,20 @@ export default function LessonPlanNewPageClient() {
     })
   }
 
+  const updateActivityDuration = (phase: ActivityPhase, durationMinutes: number) => {
+    setFormData({
+      ...formData,
+      activities: formData.activities.map((a) =>
+        a.phase === phase ? { ...a, durationMinutes } : a
+      ),
+    })
+  }
+
   const updateMaterials = (value: string) => {
     setFormData({ ...formData, materials: value })
   }
 
+  // ── Loading / empty states ─────────────────────────────────────────
   if (loadingUser) {
     return (
       <>
@@ -396,11 +443,10 @@ export default function LessonPlanNewPageClient() {
             <div className="flex items-start gap-4">
               <IconAlertCircle className="h-6 w-6 text-yellow-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <h3 className="font-semibold text-yellow-900 mb-1">
-                  Belum Ada Rombongan Belajar
-                </h3>
+                <h3 className="font-semibold text-yellow-900 mb-1">Belum Ada Rombongan Belajar</h3>
                 <p className="text-sm text-yellow-800">
-                  Anda belum di-assign ke rombongan belajar manapun. Silakan hubungi admin untuk mendapatkan akses ke rombongan belajar.
+                  Anda belum di-assign ke rombongan belajar manapun. Silakan hubungi admin untuk
+                  mendapatkan akses ke rombongan belajar.
                 </p>
                 <Button
                   variant="outline"
@@ -418,6 +464,7 @@ export default function LessonPlanNewPageClient() {
     )
   }
 
+  // ── Render ─────────────────────────────────────────────────────────
   return (
     <>
       <PageHeader
@@ -426,59 +473,134 @@ export default function LessonPlanNewPageClient() {
         breadcrumbs={lessonPlanBreadcrumbs}
       />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <LessonPlanBasicInfoCard
-            formData={{
-              classroomId: formData.classroomId,
-              date: formData.date,
-              topic: formData.topic,
-              subtopic: formData.subtopic,
-              code: formData.code,
-              ageGroup: formData.ageGroup,
-            }}
-            classrooms={classrooms}
-            loadingClassrooms={loadingClassrooms}
-            generatedByAi={generatedByAi}
-            isGenerating={isGenerating}
-            saving={saving}
-            userRole={user?.role as "teacher" | "admin" | undefined}
-            errors={errors}
-            onFormChange={(data) => setFormData({ ...formData, ...data })}
-            onGenerateWithAI={handleGenerateWithAI}
-            onSave={submitLessonPlan}
-            onCancel={() => router.push("/teacher/lesson-plan")}
-            currentTopics={currentTopics}
-            topicsLoading={topicsLoading}
-            topicsError={topicsError}
-          />
+      <WizardProgress currentStep={currentStep} />
 
-          <LessonPlanAgendaCard
-            items={formData.items}
-            errors={errors}
-            onItemChange={updateItem}
-          />
+      {/* ── Step 1: Rincian Agenda ── */}
+      {currentStep === 1 && (
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button onClick={handleStep1Next} disabled={isGenerating}>
+              Lanjut ke Rangkaian Kegiatan
+              <IconArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+            <LessonPlanBasicInfoCard
+              formData={{
+                classroomId: formData.classroomId,
+                date: formData.date,
+                topic: formData.topic,
+                subtopic: formData.subtopic,
+                code: formData.code,
+                ageGroup: formData.ageGroup,
+              }}
+              classrooms={classrooms}
+              loadingClassrooms={loadingClassrooms}
+              generatedByAi={agendaGeneratedByAi}
+              isGenerating={isGenerating}
+              saving={false}
+              userRole={user?.role as "teacher" | "admin" | undefined}
+              errors={errors}
+              onFormChange={(data) => setFormData({ ...formData, ...data })}
+              onGenerateWithAI={handleGenerateAgenda}
+              onSave={handleStep1Next}
+              onCancel={() => router.push("/teacher/lesson-plan")}
+              currentTopics={currentTopics}
+              topicsLoading={topicsLoading}
+              topicsError={topicsError}
+              actionLabel="Lanjut"
+            />
+
+            <LessonPlanAgendaCard
+              items={formData.items}
+              errors={errors}
+              onItemChange={updateItem}
+            />
+          </div>
+
+          {errors.submit && (
+            <Card className="border-destructive">
+              <CardContent className="py-3">
+                <div className="flex items-center gap-2 text-destructive">
+                  <IconAlertCircle className="h-4 w-4" />
+                  <p className="text-xs">{errors.submit}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
+      )}
 
-        <LessonPlanActivitiesCard
-          activities={formData.activities}
-          materials={formData.materials}
-          isGenerating={isGenerating}
-          onActivityChange={updateActivity}
-          onMaterialsChange={updateMaterials}
+      {/* ── Step 2: Rangkaian Kegiatan ── */}
+      {currentStep === 2 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCurrentStep(1)
+                window.scrollTo({ top: 0, behavior: "smooth" })
+              }}
+              disabled={saving}
+            >
+              <IconArrowLeft className="mr-2 h-4 w-4" />
+              Kembali
+            </Button>
+
+            <Button onClick={submitLessonPlan} disabled={saving || isGenerating}>
+              {saving ? (
+                <>Menyimpan...</>
+              ) : FEATURE_FLAGS.SHOW_LESSON_PLAN_PREVIEW ? (
+                <>
+                  <IconEye className="mr-2 h-4 w-4" />
+                  Simpan &amp; Pratinjau
+                </>
+              ) : (
+                <>
+                  <IconDeviceFloppy className="mr-2 h-4 w-4" />
+                  Simpan
+                </>
+              )}
+            </Button>
+          </div>
+
+          <LessonPlanActivitiesCard
+            activities={formData.activities}
+            materials={formData.materials}
+            isGenerating={isGenerating}
+            onActivityChange={updateActivity}
+            onDurationChange={updateActivityDuration}
+            onMaterialsChange={updateMaterials}
+            onGenerateWithAI={handleGenerateActivities}
+          />
+
+          {errors.submit && (
+            <Card className="border-destructive">
+              <CardContent className="py-3">
+                <div className="flex items-center gap-2 text-destructive">
+                  <IconAlertCircle className="h-4 w-4" />
+                  <p className="text-xs">{errors.submit}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* ── Step 3: Preview (feature-flagged) ── */}
+      {currentStep === 3 && FEATURE_FLAGS.SHOW_LESSON_PLAN_PREVIEW && savedLessonPlan && (
+        <LessonPlanPreview
+          lessonPlan={savedLessonPlan}
+          classroomName={classrooms.find((c) => c.id === savedLessonPlan.classroomId)?.name}
+          onFinish={() => {
+            router.push("/teacher/lesson-plan")
+            router.refresh()
+          }}
         />
-
-        {errors.submit && (
-          <Card className="border-destructive">
-            <CardContent className="py-3">
-              <div className="flex items-center gap-2 text-destructive">
-                <IconAlertCircle className="h-4 w-4" />
-                <p className="text-xs">{errors.submit}</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </form>
+      )}
     </>
   )
 }
+
+

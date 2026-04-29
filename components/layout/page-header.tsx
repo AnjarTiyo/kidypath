@@ -40,7 +40,7 @@ export function PageHeader({
               const isLast = index === breadcrumbs.length - 1
 
               return (
-                <div key={index} className="flex items-center space-x-1 sm:space-x-2">
+                <div key={index} className="flex items-center space-x-1 sm:space-x-2 text-primary">
                   <BreadcrumbItem>
                     {isLast || !item.href ? (
                       <BreadcrumbPage className="flex items-center gap-1 sm:gap-2 font-semibold text-xs sm:text-sm">
@@ -64,7 +64,7 @@ export function PageHeader({
 
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
         <div className="space-y-1 min-w-0 flex-1">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight break-words">{title}</h1>
+          <h1 className="text-md sm:text-lg md:text-xl font-bold tracking-tight break-words">{title}</h1>
           {description && (
             <p className="text-muted-foreground text-xs sm:text-sm break-words">{description}</p>
           )}

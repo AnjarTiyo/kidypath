@@ -1,23 +1,35 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { IconSparkles, IconUpload } from "@tabler/icons-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { IconSparkles, IconUpload, IconLoader2 } from "@tabler/icons-react"
 
-type ActivityPhase =
+export type ActivityPhase =
   | "kegiatan_awal"
   | "kegiatan_inti"
   | "istirahat"
   | "kegiatan_penutup"
   | "refleksi"
 
-interface ActivityPhaseItem {
+export const DEFAULT_ACTIVITY_DURATIONS: Record<ActivityPhase, number> = {
+  kegiatan_awal: 15,
+  kegiatan_inti: 60,
+  istirahat: 30,
+  kegiatan_penutup: 15,
+  refleksi: 0,
+}
+
+export interface ActivityPhaseItem {
   phase: ActivityPhase
   description: string
+  durationMinutes: number
   generatedByAi?: boolean
 }
 
@@ -26,33 +38,31 @@ interface LessonPlanActivitiesCardProps {
   materials: string
   isGenerating?: boolean
   onActivityChange: (phase: ActivityPhase, value: string) => void
+  onDurationChange?: (phase: ActivityPhase, durationMinutes: number) => void
   onMaterialsChange: (value: string) => void
+  onGenerateWithAI?: (prompt?: string) => void
 }
 
-const PHASE_CONFIG: Record<ActivityPhase, { label: string; duration: string; placeholder: string }> = {
+const PHASE_CONFIG: Record<ActivityPhase, { label: string; hideDuration?: boolean; placeholder: string }> = {
   kegiatan_awal: {
     label: "Kegiatan Awal",
-    duration: "± 15 menit",
     placeholder: "Contoh: Berdoa bersama, salam, mengabsen, ice breaking, menyanyikan lagu pembuka, bercerita singkat tentang tema...",
   },
   kegiatan_inti: {
     label: "Kegiatan Inti",
-    duration: "± 60 menit",
     placeholder: "Contoh: Eksplorasi bahan, bermain peran, kegiatan seni, permainan edukatif sesuai aspek perkembangan...",
   },
   istirahat: {
     label: "Istirahat",
-    duration: "± 30 menit",
     placeholder: "Contoh: Cuci tangan, makan bekal, bermain bebas di luar/dalam kelas, toilet time...",
   },
   kegiatan_penutup: {
     label: "Kegiatan Penutup",
-    duration: "± 15 menit",
     placeholder: "Contoh: Recalling kegiatan hari ini, tanya jawab, pesan moral, doa penutup, persiapan pulang...",
   },
   refleksi: {
     label: "Refleksi Guru",
-    duration: "Catatan",
+    hideDuration: true,
     placeholder: "Contoh: Catatan perkembangan anak hari ini, hal yang perlu ditingkatkan, rencana tindak lanjut...",
   },
 }
@@ -70,12 +80,28 @@ export function LessonPlanActivitiesCard({
   materials,
   isGenerating = false,
   onActivityChange,
+  onDurationChange,
   onMaterialsChange,
+  onGenerateWithAI,
 }: LessonPlanActivitiesCardProps) {
-  const getActivity = (phase: ActivityPhase) =>
-    activities.find((a) => a.phase === phase) ?? { phase, description: "", generatedByAi: false }
+  const [aiPromptOpen, setAiPromptOpen] = useState(false)
+  const [aiPrompt, setAiPrompt] = useState("")
+
+  const getActivity = (phase: ActivityPhase): ActivityPhaseItem =>
+    activities.find((a) => a.phase === phase) ?? {
+      phase,
+      description: "",
+      durationMinutes: DEFAULT_ACTIVITY_DURATIONS[phase],
+      generatedByAi: false,
+    }
 
   const hasAiActivities = activities.some((a) => a.generatedByAi && a.description)
+
+  const handleGenerateClick = () => {
+    onGenerateWithAI?.(aiPrompt.trim())
+    setAiPromptOpen(false)
+    setAiPrompt("")
+  }
 
   return (
     <Card>
@@ -87,12 +113,73 @@ export function LessonPlanActivitiesCard({
               Isi deskripsi setiap fase kegiatan harian dan alat atau bahan yang dibutuhkan
             </CardDescription>
           </div>
-          {hasAiActivities && (
-            <Badge variant="secondary" className="text-xs shrink-0">
-              <IconSparkles className="mr-1 h-3 w-3" />
-              AI Generated
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {hasAiActivities && (
+              <Badge variant="secondary" className="text-xs shrink-0">
+                <IconSparkles className="mr-1 h-3 w-3" />
+                AI Generated
+              </Badge>
+            )}
+            {onGenerateWithAI && (
+              <Popover open={aiPromptOpen} onOpenChange={setAiPromptOpen}>
+                <PopoverTrigger asChild>
+                  <Button type="button" variant="default" size="sm" disabled={isGenerating}>
+                    {isGenerating ? (
+                      <IconLoader2 className="mr-1 h-3 w-3 animate-spin" />
+                    ) : (
+                      <IconSparkles className="mr-1 h-3 w-3" />
+                    )}
+                    AI
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80" align="end">
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <h4 className="font-semibold text-sm flex items-center">
+                        <IconSparkles className="mr-1 h-4 w-4" />
+                        Instruksi untuk AI
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        Berikan instruksi tambahan untuk menghasilkan rangkaian kegiatan yang lebih
+                        sesuai (opsional)
+                      </p>
+                    </div>
+                    <textarea
+                      placeholder="Contoh: Tambahkan kegiatan outdoor, fokus pada kegiatan sensorik..."
+                      value={aiPrompt}
+                      onChange={(e) => setAiPrompt(e.target.value)}
+                      rows={4}
+                      className="w-full resize-none text-xs rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => { setAiPromptOpen(false); setAiPrompt("") }}
+                        className="flex-1"
+                      >
+                        Batal
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={handleGenerateClick}
+                        disabled={isGenerating}
+                        size="sm"
+                        className="flex-1"
+                      >
+                        {isGenerating ? (
+                          <><IconLoader2 className="mr-1 h-3 w-3 animate-spin" />Generating...</>
+                        ) : (
+                          <><IconSparkles className="mr-1 h-3 w-3" />Generate</>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-0 p-0">
@@ -109,11 +196,28 @@ export function LessonPlanActivitiesCard({
               const config = PHASE_CONFIG[phase]
               return (
                 <div key={phase} className="px-6 py-4 space-y-1.5">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Label htmlFor={`activity-${phase}`} className="text-xs font-semibold">
                       {config.label}
                     </Label>
-                    <span className="text-[10px] text-muted-foreground">{config.duration}</span>
+                    {!config.hideDuration ? (
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          min={0}
+                          max={300}
+                          value={activity.durationMinutes}
+                          onChange={(e) =>
+                            onDurationChange?.(phase, parseInt(e.target.value) || 0)
+                          }
+                          disabled={isGenerating}
+                          className="w-16 h-6 text-xs px-1.5 py-0"
+                        />
+                        <span className="text-[10px] text-muted-foreground">menit</span>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-muted-foreground">Catatan</span>
+                    )}
                     {activity.generatedByAi && activity.description && (
                       <Badge variant="secondary" className="text-[10px] py-0 px-1.5 h-4">
                         <IconSparkles className="mr-0.5 h-2.5 w-2.5" />

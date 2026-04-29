@@ -52,6 +52,7 @@ interface LessonPlanBasicInfoCardProps {
     currentTopics: CurrentTopicsPayload | null
     topicsLoading: boolean
     topicsError?: string | null
+    actionLabel?: string
 }
 
 export function LessonPlanBasicInfoCard({
@@ -70,6 +71,7 @@ export function LessonPlanBasicInfoCard({
     currentTopics,
     topicsLoading,
     topicsError,
+    actionLabel = "Simpan",
 }: LessonPlanBasicInfoCardProps) {
     const [aiPromptOpen, setAiPromptOpen] = useState(false)
     const [aiPrompt, setAiPrompt] = useState("")
@@ -151,7 +153,7 @@ export function LessonPlanBasicInfoCard({
     )
 
     return (
-        <Card className="h-fit">
+        <Card className="h-full">
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <div>
@@ -237,7 +239,7 @@ export function LessonPlanBasicInfoCard({
                         >
                             {saving && <IconLoader2 className="mr-1 h-3 w-3 animate-spin" />}
                             <IconDeviceFloppy className="mr-1 h-3 w-3" />
-                            {saving ? "Menyimpan..." : "Simpan"}
+                            {saving ? "Menyimpan..." : actionLabel}
                         </Button>
                     </div>
                 </div>
@@ -249,11 +251,11 @@ export function LessonPlanBasicInfoCard({
                         <Label htmlFor="classroom" className="text-xs">
                             Rombongan Belajar <span className="text-destructive">*</span>
                         </Label>
-                        {userRole === "teacher" ? (
+                        {userRole === "teacher" && classrooms.length <= 1 ? (
                             <>
                                 <Input
                                     id="classroom"
-                                    value={classrooms.find(c => c.id === formData.classroomId)?.name || ""}
+                                    value={classrooms.find(c => c.id === formData.classroomId)?.name || (loadingClassrooms ? "Memuat..." : "")}
                                     disabled
                                     className="h-9 text-xs bg-muted"
                                 />
