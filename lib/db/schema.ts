@@ -152,6 +152,7 @@ export const lessonPlanActivities = pgTable('lesson_plan_activities', {
   lessonPlanId: uuid('lesson_plan_id').references(() => lessonPlans.id, { onDelete: 'cascade' }),
   phase: lessonPlanActivityPhaseEnum('phase'),
   description: text('description'),
+  durationMinutes: integer('duration_minutes'), // Configurable duration in minutes (null = no duration, e.g. refleksi)
   generatedByAi: boolean('generated_by_ai').default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),

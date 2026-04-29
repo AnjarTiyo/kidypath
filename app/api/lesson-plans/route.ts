@@ -15,6 +15,7 @@ interface LessonPlanRequestItem {
 interface LessonPlanActivityRequest {
   phase: string
   description: string
+  durationMinutes?: number | null
   generatedByAi?: boolean
 }
 
@@ -169,8 +170,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Only teachers and admins can create lesson plans
-    if (session.user.role !== "teacher" && session.user.role !== "admin") {
+    // Only teachers, admins, and curriculum coordinators can create lesson plans
+    if (
+      session.user.role !== "teacher" &&
+      session.user.role !== "admin" &&
+      !session.user.isCurriculumCoordinator
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
@@ -303,6 +308,7 @@ export async function POST(request: NextRequest) {
                 lessonPlanId: newLessonPlan.id,
                 phase: activity.phase as "kegiatan_awal" | "kegiatan_inti" | "istirahat" | "kegiatan_penutup" | "refleksi",
                 description: activity.description,
+                durationMinutes: activity.durationMinutes ?? null,
                 generatedByAi: activity.generatedByAi || generatedByAi,
               }))
             )

@@ -37,7 +37,10 @@ export function getMonthNumberFromDate(date: Date): number {
 
 export function getWeekOfMonth(date: Date): number {
   const day = date.getDate()
-  return Math.max(1, Math.ceil(day / 7))
+  const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1)
+  // Convert Sunday-indexed (0=Sun) to Monday-indexed (0=Mon) offset
+  const offset = (firstDayOfMonth.getDay() + 6) % 7
+  return Math.ceil((day + offset) / 7)
 }
 
 export function getMonthName(monthNumber?: number | null): string {

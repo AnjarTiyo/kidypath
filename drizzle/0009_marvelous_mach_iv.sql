@@ -1,0 +1,1 @@
+ALTER TABLE "lesson_plan_activities" ADD COLUMN "duration_minutes" integer;
